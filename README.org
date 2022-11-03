@@ -11,6 +11,6 @@ Make sure you're in the project directory.
 ** Install via the install script
 If you want to install without git or any additional command, simply run the following one-liner.
 #+begin_src shell
-  wget -q -O - https://github.com/roelbroersma/tunneling-gui/raw/main/install.txt | bash
+  wget -q -O - https://github.com/roelbroersma/tunnel-gui/raw/main/install.txt | bash
 #+end_src
 
