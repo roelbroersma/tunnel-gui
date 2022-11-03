@@ -1,0 +1,31 @@
+{% extends 'base.html' %} {% block content %}
+<h3>IP Address</h3>
+<form method="post">
+  {{ form.csrf_token }}
+      <input type="radio" id="static">
+      <label for="static">Static IP Address</label>
+      <br>
+
+  <dl>
+    {% for field in form %} {% if field.label != "CSRF Token" %}
+    <dt>{{ field.label }}</dt>
+    <dd>{{ field }}</dd>
+    <br />
+    {% endif %} {% endfor %}
+    <br /><br />
+    </dl>
+
+    <input type="radio" id="dhcp" />
+    <label for="dhcp">Get IP Address from DHCP</label>
+    <br /><br />
+    <br /><br />
+
+    <dl>
+
+    <dt>
+      <button class="submit btn btn-primary">Save</button>
+    </dt>
+  </dl>
+</form>
+
+{% endblock %}
