@@ -1,13 +1,20 @@
 import os
+from pathlib import Path
 import shelve
 import subprocess
+
+from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, url_for, request, session
 
 from forms import StaticIpForm, PasswordForm, TunnelForm
 from utils import do_change_password, change_ip
 
+
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
+
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "really-long-string")
+app.secret_key = os.getenv("SECRET_KEY")
 
 # db = shelve.open
 
@@ -56,6 +63,7 @@ def diagnostics():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    is_debug = os.getenv('DEBUG', 'False').lower() == 'true'
+    app.run(debug=is_debug)
     # from waitress import serve
     # serve(app, host="0.0.0.0", port=8080)

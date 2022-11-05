@@ -8,7 +8,7 @@ COPY poetry.lock project/
 WORKDIR ./project
 
 RUN poetry config virtualenvs.in-project true
-RUN poetry install
+RUN poetry install --no-root
 
 COPY . .
 
