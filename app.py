@@ -31,7 +31,7 @@ def index():
 
 
 @app.route("/change-password", methods=["GET", "POST"])
-def change_password():
+def old_change_password():
     form = PasswordForm(meta={"csrf": False})
     error = False
 
@@ -49,6 +49,27 @@ def change_password():
                 error = "Passwords didn't match"
                 return render_template("change-password.html", form=form, error=error)
     return render_template("change-password.html", form=form)
+
+
+@app.route("/new-change-password", methods=["GET", "POST"])
+def change_password():
+    form = PasswordForm(meta={"csrf": False})
+    error = False
+
+    if request.method == "POST":
+        if form.validate_on_submit():
+            new_password = form.password.data
+            password_again = form.password_again.data
+            print(new_password)
+            print(password_again)
+            # assert(new_password == password_again)
+            if new_password == password_again:
+                # shelve sync
+                do_change_password(new_password)
+            else:
+                error = "Passwords didn't match"
+                return render_template("new-change-password.html", form=form, error=error)
+    return render_template("new-change-password.html", form=form)
 
 
 @app.route("/tunnel", methods=["GET", "POST"])
