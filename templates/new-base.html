@@ -139,33 +139,14 @@
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
 
+      {% for item, page_name, svg_id in menu_items %}
       <li class="nav-item">
-        <a href="{{ url_for ('index') }}" class="nav-link {% if active == 'index' %}active{% else %}text-white{% endif %}" aria-current="page">
-          <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#home"></use></svg>
-          IP Address
+        <a href="{{ url_for (item) }}" class="nav-link {% if active_item == item %}active{% else %}text-white{% endif %}" aria-current="page">
+          <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#{{ svg_id }}"></use></svg>
+          {{ page_name }}
         </a>
       </li>
-
-      <li>
-        <a href="{{ url_for('change_password') }}" class="nav-link {% if active == 'change_password' %}active{% else %}text-white{% endif %}">
-          <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg>
-          Password
-        </a>
-      </li>
-
-      <li>
-        <a href="{{ url_for('tunnel') }}" class="nav-link {% if active == 'tunnel' %}active{% else %}text-white{% endif %}">">
-          <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#table"></use></svg>
-          Tunnel
-        </a>
-      </li>
-
-      <li>
-        <a href="{{ url_for('diagnostics') }}" class="nav-link {% if active == 'diagnostics' %}active{% else %}text-white{% endif %}">">
-          <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#grid"></use></svg>
-          Diagnostics
-        </a>
-      </li>
+      {% endfor %}
     </ul>
     <hr>
   </div>
