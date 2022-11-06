@@ -1,9 +1,12 @@
+import re
+
 from flask_wtf import FlaskForm
 
 from wtforms import StringField, PasswordField, RadioField, BooleanField
 from wtforms.validators import (
     DataRequired,
     Length,
+    Regexp,
     ValidationError,
     InputRequired,
     IPAddress,
@@ -32,17 +35,21 @@ class StaticIpForm(FlaskForm):
 class PasswordForm(FlaskForm):
     extra_args = {"class": "form-control", "placeholder": "Password"}
     extra_args_again = {"class": "form-control", "placeholder": "Password again"}
-    password = PasswordField(
-        "Password", validators=[DataRequired(), Length(8, 128)], render_kw=extra_args
+    pass1 = PasswordField(
+        "Password", validators=[
+            DataRequired(),
+            Length(8, 128),
+            Regexp(r'^[a-z0-9]+$', flags=re.IGNORECASE, message='There can be only digits and letters')
+        ], render_kw=extra_args
     )
-    password_again = PasswordField(
+    pass2 = PasswordField(
         "Password (verify)",
         validators=[DataRequired(), Length(8, 128)],
         render_kw=extra_args_again,
     )
 
-    def validate_password(self, password):
-        if password != self.password_again:
+    def validate_pass1(self, password):
+        if password.data != self.pass2.data:
             raise ValidationError("Passwords didn't match")
 
 

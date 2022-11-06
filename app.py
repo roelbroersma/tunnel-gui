@@ -78,22 +78,15 @@ def index():
 @app.route("/change-password", methods=["GET", "POST"])
 @do_response_from_context
 def change_password():
-    form = PasswordForm(meta={"csrf": False})
-    error = False
+    form = PasswordForm(request.form, meta={"csrf": False})
 
     if request.method == "POST":
-        if form.validate_on_submit():
-            new_password = form.password.data
-            password_again = form.password_again.data
-            print(new_password)
-            print(password_again)
-            # assert(new_password == password_again)
-            if new_password == password_again:
-                # shelve sync
-                do_change_password(new_password)
-            else:
-                error = "Passwords didn't match"
-                return {'form': form, 'error': error}
+        is_ok = form.validate_on_submit()
+
+        if is_ok:
+            # shelve sync
+            pass
+            # do_change_password(new_password)
     return {'form': form}
 
 
