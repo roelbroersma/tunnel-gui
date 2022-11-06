@@ -6,6 +6,7 @@ import subprocess
 from dotenv import load_dotenv
 from flask import Flask, redirect, url_for, request, session
 from flask import render_template as flask_render_template
+from pydantic import BaseModel
 
 from .forms import StaticIpForm, PasswordForm, TunnelForm
 from .utils import do_change_password, change_ip
@@ -20,15 +21,37 @@ app.secret_key = os.getenv("SECRET_KEY")
 # db = shelve.open
 
 
+class MenuItemInfo(BaseModel):
+    linked_route_method_name: str
+    svg_icon_id: str
+    title: str
+
+
 def render_template(route_name: str, **kwargs):
     menu_items = [
-        ('index', 'IP Address', 'home'),
-        ('change_password', 'Password', 'speedometer2'),
-        ('tunnel', 'Tunnel', 'table'),
-        ('diagnostics', 'Diagnostics', 'grid'),
+        MenuItemInfo(
+            linked_route_method_name='index',
+            title='IP Address',
+            svg_icon_id='home'
+        ),
+        MenuItemInfo(
+            linked_route_method_name='change_password',
+            title='Password',
+            svg_icon_id='speedometer2'
+        ),
+        MenuItemInfo(
+            linked_route_method_name='tunnel',
+            title='Tunnel',
+            svg_icon_id='table'
+        ),
+        MenuItemInfo(
+            linked_route_method_name='diagnostics',
+            title='Diagnostics',
+            svg_icon_id='grid'
+        ),
     ]
     template_name = f"{route_name}.html"
-    return flask_render_template(template_name, **kwargs, menu_items=menu_items, active_item=route_name)
+    return flask_render_template(template_name, **kwargs, menu_items=menu_items, active_route_method_name=route_name)
 
 
 def do_response_from_context(make_context_func):

@@ -139,11 +139,11 @@
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
 
-      {% for item, page_name, svg_id in menu_items %}
+      {% for item in menu_items %}
       <li class="nav-item">
-        <a href="{{ url_for (item) }}" class="nav-link {% if active_item == item %}active{% else %}text-white{% endif %}" aria-current="page">
-          <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#{{ svg_id }}"></use></svg>
-          {{ page_name }}
+        <a href="{{ url_for (item.linked_route_method_name) }}" class="nav-link {% if active_route_method_name == item.linked_route_method_name %}active{% else %}text-white{% endif %}" aria-current="page">
+          <svg class="bi pe-none me-2" width="16" height="16"><use xlink:href="#{{ item.svg_icon_id }}"></use></svg>
+          {{ item.title }}
         </a>
       </li>
       {% endfor %}
