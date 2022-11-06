@@ -20,18 +20,28 @@ app.secret_key = os.getenv("SECRET_KEY")
 # db = shelve.open
 
 
-def render_template(template_name: str, **kwargs):
+def render_template(route_name: str, **kwargs):
     menu_items = [
         ('index', 'IP Address', 'home'),
         ('change_password', 'Password', 'speedometer2'),
         ('tunnel', 'Tunnel', 'table'),
         ('diagnostics', 'Diagnostics', 'grid'),
     ]
-    active_item = template_name[:-5].replace('-', '_')
-    return flask_render_template(template_name, **kwargs, menu_items=menu_items, active_item=active_item)
+    template_name = f"{route_name}.html"
+    return flask_render_template(template_name, **kwargs, menu_items=menu_items, active_item=route_name)
+
+
+def do_response_from_context(make_context_func):
+    def wrapper(*args, **kwargs):
+        context = make_context_func(*args, **kwargs)
+        route_name = make_context_func.__name__
+        return render_template(route_name, **context)
+    wrapper.__name__ = make_context_func.__name__
+    return wrapper
 
 
 @app.route("/", methods=["GET", "POST"])
+@do_response_from_context
 def index():
     """This renders IP Address template"""
     form = StaticIpForm(meta={"csrf": False})
@@ -39,31 +49,11 @@ def index():
     if request.method == "POST":
         if form.validate_on_submit():
             change_ip(ip, network, gateway, dns)
-    return render_template("index.html", form=form)
-
-
-@app.route("/old-change-password", methods=["GET", "POST"])
-def old_change_password():
-    form = PasswordForm(meta={"csrf": False})
-    error = False
-
-    if request.method == "POST":
-        if form.validate_on_submit():
-            new_password = form.password.data
-            password_again = form.password_again.data
-            print(new_password)
-            print(password_again)
-            # assert(new_password == password_again)
-            if new_password == password_again:
-                # shelve sync
-                do_change_password(new_password)
-            else:
-                error = "Passwords didn't match"
-                return render_template("old-change-password.html", form=form, error=error)
-    return render_template("old-change-password.html", form=form)
+    return {'form': form}
 
 
 @app.route("/change-password", methods=["GET", "POST"])
+@do_response_from_context
 def change_password():
     form = PasswordForm(meta={"csrf": False})
     error = False
@@ -80,19 +70,21 @@ def change_password():
                 do_change_password(new_password)
             else:
                 error = "Passwords didn't match"
-                return render_template("change-password.html", form=form, error=error)
-    return render_template("change-password.html", form=form)
+                return {'form': form, 'error': error}
+    return {'form': form}
 
 
 @app.route("/tunnel", methods=["GET", "POST"])
+@do_response_from_context
 def tunnel():
     form = TunnelForm()
-    return render_template("tunnel.html", form=form)
+    return {'form': form}
 
 
 @app.route("/diagnostics", methods=["GET", "POST"])
+@do_response_from_context
 def diagnostics():
-    return render_template("diagnostics.html")
+    return dict()
 
 
 if __name__ == "__main__":
