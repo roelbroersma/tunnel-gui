@@ -8,8 +8,8 @@ from flask import Flask, redirect, url_for, request, session
 from flask import render_template as flask_render_template
 from pydantic import BaseModel
 
-from .forms import StaticIpForm, PasswordForm, TunnelForm
-from .utils import do_change_password, change_ip
+from forms import StaticIpForm, PasswordForm, TunnelForm
+from utils import do_change_password, change_ip
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -112,6 +112,8 @@ def diagnostics():
 
 if __name__ == "__main__":
     is_debug = os.getenv('DEBUG', 'False').lower() == 'true'
-    app.run(debug=is_debug)
-    # from waitress import serve
-    # serve(app, host="0.0.0.0", port=8080)
+    if is_debug:
+        app.run(debug=is_debug, host="0.0.0.0")
+    else:
+        from waitress import serve
+        serve(app, host="0.0.0.0", port=8080)

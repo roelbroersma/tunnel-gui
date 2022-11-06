@@ -11,4 +11,4 @@ freeze:
 	source ./.venv/bin/activate && pip list --format=freeze > requirements.txt
 
 start:
-	source ./.venv/bin/activate && flask --app app run --host=0.0.0.0 
+	source ./.venv/bin/activate && python app.py
