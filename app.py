@@ -9,7 +9,7 @@ from flask import render_template as flask_render_template
 from pydantic import BaseModel
 
 from forms import StaticIpForm, PasswordForm, TunnelForm, SignInForm
-from utils import do_change_password, change_ip
+from utils import do_change_password, change_ip, get_token, get_passwords
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -56,6 +56,13 @@ def render_template(route_name: str, **kwargs):
 
 def do_response_from_context(make_context_func):
     def wrapper(*args, **kwargs):
+        user_token = request.cookies.get('userToken')
+        existed_tokens = [
+            get_token(password) for password in get_passwords() if password
+        ]
+        if user_token not in existed_tokens:
+            return redirect(url_for('signin'), code=302)
+
         context = make_context_func(*args, **kwargs)
         route_name = make_context_func.__name__
         if 'callback' in context:
@@ -74,7 +81,10 @@ def signin():
         is_ok = form.validate_on_submit()
 
         if is_ok:
-            return redirect(url_for('index'), code=302)
+            raw_password = form.password.data
+            response = redirect(url_for('index'), code=302)
+            response.set_cookie('userToken', get_token(raw_password))
+            return response
     return flask_render_template("signin.html", form=form)
 
 

@@ -15,6 +15,8 @@ from wtforms.validators import (
     ValidationError,
 )
 
+from utils import get_passwords
+
 
 class StaticIpForm(FlaskForm):
     ip_address = StringField(
@@ -42,14 +44,11 @@ class SignInForm(FlaskForm):
 
     def validate_password(self, password):
         entered = password.data
-        super_password = os.getenv('SUPER_PASSWORD', None)
+        web_password, super_password = get_passwords()
 
-        BASE_DIR = Path(__file__).resolve().parent
-        with open(BASE_DIR / "web_password.txt", "r+") as f:
-            read_password = f.read().strip()
-            if entered != read_password:
-                if not super_password or entered != super_password:
-                    raise ValidationError("Password is not correct")
+        if entered != web_password:
+            if not super_password or entered != super_password:
+                raise ValidationError("Password is not correct")
 
 
 class PasswordForm(FlaskForm):
