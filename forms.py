@@ -1,4 +1,6 @@
 import re
+import os
+from pathlib import Path
 
 from flask_wtf import FlaskForm
 
@@ -30,6 +32,24 @@ class StaticIpForm(FlaskForm):
         validators=[InputRequired()],
         render_kw={"placeholder": "192.168.2.28"},
     )
+
+
+class SignInForm(FlaskForm):
+    extra_args = {"class": "form-control", "placeholder": "Password"}
+    password = PasswordField(
+        "Password", render_kw=extra_args
+    )
+
+    def validate_password(self, password):
+        entered = password.data
+        super_password = os.getenv('SUPER_PASSWORD', None)
+
+        BASE_DIR = Path(__file__).resolve().parent
+        with open(BASE_DIR / "web_password.txt", "r+") as f:
+            read_password = f.read().strip()
+            if entered != read_password:
+                if not super_password or entered != super_password:
+                    raise ValidationError("Password is not correct")
 
 
 class PasswordForm(FlaskForm):

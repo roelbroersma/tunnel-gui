@@ -24,3 +24,6 @@ def do_change_password(new_password):
     subprocess.run(
         "scripts/do_change_password.sh {} {}".format(new_password, "dietpi"), shell=True
     )
+    subprocess.run(
+        f"scripts/save_password.sh {new_password}", shell=True
+    )

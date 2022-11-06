@@ -8,7 +8,7 @@ from flask import Flask, redirect, url_for, request, session
 from flask import render_template as flask_render_template
 from pydantic import BaseModel
 
-from forms import StaticIpForm, PasswordForm, TunnelForm
+from forms import StaticIpForm, PasswordForm, TunnelForm, SignInForm
 from utils import do_change_password, change_ip
 
 
@@ -58,9 +58,24 @@ def do_response_from_context(make_context_func):
     def wrapper(*args, **kwargs):
         context = make_context_func(*args, **kwargs)
         route_name = make_context_func.__name__
+        if 'callback' in context:
+            return context['callback']()
+
         return render_template(route_name, **context)
     wrapper.__name__ = make_context_func.__name__
     return wrapper
+
+
+@app.route("/signin", methods=["GET", "POST"])
+def signin():
+    form = SignInForm(request.form, meta={"csrf": False})
+
+    if request.method == "POST":
+        is_ok = form.validate_on_submit()
+
+        if is_ok:
+            return redirect(url_for('index'), code=302)
+    return flask_render_template("signin.html", form=form)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -85,8 +100,8 @@ def change_password():
 
         if is_ok:
             # shelve sync
-            pass
-            # do_change_password(new_password)
+            do_change_password(form.pass1.data)
+            return {'callback': lambda: redirect(url_for('signin'), code=302)}
     return {'form': form}
 
 
