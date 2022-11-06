@@ -6,8 +6,8 @@ import subprocess
 from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, url_for, request, session
 
-from forms import StaticIpForm, PasswordForm, TunnelForm
-from utils import do_change_password, change_ip
+from .forms import StaticIpForm, PasswordForm, TunnelForm
+from .utils import do_change_password, change_ip
 
 
 BASE_DIR = Path(__file__).resolve().parent
