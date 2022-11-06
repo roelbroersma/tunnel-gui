@@ -32,22 +32,22 @@ def render_template(route_name: str, **kwargs):
         MenuItemInfo(
             linked_route_method_name='index',
             title='IP Address',
-            svg_icon_id='home'
+            svg_icon_id='map_pin'
         ),
         MenuItemInfo(
             linked_route_method_name='change_password',
             title='Password',
-            svg_icon_id='speedometer2'
+            svg_icon_id='key'
         ),
         MenuItemInfo(
             linked_route_method_name='tunnel',
             title='Tunnel',
-            svg_icon_id='table'
+            svg_icon_id='route'
         ),
         MenuItemInfo(
             linked_route_method_name='diagnostics',
             title='Diagnostics',
-            svg_icon_id='grid'
+            svg_icon_id='checklist'
         ),
     ]
     template_name = f"{route_name}.html"
