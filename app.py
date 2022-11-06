@@ -49,6 +49,11 @@ def render_template(route_name: str, **kwargs):
             title='Diagnostics',
             svg_icon_id='checklist'
         ),
+        MenuItemInfo(
+            linked_route_method_name='signout',
+            title='Sign Out',
+            svg_icon_id='exit'
+        ),
     ]
     template_name = f"{route_name}.html"
     return flask_render_template(template_name, **kwargs, menu_items=menu_items, active_route_method_name=route_name)
@@ -86,6 +91,13 @@ def signin():
             response.set_cookie('userToken', get_token(raw_password))
             return response
     return flask_render_template("signin.html", form=form)
+
+
+@app.route("/signout", methods=["GET", ])
+def signout():
+    response = redirect(url_for('index'), code=302)
+    response.set_cookie('userToken', '-')
+    return response
 
 
 @app.route("/", methods=["GET", "POST"])
