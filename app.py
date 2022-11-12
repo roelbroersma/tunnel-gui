@@ -8,7 +8,7 @@ from flask import Flask, redirect, url_for, request, session
 from flask import render_template as flask_render_template
 from pydantic import BaseModel
 
-from forms import StaticIpForm, PasswordForm, TunnelForm, SignInForm
+from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm
 from utils import do_change_password, change_ip, get_token, get_passwords
 
 
@@ -104,11 +104,14 @@ def signout():
 @do_response_from_context
 def index():
     """This renders IP Address template"""
-    form = StaticIpForm(meta={"csrf": False})
+    form = IpAddressChangeForm(request.form, meta={"csrf": False})
 
     if request.method == "POST":
-        if form.validate_on_submit():
-            change_ip(ip, network, gateway, dns)
+        is_ok = form.validate_on_submit()
+
+        if is_ok:
+            pass
+            # change_ip(ip, network, gateway, dns)
     return {'form': form}
 
 

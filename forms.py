@@ -18,22 +18,49 @@ from wtforms.validators import (
 from utils import get_passwords
 
 
-class StaticIpForm(FlaskForm):
+class IpAddressChangeForm(FlaskForm):
+    static = BooleanField("Static IP Address")
+    dhcp = BooleanField("Get IP Address from DHCP")
+
     ip_address = StringField(
         "IP Address",
-        validators=[InputRequired(), IPAddress()],
-        render_kw={"placeholder": "123.45.678.9"},
+        validators=[IPAddress(), ],
+        render_kw={"class": "form-control", "placeholder": "123.45.678.9"},
+    )
+    dns_address = StringField(
+        "DNS Address",
+        validators=[IPAddress(), ],
+        render_kw={"class": "form-control", "placeholder": "8.8.8.8"},
     )
     subnet_mask = StringField(
         "Subnet Mask",
-        validators=[InputRequired()],
-        render_kw={"placeholder": "255.0.0.0"},
+        validators=[IPAddress(), ],
+        render_kw={"class": "form-control", "placeholder": "255.0.0.0"},
     )
     gateway = StringField(
         "Gateway",
-        validators=[InputRequired()],
-        render_kw={"placeholder": "192.168.2.28"},
+        validators=[IPAddress(), ],
+        render_kw={"class": "form-control", "placeholder": "192.168.2.28"},
     )
+
+    def validate(self, extra_validators=None):
+        dhcp = self.data['dhcp']
+        static = self.data['static']
+        msg = 'Should be selected only 1 option: DHCP or Static IP'
+        self.dhcp.validate(self)
+        self.static.validate(self)
+        if dhcp and static:
+            self.dhcp.errors.append(msg)
+            self.static.errors.append(msg)
+        elif not dhcp and not static:
+            self.dhcp.errors.append(msg)
+            self.static.errors.append(msg)
+        elif static:
+            super_result = super().validate(extra_validators)
+            return super_result
+        else:
+            return True
+        return False
 
 
 class SignInForm(FlaskForm):
