@@ -143,6 +143,12 @@ def diagnostics():
     return dict()
 
 
+@app.route("/log-file", methods=["GET", ])
+def get_log_file():
+    with open(os.getenv('LOG_PATH', '/'), 'r+') as f:
+        return f.readlines()
+
+
 if __name__ == "__main__":
     is_debug = os.getenv('DEBUG', 'False').lower() == 'true'
     if is_debug:
