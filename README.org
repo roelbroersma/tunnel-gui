@@ -5,7 +5,7 @@ Flask GUI
 Make sure you're in the project directory.
 #+begin_src shell
   pip install -r requirements.txt
-  flask run
+  make -f Makefile start_flask
 #+end_src
 
 ** Install via the install script
