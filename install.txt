@@ -10,6 +10,6 @@ unzip ./tunnel-gui_main.zip
 rm ./tunnel-gui_main.zip
 cd ./tunnel-gui-main
 
-echo "Succesfully installed the Tunneling GUI. You can run it by typing: make -f Makefile start_flask"
+echo "Succesfully installed the Tunneling GUI. Check the next steps in README.org file"
 
 

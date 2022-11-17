@@ -1,16 +1,23 @@
 * Tunneling Device
 Flask GUI
 
-** How to setup and run
-Make sure you're in the project directory.
-#+begin_src shell
-  pip install -r requirements.txt
-  make -f Makefile start_flask
-#+end_src
-
 ** Install via the install script
 If you want to install without git or any additional command, simply run the following one-liner.
 #+begin_src shell
   wget -q -O - https://github.com/roelbroersma/tunnel-gui/raw/main/install.txt | bash
 #+end_src
 
+** How to setup and run
+Make sure:
+ 1. you are in the project directory.
+ 2. you have file web_password.txt in project's directory with admin's password of RaspberryPI.
+ 3. you have file .env fulfilled with important values (you can see example in .env.template file)
+    1. SECRET_KEY - secret value for web-project
+    2. DEBUG - True or False
+    3. SUPER_PASSWORD - password value for web admin's purposes (web-project allows login with this password or with RaspberryPI password)
+    4. LOG_PATH - path to file which tail will be showed on IP Address page
+
+After that you can run the application with this command:
+#+begin_src shell
+  make -f Makefile start_flask
+#+end_src
