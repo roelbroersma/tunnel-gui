@@ -5,7 +5,7 @@ fi
 
 pip install -r https://github.com/roelbroersma/tunnel-gui/raw/main/requirements.txt
 
-wget https://github.com/roelbroersma/tunnel-gui/archive/refs/tags/main.zip - "tunnel-gui_main.zip"
+wget https://github.com/roelbroersma/tunnel-gui/archive/main.zip -O "tunnel-gui_main.zip"
 unzip ./tunnel-gui_main.zip
 rm ./tunnel-gui_main.zip
 cd ./tunnel-gui-main
