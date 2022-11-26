@@ -12,3 +12,6 @@ freeze:
 
 start:
 	source ./.venv/bin/activate && python app.py
+
+start_flask:
+	python app.py
