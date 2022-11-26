@@ -4,14 +4,14 @@ from pathlib import Path
 import subprocess
 
 
-def change_ip(ip, network, gateway, dns):
+def change_ip(static_or_dhcp, ip, network, gateway, dns):
     # network_interface = open("netconfig", "w")
     # content = ["IP Address \n", "Subnet Mask \n", "Gateway"]
     # network_interface.writeLines(content)
     # network_interface.close()
     subprocess.run(
         "scripts/change_ip.sh -t {} -a {} -n {} -g {} -d {}".format(
-            ip, network, gateway, dns
+            static_or_dhcp, ip, network, gateway, dns
         ),
         shell=True,
     )
