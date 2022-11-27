@@ -8,8 +8,8 @@ from flask import Flask, redirect, url_for, request, session
 from flask import render_template as flask_render_template
 from pydantic import BaseModel
 
-from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm
-from utils import do_change_password, change_ip, get_token, get_passwords
+from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm, IpAddressChangeInfo
+from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -140,7 +140,20 @@ def tunnel():
 @app.route("/diagnostics", methods=["GET", "POST"])
 @do_response_from_context
 def diagnostics():
-    return dict()
+    with open(BASE_DIR / IP_CONFIG_FILE, 'r') as f:
+        json_str = f.read()
+        ip_change_info = IpAddressChangeInfo.from_json(json_str)
+
+        def or_info(val):
+            return val or 'info was not chosen (dhcp was chosen)'
+
+        return {
+            'ip_address': or_info(ip_change_info.ip_address),
+            'subnet_mask': or_info(ip_change_info.subnet_mask),
+            'gateway': or_info(ip_change_info.gateway),
+            'dns_address': or_info(ip_change_info.dns_address),
+            'public_ip_address': '[should we add here something important? :)]'
+        }
 
 
 @app.route("/log-file", methods=["GET", ])

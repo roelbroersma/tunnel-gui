@@ -162,41 +162,9 @@ container.onkeyup = function(e) {
 </script>
 
 {% if not form.errors and request.method == 'POST' %}
-
-Logs from file are:
-<br>
-<div id="log" class="g-5" style="height: 20%; overflow-y: scroll">
-</div>
-<script>
-	async function fetchAsync (url) {
-		let response = await fetch(url);
-		let data = await response.json();
-		return data;
-	}
-	function doF() {
-        let linesParent = document.getElementById("log");
-        // console.log(linesParent);
-        let oldLinesCount = linesParent.childNodes.length - 1;
-        fetchAsync('/log-file')
-        .then(
-            function (result) {
-                let newLinesCount = result.length;
-                if (newLinesCount > oldLinesCount) {
-                    let newLines = result.slice(oldLinesCount);
-                    newLines.forEach(function (text) {
-                        let elem = document.createElement('span');
-                        elem.style.display='block';
-                        elem.innerText = text;
-                        // console.log(elem);
-                        linesParent.insertBefore(elem, linesParent.firstChild);
-                    });
-                }
-            }
-        )
-    }
-    setInterval(doF, 1000);
-
-</script>
+	{% with height='40%' %}
+		{% include 'logs_block.html' %}
+	{% endwith %}
 {%  endif %}
 
 {% endblock %}

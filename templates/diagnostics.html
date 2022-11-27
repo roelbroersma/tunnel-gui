@@ -4,19 +4,21 @@
 <div>
   <dl>
     <dt>IP Address:</dt>
-    <dd>3.3.3.3</dd>
+    <dd>{{ ip_address }}</dd>
     <br />
     <dt>Subnet Mask:</dt>
-    <dd>3.3.3.3</dd>
+    <dd>{{ subnet_mask }}</dd>
     <dt>Gateway:</dt>
-    <dd>3.3.3.3</dd>
+    <dd>{{  gateway }}</dd>
     <dt>DNS Servers:</dt>
-    <dd>3.3.3.3</dd>
+    <dd>{{ dns_address }}</dd>
     <dt>Public IP Address:</dt>
-    <dd>3.3.3.3</dd>
+    <dd>{{ public_ip_address }}</dd>
   </dl>
 </div>
 <h4>Tunnel Info</h4>
-<p>....</p>
+{% with height='50%' %}
+	{% include 'logs_block.html' %}
+{% endwith %}
 
 {% endblock %}
