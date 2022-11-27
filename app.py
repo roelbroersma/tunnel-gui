@@ -112,7 +112,7 @@ def index():
         if is_ok:
             form_generated_data = form.get_generated_data()
             change_ip(form_generated_data)
-    return {'form': form}
+    return {'form': form, 'fields': {field: form[field].label for field in form.data}}
 
 
 @app.route("/change-password", methods=["GET", "POST"])

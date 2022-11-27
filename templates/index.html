@@ -8,8 +8,12 @@
 			.was-validated>.invalid-feedback {
 				display: block;
 			}
+
+			.form-control::placeholder {
+				opacity: 0.3;
+			}
 		</style>
-		<form method="POST" action="{{ url_for('index') }}">
+		<form method="POST" action="{{ url_for('index') }}" id="ipForm">
 
 			<div class="row g-3">
 				<div class="col-12 {% if form.dhcp.errors %}was-validated{% endif %}">
@@ -38,45 +42,28 @@
 			</div>
 
 			<div  class="row g-3 mt-0 p-5 jumping-container" style="display: none; margin-left: 30px; padding-top: 0!important; border: 1px solid gray; border-radius: 10px;">
-				<div class="col-12 {% if form.ip_address.errors %}was-validated{% endif %}">
-		            {{ form.ip_address.label }}
-		            {{ form.ip_address() }}
-		            {% for err in form.ip_address.errors %}
-		            <div class="invalid-feedback" >
-		            {{ err }}
-		            </div>
-	                {% endfor %}
-	            </div>
 
-				<div class="col-12 {% if form.subnet_mask.errors %}was-validated{% endif %}">
-		            {{ form.subnet_mask.label }}
-		            {{ form.subnet_mask() }}
-		            {% for err in form.subnet_mask.errors %}
-		            <div class="invalid-feedback" >
-		            {{ err }}
-		            </div>
-	                {% endfor %}
-	            </div>
-
-				<div class="col-12 {% if form.gateway.errors %}was-validated{% endif %}">
-		            {{ form.gateway.label }}
-		            {{ form.gateway() }}
-		            {% for err in form.gateway.errors %}
-		            <div class="invalid-feedback" >
-		            {{ err }}
-		            </div>
-	                {% endfor %}
-	            </div>
-
-				<div class="col-12 {% if form.dns_address.errors %}was-validated{% endif %}">
-		            {{ form.dns_address.label }}
-		            {{ form.dns_address() }}
-		            {% for err in form.dns_address.errors %}
-		            <div class="invalid-feedback" >
-		            {{ err }}
-		            </div>
-	                {% endfor %}
-	            </div>
+				{% for input_name, input_label in fields.items() if form[input_name].type == 'StringField' %}
+				<div class="col-12">
+					<label for="{{ input_name }}-part0">{{ input_label }}</label>
+					<div class="row">
+						{% for x in range(4) %}
+						<div class="col-2">
+							<input class="form-control" id="{{ input_name }}-part{{ x }}" type="number" max="255" min="0">
+						</div>
+							{% if x != 3 %}.{% endif %}
+						{% endfor %}
+					</div>
+					{{ form[input_name]() }}
+					<div class=" {% if form[input_name].errors %}was-validated{% endif %}">
+						{% for err in form[input_name].errors %}
+			            <div class="invalid-feedback" >
+			            {{ err }}
+			            </div>
+		                {% endfor %}
+					</div>
+				</div>
+				{% endfor %}
 			</div>
 
 			<hr class="my-4">
@@ -85,6 +72,7 @@
 		</form>
 	</div>
 </div>
+
 <script>
 let staticIpCheckbox = document.getElementById("static");
 staticIpCheckbox.onclick = function(e) {
@@ -104,61 +92,43 @@ if (staticIpCheckbox.checked === true) {
 </script>
 
 <script>
-let container = document.getElementsByClassName("jumping-container")[0];
-container.onkeyup = function(e) {
-    let target = e.srcElement || e.target;
-    // let maxLength = parseInt(target.attributes["maxlength"].value, 10);
-	let dottedParts = target.value.split('.');
-	let doesItHave3dots = dottedParts.length - 1 === 3;
-	let doesItHave3charsAfterLastDot = dottedParts[dottedParts.length - 1].length === 3;
-    let myLength = target.value.length;
-    {#console.log('does it have 3 dots? ' + doesItHave3dots);#}
-    {#console.log('does it have 3 chars after last dot? ' + doesItHave3charsAfterLastDot);#}
-    {#console.log('real length: ' + myLength);#}
-    {#console.log('element is ', target);#}
-
-    if (doesItHave3dots && doesItHave3charsAfterLastDot) {
-        console.log('hello')
-        let next = target;
-        let siblingInputWrapper = next.parentElement.nextElementSibling;
-        let siblingInput = siblingInputWrapper && siblingInputWrapper.children[1];
-        next = siblingInput;
-        {#console.log(next.parentElement.nextElementSibling.children);#}
-        console.log(siblingInput);
-        while (next) {
-            {#console.log('wtf magic')#}
-            if (next === null)
-                break;
-            if (next.tagName.toLowerCase() === "input") {
-                next.focus();
-                break;
-            }
-            siblingInputWrapper = next.parentElement.nextElementSibling;
-            siblingInput = siblingInputWrapper && siblingInputWrapper.children[1];
-            next = siblingInput;
-        }
-    }
-    // Move to previous field if empty (user pressed backspace)
-    else if (myLength === 0) {
-        let previous = target;
-        let previousInputWrapper = previous.parentElement.previousElementSibling;
-        let previousInput = previousInputWrapper && previousInputWrapper.children[1];
-        previous = previousInput;
-
-        while (previous) {
-            if (previous == null)
-                break;
-            if (previous.tagName.toLowerCase() === "input") {
-                previous.focus();
-                break;
-            }
-            previousInputWrapper = previous.parentElement.previousElementSibling;
-            previousInput = previousInputWrapper && previousInputWrapper.children[1];
-            previous = previousInput;
+let hiddenInputs = document.getElementsByClassName('visually-hidden');
+for (let i = 0; i < hiddenInputs.length; i++) {
+    let hiddenId = hiddenInputs[i].id;
+    let placeholderParts = hiddenInputs[i].placeholder.split('.');
+    let valueParts = (hiddenInputs[i].value || '').split('.');
+    console.log(hiddenInputs[i].id);
+    for (let partI = 0; partI < 4; partI++) {
+        let partInput = document.getElementById(`${hiddenId}-part${partI}`);
+        partInput.placeholder = placeholderParts[partI];
+        if (valueParts[partI] !== undefined) {
+            partInput.value = valueParts[partI];
         }
     }
 }
 
+function beforeSubmit(event) {
+    let hiddenInputs = document.getElementsByClassName('visually-hidden');
+    for (let i = 0; i < hiddenInputs.length; i++) {
+	    let hiddenId = hiddenInputs[i].id;
+	    let newValue = '';
+	    for (let partI = 0; partI < 4; partI++) {
+	        let partInput = document.getElementById(`${hiddenId}-part${partI}`);
+	        let partValue = partInput.value;
+	        if (partValue !== undefined) {
+	            newValue += '.' + partValue
+	        }
+	    }
+	    newValue = newValue.slice(1);
+	    console.log(`${hiddenId} - "${newValue}"`)
+	    if (newValue) {
+            hiddenInputs[i].value = newValue;
+        }
+	}
+}
+
+const form = document.getElementById('ipForm');
+form.addEventListener('submit', beforeSubmit);
 </script>
 
 {% if not form.errors and request.method == 'POST' %}

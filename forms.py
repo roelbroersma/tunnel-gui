@@ -52,6 +52,9 @@ class IpAddressChangeInfo:
         )
 
 
+IP_INPUT_DEFAULT_CLASSES = "visually-hidden"
+
+
 class IpAddressChangeForm(FlaskForm):
     static = BooleanField("Static IP Address")
     dhcp = BooleanField("Get IP Address from DHCP")
@@ -59,22 +62,22 @@ class IpAddressChangeForm(FlaskForm):
     ip_address = StringField(
         "IP Address",
         validators=[IPAddress(), ],
-        render_kw={"class": "form-control", "placeholder": "123.45.678.9"},
+        render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "123.45.678.9"},
     )
     dns_address = StringField(
         "DNS Address",
         validators=[IPAddress(), ],
-        render_kw={"class": "form-control", "placeholder": "8.8.8.8"},
+        render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "8.8.8.8"},
     )
     subnet_mask = StringField(
         "Subnet Mask",
         validators=[IPAddress(), ],
-        render_kw={"class": "form-control", "placeholder": "255.0.0.0"},
+        render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "255.0.0.0"},
     )
     gateway = StringField(
         "Gateway",
         validators=[IPAddress(), ],
-        render_kw={"class": "form-control", "placeholder": "192.168.2.28"},
+        render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "192.168.2.28"},
     )
 
     def validate(self, extra_validators=None):
