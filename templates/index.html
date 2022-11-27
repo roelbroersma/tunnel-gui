@@ -89,9 +89,6 @@ if (staticIpCheckbox.checked === true) {
     additionalInputsContainer.style.display = "block";
 }
 
-</script>
-
-<script>
 let hiddenInputs = document.getElementsByClassName('visually-hidden');
 for (let i = 0; i < hiddenInputs.length; i++) {
     let hiddenId = hiddenInputs[i].id;
@@ -129,7 +126,41 @@ function beforeSubmit(event) {
 
 const form = document.getElementById('ipForm');
 form.addEventListener('submit', beforeSubmit);
+
+let container = document.getElementsByClassName("jumping-container")[0];
+let visiblePartsId = [];
+for (let i = 0; i < hiddenInputs.length; i++) {
+    let hiddenId = hiddenInputs[i].id;
+    for (let partI = 0; partI < 4; partI++) {
+        visiblePartsId.push(`${hiddenId}-part${partI}`);
+    }
+}
+console.log(`visible parts: ${visiblePartsId}`)
+
+container.onkeyup = function(e) {
+    let target = e.srcElement || e.target;
+    let targetId = target.id;
+    let targetLength = target.value.length;
+	let doesItHave3chars = targetLength === 3;
+
+    if (doesItHave3chars) {
+        let nextPartIndex = visiblePartsId.indexOf(targetId) + 1;
+        if (nextPartIndex < visiblePartsId.length) {
+            let nextId = visiblePartsId[nextPartIndex];
+            document.getElementById(nextId).focus();
+        }
+    }
+    // Move to previous field if empty (user pressed backspace)
+    else if (targetLength === 0) {
+        let previousPartIndex = visiblePartsId.indexOf(targetId) - 1;
+        if (-1 < previousPartIndex) {
+            let previousId = visiblePartsId[previousPartIndex];
+            document.getElementById(previousId).focus();
+        }
+    }
+}
 </script>
+
 
 {% if not form.errors and request.method == 'POST' %}
 	{% with height='40%' %}
