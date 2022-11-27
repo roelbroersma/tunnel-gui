@@ -37,7 +37,7 @@
 	            </div>
 			</div>
 
-			<div  class="row g-3 mt-0 p-5 jumping-container" style="margin-left: 30px; padding-top: 0!important; border: 1px solid gray; border-radius: 10px;">
+			<div  class="row g-3 mt-0 p-5 jumping-container" style="display: none; margin-left: 30px; padding-top: 0!important; border: 1px solid gray; border-radius: 10px;">
 				<div class="col-12 {% if form.ip_address.errors %}was-validated{% endif %}">
 		            {{ form.ip_address.label }}
 		            {{ form.ip_address() }}
@@ -85,6 +85,19 @@
 		</form>
 	</div>
 </div>
+<script>
+let staticIpCheckbox = document.getElementById("static");
+staticIpCheckbox.onclick = function(e) {
+	let additionalInputsContainer = document.getElementsByClassName("jumping-container")[0];
+    let input = document.getElementById("static");
+    if (input.checked === true) {
+        additionalInputsContainer.style.display = "block";
+    } else {
+        additionalInputsContainer.style.display = "none";
+    }
+};
+
+</script>
 
 <script>
 let container = document.getElementsByClassName("jumping-container")[0];
