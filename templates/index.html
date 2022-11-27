@@ -96,6 +96,10 @@ staticIpCheckbox.onclick = function(e) {
         additionalInputsContainer.style.display = "none";
     }
 };
+if (staticIpCheckbox.checked === true) {
+    let additionalInputsContainer = document.getElementsByClassName("jumping-container")[0];
+    additionalInputsContainer.style.display = "block";
+}
 
 </script>
 
