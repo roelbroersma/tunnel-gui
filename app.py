@@ -110,15 +110,8 @@ def index():
         is_ok = form.validate_on_submit()
 
         if is_ok:
-            is_static = form.static.data
-            static_or_dhcp = 'static' if is_static else 'dhcp'
-
-            ip = form.ip_address.data
-            gateway = form.gateway.data
-            network = form.subnet_mask.data
-            dns = form.dns_address.data
-
-            change_ip(static_or_dhcp, ip, network, gateway, dns)
+            form_generated_data = form.get_generated_data()
+            change_ip(form_generated_data)
     return {'form': form}
 
 

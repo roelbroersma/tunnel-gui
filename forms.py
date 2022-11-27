@@ -1,5 +1,6 @@
 import re
 import os
+import json
 from pathlib import Path
 
 from flask_wtf import FlaskForm
@@ -16,6 +17,39 @@ from wtforms.validators import (
 )
 
 from utils import get_passwords
+
+
+class IpAddressChangeInfo:
+    def __init__(self, static_or_dhcp, ip_address, dns_address, subnet_mask, gateway):
+        self.static_or_dhcp = static_or_dhcp
+        is_static = self.static_or_dhcp == 'static'
+        def or_empty(val):
+            return val if is_static else ''
+        self.ip_address = or_empty(ip_address)
+        self.dns_address = or_empty(dns_address)
+        self.subnet_mask = or_empty(subnet_mask)
+        self.gateway = or_empty(gateway)
+
+    def to_json(self):
+        data = {
+            'staticOrDhcp': self.static_or_dhcp,
+            'ipAddress': self.ip_address,
+            'subnetMask': self.subnet_mask,
+            'dnsAddress': self.dns_address,
+            'gateway': self.gateway
+        }
+        return json.dumps(data, indent=4)
+
+    @classmethod
+    def from_json(cls, json_string):
+        data = json.loads(json_string)
+        return cls(
+            static_or_dhcp=data['staticOrDhcp'],
+            ip_address=data['ipAddress'],
+            subnet_mask=data['subnetMask'],
+            dns_address=data['dnsAddress'],
+            gateway=data['gateway']
+        )
 
 
 class IpAddressChangeForm(FlaskForm):
@@ -61,6 +95,22 @@ class IpAddressChangeForm(FlaskForm):
         else:
             return True
         return False
+
+    def get_generated_data(self):
+        is_static = self.static.data
+        static_or_dhcp = 'static' if is_static else 'dhcp'
+
+        ip = self.ip_address.data
+        gateway = self.gateway.data
+        network = self.subnet_mask.data
+        dns = self.dns_address.data
+        return IpAddressChangeInfo(
+            static_or_dhcp=static_or_dhcp,
+            ip_address=ip,
+            subnet_mask=network,
+            dns_address=dns,
+            gateway=gateway
+        )
 
 
 class SignInForm(FlaskForm):

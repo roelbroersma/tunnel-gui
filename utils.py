@@ -3,15 +3,25 @@ import os
 from pathlib import Path
 import subprocess
 
+BASE_DIR = Path(__file__).parent
+IP_CONFIG_FILE = 'ip_config.json'
 
-def change_ip(static_or_dhcp, ip, network, gateway, dns):
+
+def change_ip(ip_address_info):
     # network_interface = open("netconfig", "w")
     # content = ["IP Address \n", "Subnet Mask \n", "Gateway"]
     # network_interface.writeLines(content)
     # network_interface.close()
+    with open(BASE_DIR / IP_CONFIG_FILE, 'w+') as f:
+        f.write(ip_address_info.to_json())
+
     subprocess.run(
         "scripts/change_ip.sh -t {} -a {} -n {} -g {} -d {}".format(
-            static_or_dhcp, ip, network, gateway, dns
+            ip_address_info.static_or_dhcp,
+            ip_address_info.ip_address,
+            ip_address_info.subnet_mask,
+            ip_address_info.gateway,
+            ip_address_info.dns_address
         ),
         shell=True,
     )
