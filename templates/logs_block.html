@@ -1,0 +1,35 @@
+{% block logs %}
+Logs from file are:
+<br>
+<div id="log" class="g-5" style="height: {{ height }}; overflow-y: scroll">
+</div>
+<script>
+	async function fetchAsync (url) {
+		let response = await fetch(url);
+		let data = await response.json();
+		return data;
+	}
+	function doF() {
+        let linesParent = document.getElementById("log");
+
+        let oldLinesCount = linesParent.childNodes.length - 1;
+        fetchAsync('/log-file')
+        .then(
+            function (result) {
+                let newLinesCount = result.length;
+                if (newLinesCount > oldLinesCount) {
+                    let newLines = result.slice(oldLinesCount);
+                    newLines.forEach(function (text) {
+                        let elem = document.createElement('span');
+                        elem.style.display='block';
+                        elem.innerText = text;
+                        linesParent.insertBefore(elem, linesParent.firstChild);
+                    });
+                }
+            }
+        )
+    }
+    setInterval(doF, 1000);
+
+</script>
+{% endblock %}
