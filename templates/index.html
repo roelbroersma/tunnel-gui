@@ -143,21 +143,16 @@ container.onkeyup = function(e) {
     let targetLength = target.value.length;
 	let doesItHave3chars = targetLength === 3;
 
-    if (doesItHave3chars) {
-        let nextPartIndex = visiblePartsId.indexOf(targetId) + 1;
-        if (nextPartIndex < visiblePartsId.length) {
-            let nextId = visiblePartsId[nextPartIndex];
-            document.getElementById(nextId).focus();
+	if ("0" <= e.key && e.key <= "9") {
+        if (doesItHave3chars) {
+            let nextPartIndex = visiblePartsId.indexOf(targetId) + 1;
+            if (nextPartIndex < visiblePartsId.length) {
+                let nextId = visiblePartsId[nextPartIndex];
+                document.getElementById(nextId).focus();
+            }
         }
     }
-    // Move to previous field if empty (user pressed backspace)
-    else if (targetLength === 0) {
-        let previousPartIndex = visiblePartsId.indexOf(targetId) - 1;
-        if (-1 < previousPartIndex) {
-            let previousId = visiblePartsId[previousPartIndex];
-            document.getElementById(previousId).focus();
-        }
-    }
+
 }
 </script>
 
