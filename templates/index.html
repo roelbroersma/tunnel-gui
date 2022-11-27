@@ -10,6 +10,20 @@
 			}
 		</style>
 		<form method="POST" action="{{ url_for('index') }}">
+
+			<div class="row g-3">
+				<div class="col-12 {% if form.dhcp.errors %}was-validated{% endif %}">
+		            {{ form.dhcp() }}
+		            {{ form.dhcp.label }}
+				    <br>
+		            {% for err in form.dhcp.errors %}
+		            <div class="invalid-feedback" >
+		            {{ err }}
+		            </div>
+	                {% endfor %}
+	            </div>
+			</div>
+
 			<div class="row g-3">
 				<div class="col-12 {% if form.static.errors %}was-validated{% endif %}">
 		            {{ form.static() }}
@@ -23,7 +37,7 @@
 	            </div>
 			</div>
 
-			<div  class="row g-3 mt-0 p-5 jumping-container" style="padding-top: 0!important; border: 1px solid gray; border-radius: 10px;">
+			<div  class="row g-3 mt-0 p-5 jumping-container" style="margin-left: 30px; padding-top: 0!important; border: 1px solid gray; border-radius: 10px;">
 				<div class="col-12 {% if form.ip_address.errors %}was-validated{% endif %}">
 		            {{ form.ip_address.label }}
 		            {{ form.ip_address() }}
@@ -58,19 +72,6 @@
 		            {{ form.dns_address.label }}
 		            {{ form.dns_address() }}
 		            {% for err in form.dns_address.errors %}
-		            <div class="invalid-feedback" >
-		            {{ err }}
-		            </div>
-	                {% endfor %}
-	            </div>
-			</div>
-
-			<div class="row g-3">
-				<div class="col-12 {% if form.dhcp.errors %}was-validated{% endif %}">
-		            {{ form.dhcp() }}
-		            {{ form.dhcp.label }}
-				    <br>
-		            {% for err in form.dhcp.errors %}
 		            <div class="invalid-feedback" >
 		            {{ err }}
 		            </div>
