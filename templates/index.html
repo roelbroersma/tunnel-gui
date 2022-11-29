@@ -49,7 +49,7 @@
 					<div class="row">
 						{% for x in range(4) %}
 						<div class="col-2">
-							<input class="form-control" id="{{ input_name }}-part{{ x }}" type="number" max="255" min="0">
+							<input class="form-control" id="{{ input_name }}-part{{ x }}" type="text" maxlength="3">
 						</div>
 							{% if x != 3 %}.{% endif %}
 						{% endfor %}
@@ -140,11 +140,18 @@ console.log(`visible parts: ${visiblePartsId}`)
 container.onkeyup = function(e) {
     let target = e.srcElement || e.target;
     let targetId = target.id;
-    let targetLength = target.value.length;
-	let doesItHave3chars = targetLength === 3;
+    let targetValue = target.value;
 
-	if ("0" <= e.key && e.key <= "9") {
-        if (doesItHave3chars) {
+    let isDotKey = '.' === e.key;
+	let shouldJumpToNext = (targetValue.length === 3 || isDotKey);
+
+	if (("0" <= e.key && e.key <= "9") || isDotKey) {
+	    if (isDotKey) {
+	        if (targetValue && targetValue[targetValue.length - 1] === '.') {
+		        target.value = targetValue.slice(0, -1);
+		    }
+	    }
+        if (shouldJumpToNext) {
             let nextPartIndex = visiblePartsId.indexOf(targetId) + 1;
             if (nextPartIndex < visiblePartsId.length) {
                 let nextId = visiblePartsId[nextPartIndex];
