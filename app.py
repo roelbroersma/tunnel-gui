@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import requests
 import shelve
 import subprocess
 
@@ -168,7 +169,7 @@ def diagnostics():
             'subnet_mask': or_info(ip_change_info.subnet_mask),
             'gateway': or_info(ip_change_info.gateway),
             'dns_address': or_info(ip_change_info.dns_address),
-            'public_ip_address': '[should we add here something important? :)]'
+            'public_ip_address': requests.get('https://icanhazip.com/').text
         }
 
 
