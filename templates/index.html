@@ -155,7 +155,10 @@ container.onkeyup = function(e) {
             let nextPartIndex = visiblePartsId.indexOf(targetId) + 1;
             if (nextPartIndex < visiblePartsId.length) {
                 let nextId = visiblePartsId[nextPartIndex];
-                document.getElementById(nextId).focus();
+                setTimeout(function() {
+					document.getElementById(nextId).focus();
+				}, 0);
+
             }
         }
     }
