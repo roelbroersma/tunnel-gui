@@ -112,6 +112,18 @@ def index():
         if is_ok:
             form_generated_data = form.get_generated_data()
             change_ip(form_generated_data)
+    elif request.method == "GET":
+        with open(BASE_DIR / IP_CONFIG_FILE, 'r') as f:
+            json_str = f.read()
+            ip_change_info = IpAddressChangeInfo.from_json(json_str)
+
+        form.ip_address.default = ip_change_info.ip_address or None
+        form.static.default = ip_change_info.static_or_dhcp == 'static'
+        form.dhcp.default = ip_change_info.static_or_dhcp != 'static'
+        form.subnet_mask.default = ip_change_info.subnet_mask or None
+        form.gateway.default = ip_change_info.gateway or None
+        form.dns_address.default = ip_change_info.dns_address or None
+        form.process()
 
     fields = []
     for field_key in ['ip_address', 'subnet_mask', 'gateway', 'dns_address']:
