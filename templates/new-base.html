@@ -8,6 +8,8 @@
 	      rel="stylesheet"
 	      crossorigin="anonymous">
 
+   <link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.5/css/boxicons.min.css" rel="stylesheet">
+
 	<meta name="theme-color" content="#712cf9">
 
 
@@ -64,6 +66,50 @@
 	  }
 	</style>
 
+	<style>
+	.side-navbar {
+		width: 280px;
+		height: 100%;
+		position: fixed;
+		margin-left: -300px;
+		background-color: #100901;
+		transition: 0.5s;
+	}
+	.nav-link:active,
+	.nav-link:focus,
+	.nav-link:hover {
+		background-color: #ffffff26;
+	}
+	.my-container {
+		transition: 0.4s;
+	}
+	.active-nav {
+		margin-left: 0;
+	}
+	/* for main section */
+	.active-cont {
+		margin-left: 280px;
+	}
+	#menu-btn {
+		background-color: #100901;
+		color: #fff;
+		margin-left: -96px;
+	}
+
+	.sized-content {
+		width: calc(100vw - 3rem);
+	}
+
+	@media (min-width: 1050px) {
+	    .sized-content {
+	      width: calc(60vw - 3rem);
+        }
+	}
+
+	.sized-content>* {
+		z-index: 1;
+	}
+	</style>
 
     <!-- Custom styles for this template -->
     <link href="{{ url_for('static', filename='bootstrap5/sidebars.css') }}" rel="stylesheet">
@@ -134,7 +180,7 @@
 
 <main class="d-flex flex-nowrap">
 
-  <div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 280px;">
+  <div class="side-navbar bg-light active-nav d-flex justify-content-between flex-wrap flex-column flex-shrink-0 p-3" style="width: 280px;" id="sidebar">
     <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
       <svg class="bi pe-none me-2" width="40" height="32"><use xlink:href="#gear-fill"></use></svg>
       <span class="fs-4">T1 Tunnel</span>
@@ -155,10 +201,14 @@
     <small>Connecting the unconnectable &copy 2022</small>
   </div>
 
-  <div class="b-example-divider b-example-vr"></div>
+  <div class="b-example-divider b-example-vr my-container active-cont"></div>
 
-  <div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 700px;">
-  {% block content %}{%  endblock %}
+  <div class="d-flex flex-column flex-shrink-0 p-3 bg-light sized-content">
+    <nav class="navbar top-navbar navbar-light bg-light px-5" style="z-index: 0; margin-bottom: -52px;">
+      <a class="btn border-0" id="menu-btn" style="background-color: darkslategray;"><i class="bx bx-menu"></i></a>
+    </nav>
+
+	{% block content %}{%  endblock %}
   </div>
 
   <div class="b-example-divider b-example-vr"></div>
@@ -167,4 +217,13 @@
 
     <script src="{{ url_for('static', filename='bootstrap5/bootstrap.bundle.min.js') }}" crossorigin="anonymous"></script>
 	<script src="{{ url_for('static', filename='bootstrap5/sidebars.js') }}"></script>
+    <script>
+	  var menu_btn = document.querySelector("#menu-btn");
+	  var sidebar = document.querySelector("#sidebar");
+	  var myContainer = document.querySelector(".my-container");
+	  menu_btn.addEventListener("click", () => {
+	    sidebar.classList.toggle("active-nav");
+	    myContainer.classList.toggle("active-cont");
+	  });
+    </script>
 </body></html>
