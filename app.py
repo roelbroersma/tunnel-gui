@@ -119,8 +119,7 @@ def index():
             ip_change_info = IpAddressChangeInfo.from_json(json_str)
 
         form.ip_address.default = ip_change_info.ip_address or None
-        form.static.default = ip_change_info.static_or_dhcp == 'static'
-        form.dhcp.default = ip_change_info.static_or_dhcp != 'static'
+        form.static_or_dhcp.default = ip_change_info.static_or_dhcp
         form.subnet_mask.default = ip_change_info.subnet_mask or None
         form.gateway.default = ip_change_info.gateway or None
         form.dns_address.default = ip_change_info.dns_address or None
@@ -181,6 +180,14 @@ def get_log_file():
 
 if __name__ == "__main__":
     is_debug = os.getenv('DEBUG', 'False').lower() == 'true'
+    try:
+        with open(BASE_DIR / IP_CONFIG_FILE, 'r') as f:
+            try_read = f.read()
+    except Exception:
+        with open(BASE_DIR / IP_CONFIG_FILE, 'w') as f:
+            default_config = IpAddressChangeInfo('dhcp', None, None, None, None)
+            f.write(default_config.to_json())
+
     if is_debug:
         app.run(debug=is_debug, host="0.0.0.0")
     else:
