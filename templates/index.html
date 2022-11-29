@@ -12,28 +12,19 @@
 			.form-control::placeholder {
 				opacity: 0.3;
 			}
+
+			ul {
+				list-style-type: none;
+			}
 		</style>
 		<form method="POST" action="{{ url_for('index') }}" id="ipForm">
 
 			<div class="row g-3">
-				<div class="col-12 {% if form.dhcp.errors %}was-validated{% endif %}">
-		            {{ form.dhcp() }}
-		            {{ form.dhcp.label }}
+				<div class="col-12 {% if form.static_or_dhcp.errors %}was-validated{% endif %}">
+		            {{ form.static_or_dhcp() }}
+		            {{ form.static_or_dhcp.label }}
 				    <br>
-		            {% for err in form.dhcp.errors %}
-		            <div class="invalid-feedback" >
-		            {{ err }}
-		            </div>
-	                {% endfor %}
-	            </div>
-			</div>
-
-			<div class="row g-3">
-				<div class="col-12 {% if form.static.errors %}was-validated{% endif %}">
-		            {{ form.static() }}
-		            {{ form.static.label }}
-				    <br>
-		            {% for err in form.static.errors %}
+		            {% for err in form.static_or_dhcp.errors %}
 		            <div class="invalid-feedback" >
 		            {{ err }}
 		            </div>
@@ -74,17 +65,18 @@
 </div>
 
 <script>
-let staticIpCheckbox = document.getElementById("static");
-staticIpCheckbox.onclick = function(e) {
-	let additionalInputsContainer = document.getElementsByClassName("jumping-container")[0];
-    let input = document.getElementById("static");
-    if (input.checked === true) {
-        additionalInputsContainer.style.display = "block";
-    } else {
-        additionalInputsContainer.style.display = "none";
-    }
-};
-if (staticIpCheckbox.checked === true) {
+let dhcpIpRadiobutton = document.getElementById("static_or_dhcp-0");
+let staticIpRadiobutton = document.getElementById("static_or_dhcp-1");
+dhcpIpRadiobutton.onclick = function() {
+    let additionalInputsContainer = document.getElementsByClassName("jumping-container")[0];
+    additionalInputsContainer.style.display = "none";
+}
+staticIpRadiobutton.onclick = function() {
+    let additionalInputsContainer = document.getElementsByClassName("jumping-container")[0];
+    additionalInputsContainer.style.display = "block";
+}
+
+if (staticIpRadiobutton.checked === true) {
     let additionalInputsContainer = document.getElementsByClassName("jumping-container")[0];
     additionalInputsContainer.style.display = "block";
 }

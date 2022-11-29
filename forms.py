@@ -56,8 +56,13 @@ IP_INPUT_DEFAULT_CLASSES = "visually-hidden"
 
 
 class IpAddressChangeForm(FlaskForm):
-    static = BooleanField("Static IP Address")
-    dhcp = BooleanField("Get IP Address from DHCP")
+    static_or_dhcp = RadioField(
+        "",
+        choices=[
+            ("dhcp", "Get IP Address from DHCP"),
+            ("static", "Static IP Address"),
+        ]
+    )
 
     ip_address = StringField(
         "IP Address",
@@ -81,18 +86,8 @@ class IpAddressChangeForm(FlaskForm):
     )
 
     def validate(self, extra_validators=None):
-        dhcp = self.data['dhcp']
-        static = self.data['static']
-        msg = 'Should be selected only 1 option: DHCP or Static IP'
-        self.dhcp.validate(self)
-        self.static.validate(self)
-        if dhcp and static:
-            self.dhcp.errors.append(msg)
-            self.static.errors.append(msg)
-        elif not dhcp and not static:
-            self.dhcp.errors.append(msg)
-            self.static.errors.append(msg)
-        elif static:
+        static_or_dhcp = self.data['static_or_dhcp']
+        if static_or_dhcp == 'static':
             super_result = super().validate(extra_validators)
             return super_result
         else:
@@ -100,9 +95,7 @@ class IpAddressChangeForm(FlaskForm):
         return False
 
     def get_generated_data(self):
-        is_static = self.static.data
-        static_or_dhcp = 'static' if is_static else 'dhcp'
-
+        static_or_dhcp = self.static_or_dhcp.data
         ip = self.ip_address.data
         gateway = self.gateway.data
         network = self.subnet_mask.data
