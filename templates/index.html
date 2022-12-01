@@ -160,9 +160,9 @@ container.onkeyup = function(e) {
 
 
 {% if not form.errors and request.method == 'POST' %}
-	{% with height='40%' %}
-		{% include 'logs_block.html' %}
-	{% endwith %}
+	<div class="g-5">
+	Settings SAVED
+	</div>
 {%  endif %}
 
 {% endblock %}
