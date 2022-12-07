@@ -60,7 +60,7 @@ class IpAddressChangeForm(FlaskForm):
         "",
         choices=[
             ("dhcp", "Get IP Address from DHCP"),
-            ("static", "Static IP Address"),
+            ("static", "Set Static IP Address"),
         ]
     )
 
