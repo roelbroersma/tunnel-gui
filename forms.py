@@ -70,7 +70,7 @@ class IpAddressChangeForm(FlaskForm):
         render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "192.168.0.10"},
     )
     dns_address = StringField(
-        "DNS Address",
+        "DNS Server",
         validators=[IPAddress(), ],
         render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "8.8.8.8"},
     )
