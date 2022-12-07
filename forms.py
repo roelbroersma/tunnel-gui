@@ -67,7 +67,7 @@ class IpAddressChangeForm(FlaskForm):
     ip_address = StringField(
         "IP Address",
         validators=[IPAddress(), ],
-        render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "123.45.678.9"},
+        render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "192.168.0.10"},
     )
     dns_address = StringField(
         "DNS Address",
@@ -77,12 +77,12 @@ class IpAddressChangeForm(FlaskForm):
     subnet_mask = StringField(
         "Subnet Mask",
         validators=[IPAddress(), ],
-        render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "255.0.0.0"},
+        render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "255.255.255.0"},
     )
     gateway = StringField(
         "Gateway",
         validators=[IPAddress(), ],
-        render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "192.168.2.28"},
+        render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "192.168.0.254"},
     )
 
     def validate(self, extra_validators=None):
