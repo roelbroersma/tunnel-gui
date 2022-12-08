@@ -40,6 +40,27 @@ class IpAddressChangeInfo:
             gateway=data['gateway']
         )
 
+    @classmethod
+    def from_script_output(cls, output):
+        # Result from show_ip.sh script should be json string
+        try:
+            data = json.loads(output)
+            return cls(
+                static_or_dhcp=data['type'],
+                ip_address=data['ip_address'],
+                subnet_mask=data['subnet'],
+                dns_address=data['dns_servers'][0],
+                gateway=data['gateway']
+            )
+        except Exception:
+            return cls(
+                static_or_dhcp='',
+                ip_address='',
+                subnet_mask='',
+                dns_address='',
+                gateway=''
+            )
+
 
 def change_ip(ip_address_info):
     # network_interface = open("netconfig", "w")
@@ -61,6 +82,16 @@ def change_ip(ip_address_info):
     )
     # subprocess.run(["mv", network_interface, "/etc/"])
     # subprocess.run(["systemctl", "restart", "netctl"])
+
+
+def show_ip():
+    result = subprocess.run(
+        "scripts/show_ip.sh",
+        shell=True,
+        capture_output=True,
+    )
+    output = result.stdout
+    return IpAddressChangeInfo.from_script_output(output)
 
 
 def do_change_password(new_password):
