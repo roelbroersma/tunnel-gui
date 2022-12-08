@@ -1,6 +1,8 @@
 FROM python:3.9.12-bullseye
 RUN curl -sSL https://install.python-poetry.org | python -
 ENV PATH /root/.local/bin:$PATH
+RUN ln -s /bin/bash /usr/bin/bash
+RUN apt-get update -y && apt install iproute2 -y
 
 RUN mkdir project
 COPY pyproject.toml project/
