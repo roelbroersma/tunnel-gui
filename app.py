@@ -9,8 +9,8 @@ from flask import Flask, redirect, url_for, request, session
 from flask import render_template as flask_render_template
 from pydantic import BaseModel
 
-from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm, IpAddressChangeInfo
-from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE
+from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm
+from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo
 
 
 BASE_DIR = Path(__file__).resolve().parent

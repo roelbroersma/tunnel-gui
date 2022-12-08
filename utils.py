@@ -1,10 +1,44 @@
 import base64
 import os
 from pathlib import Path
+import json
 import subprocess
 
 BASE_DIR = Path(__file__).parent
 IP_CONFIG_FILE = 'ip_config.json'
+
+
+class IpAddressChangeInfo:
+    def __init__(self, static_or_dhcp, ip_address, dns_address, subnet_mask, gateway):
+        self.static_or_dhcp = static_or_dhcp
+        is_static = self.static_or_dhcp == 'static'
+        def or_empty(val):
+            return val if is_static else ''
+        self.ip_address = or_empty(ip_address)
+        self.dns_address = or_empty(dns_address)
+        self.subnet_mask = or_empty(subnet_mask)
+        self.gateway = or_empty(gateway)
+
+    def to_json(self):
+        data = {
+            'staticOrDhcp': self.static_or_dhcp,
+            'ipAddress': self.ip_address,
+            'subnetMask': self.subnet_mask,
+            'dnsAddress': self.dns_address,
+            'gateway': self.gateway
+        }
+        return json.dumps(data, indent=4)
+
+    @classmethod
+    def from_json(cls, json_string):
+        data = json.loads(json_string)
+        return cls(
+            static_or_dhcp=data['staticOrDhcp'],
+            ip_address=data['ipAddress'],
+            subnet_mask=data['subnetMask'],
+            dns_address=data['dnsAddress'],
+            gateway=data['gateway']
+        )
 
 
 def change_ip(ip_address_info):
