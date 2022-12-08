@@ -5,6 +5,7 @@ import json
 import subprocess
 
 BASE_DIR = Path(__file__).parent
+DEFAULT_EXECUTABLE = '/bin/bash'
 IP_CONFIG_FILE = 'ip_config.json'
 
 
@@ -52,7 +53,10 @@ class IpAddressChangeInfo:
                 dns_address=data['dns_servers'][0],
                 gateway=data['gateway']
             )
-        except Exception:
+        except Exception as e:
+            print('PROBLEM: ')
+            print(e)
+            print(output)
             return cls(
                 static_or_dhcp='',
                 ip_address='',
@@ -71,7 +75,8 @@ def change_ip(ip_address_info):
         f.write(ip_address_info.to_json())
 
     subprocess.run(
-        "scripts/change_ip.sh -t {} -a {} -n {} -g {} -d {}".format(
+        str(BASE_DIR / "scripts/change_ip.sh") +\
+        " -t {} -a {} -n {} -g {} -d {}".format(
             ip_address_info.static_or_dhcp,
             ip_address_info.ip_address,
             ip_address_info.subnet_mask,
@@ -79,6 +84,7 @@ def change_ip(ip_address_info):
             ip_address_info.dns_address
         ),
         shell=True,
+        executable=DEFAULT_EXECUTABLE,
     )
     # subprocess.run(["mv", network_interface, "/etc/"])
     # subprocess.run(["systemctl", "restart", "netctl"])
@@ -86,8 +92,9 @@ def change_ip(ip_address_info):
 
 def show_ip():
     result = subprocess.run(
-        "scripts/show_ip.sh",
+        str(BASE_DIR / "scripts/show_ip.sh"),
         shell=True,
+        executable=DEFAULT_EXECUTABLE,
         capture_output=True,
     )
     output = result.stdout
@@ -97,13 +104,21 @@ def show_ip():
 def do_change_password(new_password):
     # subprocess.run("scripts/do_change_password.sh {} {}".format(new_password, "tunnel_demo"), shell=True)
     subprocess.run(
-        "scripts/do_change_password.sh {} {}".format(new_password, "root"), shell=True
+        str(BASE_DIR / "scripts/do_change_password.sh") +\
+        f" {new_password} root",
+        shell=True,
+        executable=DEFAULT_EXECUTABLE,
     )
     subprocess.run(
-        "scripts/do_change_password.sh {} {}".format(new_password, "dietpi"), shell=True
+        str(BASE_DIR / "scripts/do_change_password.sh") +\
+        f" {new_password} dietpi",
+        shell=True,
+        executable=DEFAULT_EXECUTABLE,
     )
     subprocess.run(
-        f"scripts/save_password.sh {new_password}", shell=True
+        str(BASE_DIR / f"scripts/save_password.sh") + f" {new_password}",
+        shell=True,
+        executable=DEFAULT_EXECUTABLE,
     )
 
 
