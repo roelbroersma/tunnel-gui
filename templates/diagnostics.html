@@ -1,21 +1,31 @@
 {% extends 'new-base.html' %} {% block content %}
 <style>
-.diagnostic-info > p {
+.diagnostic-info p {
   font-weight: 700;
 }
-.diagnostic-info > p > span {
+.diagnostic-info p.info {
   font-weight: 400;
 }
 </style>
 <h3 class="mb-5">Diagnostics</h3>
 <h4>IP Info</h4>
 <div class="diagnostic-info">
-	<p>IP Address: <span>{{ ip_address }}</span></p>
+	<div class="row">
+		<p class="col-4">IP Address:</p><p class="info col-6">{{ ip_address }}</p>
+	</div>
     <br />
-    <p>Subnet Mask: <span>{{ subnet_mask }}</span></p>
-    <p>Gateway: <span>{{  gateway }}</span></p>
-    <p>DNS Servers: <span>{{ dns_address }}</span></p>
-    <p>Public IP Address: <span>{{ public_ip_address }}</span></p>
+	<div class="row">
+        <p class="col-4">Subnet Mask: </p><p class="info col-6">{{ subnet_mask }}</p>
+    </div>
+    <div class="row">
+	    <p class="col-4">Gateway: </p><p class="info col-6">{{  gateway }}</p>
+    </div>
+    <div class="row">
+	    <p class="col-4">DNS Servers: </p><p class="info col-6">{{ dns_address }}</p>
+    </div>
+    <div class="row">
+	    <p class="col-4">Public IP Address: </p><p class="info col-6">{{ public_ip_address }}</p>
+	</div>
 </div>
 <h4>Tunnel Info</h4>
 {% with height='50%' %}
