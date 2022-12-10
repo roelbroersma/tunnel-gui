@@ -81,7 +81,6 @@ if [ "$CURRENT_MODE" == "normal" ] && [ $BRIDGE == "on" ]; then
         # NOW ADD THE BRIDGE INTERFACE
         #DO WE NEED TO ADD A BRIDGE WITH DHCP?
         if [ "$CURRENT_TYPE" == "dhcp" ]; then
-
                 echo "Adding Bridge interface with DHCP"
                 awk -f $SCRIPT_DIR/changeInterface.awk /etc/network/interfaces dev=br0 action=add mode=dhcp 'bridge_ports=eth0 tap0' > /tmp/tmp_interfaces
                 #WHEN SETTING A BRIDGE TO DHCP, THE BRIDGE_PORTS CONFIGURATION IS LOST, SO ADD IT HERE
