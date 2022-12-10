@@ -101,6 +101,9 @@ if [ "$CURRENT_MODE" == "normal" ] && [ $BRIDGE == "on" ]; then
         # FOR SOME REASON WE CAN NOT WRITE TO THE /ETC/NETWORK/INTERFACES FILE DIRECTLY, SO WE DO IT THIS WAY, VIA A TMP FILE.
         cp /tmp/tmp_interfaces /etc/network/interfaces
 
+        #SET THE ETH0 INTERFACE TO DOWN MANUALLY, THIS WILL REMOVE THE DHCP ADDRESS ON IT, WHEN WE RESTART NETWORKING, IT WILL COME UP WITHOUT IP (MANUAL)
+        ip link set dev eth0 down
+
         #RESTART NETWORKING
         service networking restart
 
@@ -135,12 +138,12 @@ elif [ "$CURRENT_MODE" == "bridge" ] && [ $BRIDGE == "off" ]; then
         # FOR SOME REASON WE CAN NOT WRITE TO THE /ETC/NETWORK/INTERFACES FILE DIRECTLY, SO WE DO IT THIS WAY, VIA A TMP FILE.
         cp /tmp/tmp_interfaces /etc/network/interfaces
 
-        # RESTART NETWORKING
-        service networking restart
-
-        #SET BRIDGE INTERFACE TO DOWN AND REMOVE BRIDGE
+        #FIRST, SET BRIDGE INTERFACE TO DOWN AND REMOVE BRIDGE
         ip link set dev br0 down
         brctl delbr br0
+
+        #SECOND, NOW RESTART NETWORKING (IF WE DO IT THE OPPOSITE: RESTART NETWORKING AND THEN REMOVE THE BRIDGE, THE DEFAULT ROUTE WILL BE GONE)
+        service networking restart
 
 #NOTHING TO DO
 elif [ "$CURRENT_MODE" == "bridge" ] && [ $BRIDGE == "on" ]; then
@@ -150,5 +153,3 @@ elif [ "$CURRENT_MODE" == "normal" ] && [ $BRIDGE == "off" ]; then
         echo "Nothing to do. We do not need to change to normal mode since we are already running in non-bridge mode."
 
 fi
-                                        
-
