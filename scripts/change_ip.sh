@@ -70,7 +70,7 @@ if [ "$TYPE" == "static" ]; then
 
 	unset OPTIND	#RESET GETOPTS
 	re_ip="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$" #REGEX PATTERN TO CHECK FOR VALID IP (NOT TO TIGHT, MAKE 0.0.0.0 OR 255.255.255.255 STILL POSSIBLE)
-       re_dns="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(([[:space:]]((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))?)$" #REGEX PATTERN TO CHECK FOR VALID DNS SERVER(S) (NOT TO TIGHT, MAKE 0.0.0.0 OR 255.255.255.255 STILL POSSIBLE)
+	re_dns="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(([[:space:]]((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))?)$" #REGEX PATTERN TO CHECK FOR VALID DNS SERVER(S) (NOT TO TIGHT, MAKE 0.0.0.0 OR 255.255.255.255 STILL POSSIBLE)
 
 	# GET -a, -n, -g and -d  ARGUMENTS
 	while getopts ":t:a:n:g:d:" options; do
@@ -137,6 +137,8 @@ if [ "$TYPE" == "dhcp" ]; then
 		#USING BRIDGE MODE, SO CHANGE IP ADDRESS OF BRIDGE
 		echo "Changing IP Address of br0 to DHCP Mode"
 		awk -f $SCRIPT_DIR/changeInterface.awk /etc/network/interfaces dev=br0 mode=dhcp > /tmp/tmp_interfaces
+		#WHEN SETTING A BRIDGE TO DHCP, THE BRIDGE_PORTS CONFIGURATION IS LOST, SO ADD IT HERE
+		echo "  bridge_ports eth0 tap0" >> /tmp/tmp_interfaces
 	else
 		#USING NON-BRIDGE MODE, SO ONLY CHANGE IP ADDRESS OF ETH0
 		echo "Changing IP Address of eth0 to DHCP Mode"
