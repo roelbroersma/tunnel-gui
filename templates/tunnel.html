@@ -1,38 +1,38 @@
 {% extends 'new-base.html' %} {% block content %}
-<h3 class="mb-5">Tunnel</h3>
-<form method="post">
-  {{ form.csrf_token }}
-    <input type="radio" id="tunnel-type" />
-    <label for="tunnel-tye">Tunnel Type?</label>
-  {{ form.tunnel_type }}
+	<h3 class="mb-5">Tunnel</h3>
+	<form method="post">
+		{{ form.csrf_token }}
+		<input type="radio" id="tunnel-type"/>
+		<label for="tunnel-tye">Tunnel Type?</label>
+		{{ form.tunnel_type }}
 
-    <input type="radio" id="endpoint" />
-    <label for="endpoint">Endpoint</label>
-  <p class="ml-10">Server</p>
-  <div>
-    <dl>
-      <dt>Port:</dt>
-      <dd>443</dd>
+		<input type="radio" id="endpoint"/>
+		<label for="endpoint">Endpoint</label>
+		<p class="ml-10">Server</p>
+		<div>
+			<dl>
+				<dt>Port:</dt>
+				<dd>443</dd>
 
 
-        {{ form.server_port_type }}
+				{{ form.server_port_type }}
 
-      <dt>Server Subnets:</dt>
-      <dd>{{ form.server_subnet_1 }}</dd>
-      <dt></dt>
-      <dd>{{ form.server_subnet_2 }}</dd>
+				<dt>Server Subnets:</dt>
+				<dd>{{ form.server_subnet_1 }}</dd>
+				<dt></dt>
+				<dd>{{ form.server_subnet_2 }}</dd>
 
-      <dt>Client Subnets:</dt>
-      <dd>{{ form.client_subnet_1 }}</dd>
-      <dt></dt>
-      <dd>{{ form.client_subnet_2 }}</dd>
-    </dl>
-  </div>
-  {{ form.mdns }} {{ form.mdns.label }}
-  <br />
-  {{ form.pimd }} {{ form.pimd.label }}
-  <br />
-  <button class="m-10">Save</button>
-</form>
+				<dt>Client Subnets:</dt>
+				<dd>{{ form.client_subnet_1 }}</dd>
+				<dt></dt>
+				<dd>{{ form.client_subnet_2 }}</dd>
+			</dl>
+		</div>
+		{{ form.mdns }} {{ form.mdns.label }}
+		<br/>
+		{{ form.pimd }} {{ form.pimd.label }}
+		<br/>
+		<button class="m-10">Save</button>
+	</form>
 
 {% endblock %}
