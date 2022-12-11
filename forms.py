@@ -127,3 +127,23 @@ class TunnelForm(FlaskForm):
     client_subnet_2 = StringField("", validators=[InputRequired()])
     mdns = BooleanField("Enable MDNS (Avahi Daemon)")
     pimd = BooleanField("Enable PIMD (Multicast Routing)")
+
+
+class OldTunnelForm(FlaskForm):
+    tunnel_type = RadioField(
+        "Tunnel Type",
+        choices=[("normal", "Normal"), ("bridge", "Bridge")],
+        default="normal",
+    )
+    server_port_type = RadioField(
+        "", choices=[("tcp", "TCP"), ("udp", "UDP")], default="tcp"
+    )
+    client_port_type = RadioField(
+        "", choices=[("tcp", "TCP"), ("udp", "UDP")], default="tcp"
+    )
+    server_subnet_1 = StringField("", validators=[InputRequired()])
+    server_subnet_2 = StringField("", validators=[InputRequired()])
+    client_subnet_1 = StringField("", validators=[InputRequired()])
+    client_subnet_2 = StringField("", validators=[InputRequired()])
+    mdns = BooleanField("Enable MDNS (Avahi Daemon)")
+    pimd = BooleanField("Enable PIMD (Multicast Routing)")
