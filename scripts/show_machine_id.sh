@@ -11,7 +11,7 @@ json_output="{";
 
 #GET MACHINE ID
 MACHINE_ID="$(cat /etc/machine-id)"
-json_output="$json_output \"machine_id\" : \"$MACHINE_ID\"";
+json_output="$json_output \"machine_id\" : \"$MACHINE_ID\""
 
 #END JSON OUTPUT
 json_output="$json_output }";
