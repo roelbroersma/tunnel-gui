@@ -117,7 +117,7 @@ class TunnelMasterForm(FlaskForm):
             ("bridge", "Bridge")
         ],
         default="normal",
-        render_kw={"class": "tunnel-type-popup"}
+        render_kw={"class": "tunnel-type-popup mb-0"}
     )
 
     public_ip_or_ddns_hostname = StringField(
@@ -137,16 +137,18 @@ class TunnelMasterForm(FlaskForm):
             ("udp", "UDP")
         ],
         default="tcp",
+        render_kw={"class": "mb-0"}
     )
     client_ids = StringField(
         "Client device ID(s)",
         render_kw={"class": "add-more-items visually-hidden"}
     )
 
-    server_subnet_1 = StringField("", validators=[InputRequired()])
-    server_subnet_2 = StringField("", validators=[InputRequired()])
-    client_subnet_1 = StringField("", validators=[InputRequired()])
-    client_subnet_2 = StringField("", validators=[InputRequired()])
+    # server_subnet_1 = StringField("", validators=[InputRequired()])
+    # server_subnet_2 = StringField("", validators=[InputRequired()])
+    # client_subnet_1 = StringField("", validators=[InputRequired()])
+    # client_subnet_2 = StringField("", validators=[InputRequired()])
+
     mdns = BooleanField("Enable MDNS (Avahi Daemon)")
     pimd = BooleanField("Enable PIMD (Multicast Routing)")
 

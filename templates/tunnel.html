@@ -29,7 +29,7 @@
 {#		<form method="POST" action="{{ url_for('tunnel') }}" id="masterForm">#}
 		<form method="POST" id="masterForm">
 			<div class="row g-3">
-				<div class="col-12 {% if tunnel_master_form.tunnel_type.errors %}was-validated{% endif %}">
+				<div class="col-12 mt-0 {% if tunnel_master_form.tunnel_type.errors %}was-validated{% endif %}">
 					{{ tunnel_master_form.tunnel_type.label }}
 					{{ tunnel_master_form.tunnel_type() }}
 					<br>
@@ -86,7 +86,7 @@
 					{% endfor %}
 				</div>
 
-				<div id="clientIDsWrapper" class="col-12 plus-sign {% if tunnel_master_form.client_ids.errors %}was-validated{% endif %}">
+				<div id="clientIDsWrapper" class="col-12 mt-0 plus-sign {% if tunnel_master_form.client_ids.errors %}was-validated{% endif %}">
 					{{ tunnel_master_form.client_ids.label }}
 					<br>
 					{{ tunnel_master_form.client_ids() }}
@@ -102,6 +102,29 @@
 				</div>
 			</div>
 
+
+
+			<div class="col-12 {% if tunnel_master_form.mdns.errors %}was-validated{% endif %}">
+				{{ tunnel_master_form.mdns() }}
+				{{ tunnel_master_form.mdns.label }}
+				<br>
+				{% for err in tunnel_master_form.mdns.errors %}
+					<div class="invalid-feedback">
+						{{ err }}
+					</div>
+				{% endfor %}
+			</div>
+
+			<div class="col-12 {% if tunnel_master_form.pimd.errors %}was-validated{% endif %}">
+				{{ tunnel_master_form.pimd() }}
+				{{ tunnel_master_form.pimd.label }}
+				<br>
+				{% for err in tunnel_master_form.pimd.errors %}
+					<div class="invalid-feedback">
+						{{ err }}
+					</div>
+				{% endfor %}
+			</div>
 
 			<button class="w-100 btn btn-primary btn-lg" type="submit">Save</button>
 		</form>
