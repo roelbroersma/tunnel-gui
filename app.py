@@ -9,7 +9,7 @@ from flask import Flask, redirect, url_for, request, session
 from flask import render_template as flask_render_template
 from pydantic import BaseModel
 
-from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm, OldTunnelForm
+from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm, OldTunnelForm, TunnelMasterForm
 from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip
 
 
@@ -148,7 +148,20 @@ def change_password():
 @do_response_from_context
 def tunnel():
     form = TunnelForm()
-    return {'form': form}
+    device_id = '.... my device id...'
+    tunnel_master_form = TunnelMasterForm(request.form, meta={"csrf": False})
+
+    if request.method == "POST":
+        print('wow !! ')
+        is_ok = tunnel_master_form.validate_on_submit()
+        print(tunnel_master_form.data)
+
+        if is_ok:
+            # shelve sync
+            # do_change_password(form.pass1.data)
+            print(tunnel_master_form.data)
+            return {'callback': lambda: redirect(url_for('tunnel'), code=302)}
+    return {'form': form, 'device_id': device_id, 'tunnel_master_form': tunnel_master_form}
 
 
 @app.route("/old_tunnel", methods=["GET", "POST"])

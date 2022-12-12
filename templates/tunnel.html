@@ -1,38 +1,253 @@
-{% extends 'new-base.html' %} {% block content %}
+{% extends 'new-base.html' %}
+{% block title %}Tunnel info{% endblock %}
+{% block content %}
+	<style>
+        ul {
+            list-style-type: none;
+        }
+	</style>
 	<h3 class="mb-5">Tunnel</h3>
-	<form method="post">
-		{{ form.csrf_token }}
-		<input type="radio" id="tunnel-type"/>
-		<label for="tunnel-tye">Tunnel Type?</label>
-		{{ form.tunnel_type }}
-
-		<input type="radio" id="endpoint"/>
-		<label for="endpoint">Endpoint</label>
-		<p class="ml-10">Server</p>
-		<div>
-			<dl>
-				<dt>Port:</dt>
-				<dd>443</dd>
-
-
-				{{ form.server_port_type }}
-
-				<dt>Server Subnets:</dt>
-				<dd>{{ form.server_subnet_1 }}</dd>
-				<dt></dt>
-				<dd>{{ form.server_subnet_2 }}</dd>
-
-				<dt>Client Subnets:</dt>
-				<dd>{{ form.client_subnet_1 }}</dd>
-				<dt></dt>
-				<dd>{{ form.client_subnet_2 }}</dd>
-			</dl>
+	<div class="row g-5" style="overflow-y: auto">
+		<div class="py-5 text-center">
+			<p class="lead">Current Device ID is "{{ device_id }}"</p>
 		</div>
-		{{ form.mdns }} {{ form.mdns.label }}
-		<br/>
-		{{ form.pimd }} {{ form.pimd.label }}
-		<br/>
-		<button class="m-10">Save</button>
-	</form>
+		<div class="col-12">
+			<p>One device needs to be the <b>Master</b> and be accessible from outside (public IP or forwards a port on
+				your router).<br>Do you want this device to be the Master?</p>
+			<ul id="deviceType">
+				<li>
+					<input id="deviceType-0" name="deviceType" type="radio" value="master" checked="">
+					<label for="deviceType-0">This device is the master</label>
+				</li>
+				<li>
+					<input id="deviceType-1" name="deviceType" type="radio" value="notMaster">
+					<label for="deviceType-1">This device is <b>NOT</b> master</label>
+				</li>
+			</ul>
+		</div>
 
+{#		<form method="POST" action="{{ url_for('tunnel') }}" id="masterForm">#}
+		<form method="POST" id="masterForm">
+			<div class="row g-3">
+				<div class="col-12 {% if tunnel_master_form.tunnel_type.errors %}was-validated{% endif %}">
+					{{ tunnel_master_form.tunnel_type.label }}
+					{{ tunnel_master_form.tunnel_type() }}
+					<br>
+					{% for err in tunnel_master_form.tunnel_type.errors %}
+						<div class="invalid-feedback">
+							{{ err }}
+						</div>
+					{% endfor %}
+				</div>
+
+				<div class="jumping-container">
+					<div class="col-12">
+						<label for="public_ip_or_ddns_hostname-part0">{{ tunnel_master_form.public_ip_or_ddns_hostname.label }}</label>
+						<div class="row">
+							{% for x in range(4) %}
+								<div class="col-2">
+									<input class="form-control" id="public_ip_or_ddns_hostname-part{{ x }}" type="text"
+									       maxlength="3">
+								</div>
+								{% if x != 3 %}.{% endif %}
+							{% endfor %}
+						</div>
+						{{ tunnel_master_form.public_ip_or_ddns_hostname() }}
+						<div class=" {% if tunnel_master_form.public_ip_or_ddns_hostname.errors %}was-validated{% endif %}">
+							{% for err in tunnel_master_form.public_ip_or_ddns_hostname.errors %}
+								<div class="invalid-feedback">
+									{{ err }}
+								</div>
+							{% endfor %}
+						</div>
+					</div>
+				</div>
+
+				<div class="col-12 {% if tunnel_master_form.tunnel_port.errors %}was-validated{% endif %}">
+					{{ tunnel_master_form.tunnel_port.label }}
+					<br>
+					{{ tunnel_master_form.tunnel_port() }}
+					<br>
+					{% for err in tunnel_master_form.tunnel_port.errors %}
+						<div class="invalid-feedback">
+							{{ err }}
+						</div>
+					{% endfor %}
+				</div>
+
+				<div class="col-12 {% if tunnel_master_form.protocol.errors %}was-validated{% endif %}">
+					{{ tunnel_master_form.protocol.label }}
+					{{ tunnel_master_form.protocol() }}
+					<br>
+					{% for err in tunnel_master_form.protocol.errors %}
+						<div class="invalid-feedback">
+							{{ err }}
+						</div>
+					{% endfor %}
+				</div>
+
+				<div id="clientIDsWrapper" class="col-12 plus-sign {% if tunnel_master_form.client_ids.errors %}was-validated{% endif %}">
+					{{ tunnel_master_form.client_ids.label }}
+					<br>
+					{{ tunnel_master_form.client_ids() }}
+					<input id="client-ids-0" type="text" value="" class="mb-2">
+					<i class='bx bx-plus'></i>
+					<br>
+					<div class="additional-inputs"></div>
+					{% for err in tunnel_master_form.client_ids.errors %}
+						<div class="invalid-feedback">
+							{{ err }}
+						</div>
+					{% endfor %}
+				</div>
+			</div>
+
+
+			<button class="w-100 btn btn-primary btn-lg" type="submit">Save</button>
+		</form>
+
+		<form method="POST" action="{{ url_for('tunnel') }}" id="notMasterForm">
+			NOT MASTER FORM
+			<button class="w-100 btn btn-primary btn-lg" type="submit">Save</button>
+		</form>
+	</div>
+
+
+	<script>
+        let masterFormContainer = document.getElementById("masterForm");
+        masterFormContainer.style.display = "none";
+        let notMasterFormContainer = document.getElementById("notMasterForm");
+        notMasterFormContainer.style.display = "none";
+
+        let deviceTypeMasterRadiobutton = document.getElementById("deviceType-0");
+        let deviceTypeNotMasterRadiobutton = document.getElementById("deviceType-1");
+        deviceTypeMasterRadiobutton.onclick = function () {
+            let masterFormContainer = document.getElementById("masterForm");
+            masterFormContainer.style.display = "block";
+            let notMasterFormContainer = document.getElementById("notMasterForm");
+            notMasterFormContainer.style.display = "none";
+        }
+        deviceTypeNotMasterRadiobutton.onclick = function () {
+            let masterFormContainer = document.getElementById("masterForm");
+            masterFormContainer.style.display = "none";
+            let notMasterFormContainer = document.getElementById("notMasterForm");
+            notMasterFormContainer.style.display = "block";
+        }
+
+        if (deviceTypeMasterRadiobutton.checked === true) {
+            let masterFormContainer = document.getElementById("masterForm");
+            masterFormContainer.style.display = "block";
+        }
+        if (deviceTypeNotMasterRadiobutton.checked === true) {
+            let notMasterFormContainer = document.getElementById("notMasterForm");
+            notMasterFormContainer.style.display = "block";
+        }
+
+
+        let hiddenInputs = document.getElementsByClassName('jumping-container')[0].getElementsByClassName('visually-hidden');
+        for (let i = 0; i < hiddenInputs.length; i++) {
+            let hiddenId = hiddenInputs[i].id;
+            let placeholderParts = hiddenInputs[i].placeholder.split('.');
+            let valueParts = (hiddenInputs[i].value || '').split('.');
+            console.log(hiddenInputs[i].id);
+            for (let partI = 0; partI < 4; partI++) {
+                let partInput = document.getElementById(`${hiddenId}-part${partI}`);
+                partInput.placeholder = placeholderParts[partI];
+                if (valueParts[partI] !== undefined) {
+                    partInput.value = valueParts[partI];
+                }
+            }
+        }
+        function beforeSubmit(event) {
+            let hiddenInputs = document.getElementsByClassName('jumping-container')[0].getElementsByClassName('visually-hidden');
+            for (let i = 0; i < hiddenInputs.length; i++) {
+                let hiddenId = hiddenInputs[i].id;
+                let newValue = '';
+                for (let partI = 0; partI < 4; partI++) {
+                    let partInput = document.getElementById(`${hiddenId}-part${partI}`);
+                    let partValue = partInput.value;
+                    if (partValue !== undefined) {
+                        newValue += '.' + partValue
+                    }
+                }
+                newValue = newValue.slice(1);
+                console.log(`${hiddenId} - "${newValue}"`)
+                if (newValue) {
+                    hiddenInputs[i].value = newValue;
+                }
+            }
+
+	        let clientIDsInput = document.getElementById('client_ids');
+            let clientIDInputsList = document.getElementById('clientIDsWrapper').getElementsByTagName('input');
+            clientIDInputsList = [...clientIDInputsList].slice(1);
+
+	        concattedClientIDs = clientIDInputsList.reduce(function(acc, val) {
+	            let newID = val.value.trim();
+	            if (!newID)
+	                return acc;
+	            if (!acc)
+	                return newID;
+	            return acc + ';' + newID;
+	        }, '');
+            clientIDsInput.value = concattedClientIDs;
+        }
+
+        const form = document.getElementById('masterForm');
+        form.addEventListener('submit', beforeSubmit);
+
+        let container = document.getElementsByClassName("jumping-container")[0];
+        let visiblePartsId = [];
+        for (let i = 0; i < hiddenInputs.length; i++) {
+            let hiddenId = hiddenInputs[i].id;
+            for (let partI = 0; partI < 4; partI++) {
+                visiblePartsId.push(`${hiddenId}-part${partI}`);
+            }
+        }
+        console.log(`visible parts: ${visiblePartsId}`)
+
+        container.onkeyup = function (e) {
+            let target = e.srcElement || e.target;
+            let targetId = target.id;
+            let targetValue = target.value;
+
+            let isDotKey = '.' === e.key;
+            let shouldJumpToNext = (targetValue.length === 3 || isDotKey);
+
+            if (("0" <= e.key && e.key <= "9") || isDotKey) {
+                if (isDotKey) {
+                    if (targetValue && targetValue[targetValue.length - 1] === '.') {
+                        target.value = targetValue.slice(0, -1);
+                    }
+                }
+                if (shouldJumpToNext) {
+                    let nextPartIndex = visiblePartsId.indexOf(targetId) + 1;
+                    if (nextPartIndex < visiblePartsId.length) {
+                        let nextId = visiblePartsId[nextPartIndex];
+                        setTimeout(function () {
+                            document.getElementById(nextId).focus();
+                        }, 0);
+
+                    }
+                }
+            }
+
+        };
+
+
+        const plusElement = document.getElementsByClassName('bx-plus')[0];
+        plusElement.onclick = function() {
+            const additionalInputsWrapper = document.getElementsByClassName('additional-inputs')[0];
+            const newInput = document.createElement('input');
+            newInput.type="text";
+            newInput.classList.add("mb-2");
+            const brElemenet = document.createElement('br');
+            additionalInputsWrapper.appendChild(newInput);
+            additionalInputsWrapper.appendChild(brElemenet);
+        };
+        {#const#}
+        // <input class="add-more-items" id="client_ids" name="client_ids" type="text" value="">
+
+
+
+	</script>
 {% endblock %}
