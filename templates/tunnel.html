@@ -186,6 +186,9 @@
 						{% for nested_field in tunnel_master_form.master_networks %}
 						<div class="col-12 row">
 							{{ nested_field }}
+							<div class="col-2 action-remove">
+								(x)
+							</div>
 						</div>
 						{% endfor %}
 					</div>
@@ -303,6 +306,19 @@
         {#const#}
         // <input class="add-more-items" id="client_ids" name="client_ids" type="text" value="">
 
+        const removeRowButtons = document.getElementsByClassName('action-remove');
+        function removeRow() {
+            this.parentElement.remove();
+            const masterNetworks = document.getElementById('masterNetworks');
+            console.log(masterNetworks.childElementCount);
+            console.log(this);
+            if (masterNetworks.childElementCount <= 1) {
+                const rowElements = [...[...masterNetworks.children][0].children];
+                rowElements[rowElements.length - 1].style.display = 'none';
+            }
+            console.log(this);
+        }
+        [...removeRowButtons].forEach(element => element.onclick = removeRow)
 
 
 	</script>
