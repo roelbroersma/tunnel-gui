@@ -40,26 +40,16 @@
 					{% endfor %}
 				</div>
 
-				<div class="jumping-container">
-					<div class="col-12">
-						<label for="public_ip_or_ddns_hostname-part0">{{ tunnel_master_form.public_ip_or_ddns_hostname.label }}</label>
-						<div class="row">
-							{% for x in range(4) %}
-								<div class="col-2">
-									<input class="form-control" id="public_ip_or_ddns_hostname-part{{ x }}" type="text"
-									       maxlength="3">
-								</div>
-								{% if x != 3 %}.{% endif %}
-							{% endfor %}
-						</div>
-						{{ tunnel_master_form.public_ip_or_ddns_hostname() }}
-						<div class=" {% if tunnel_master_form.public_ip_or_ddns_hostname.errors %}was-validated{% endif %}">
-							{% for err in tunnel_master_form.public_ip_or_ddns_hostname.errors %}
-								<div class="invalid-feedback">
-									{{ err }}
-								</div>
-							{% endfor %}
-						</div>
+				<div class="col-12">
+					{{ tunnel_master_form.public_ip_or_ddns_hostname.label }}
+					{{ tunnel_master_form.public_ip_or_ddns_hostname() }}
+					<br>
+					<div class=" {% if tunnel_master_form.public_ip_or_ddns_hostname.errors %}was-validated{% endif %}">
+						{% for err in tunnel_master_form.public_ip_or_ddns_hostname.errors %}
+							<div class="invalid-feedback">
+								{{ err }}
+							</div>
+						{% endfor %}
 					</div>
 				</div>
 
@@ -166,40 +156,7 @@
             notMasterFormContainer.style.display = "block";
         }
 
-
-        let hiddenInputs = document.getElementsByClassName('jumping-container')[0].getElementsByClassName('visually-hidden');
-        for (let i = 0; i < hiddenInputs.length; i++) {
-            let hiddenId = hiddenInputs[i].id;
-            let placeholderParts = hiddenInputs[i].placeholder.split('.');
-            let valueParts = (hiddenInputs[i].value || '').split('.');
-            console.log(hiddenInputs[i].id);
-            for (let partI = 0; partI < 4; partI++) {
-                let partInput = document.getElementById(`${hiddenId}-part${partI}`);
-                partInput.placeholder = placeholderParts[partI];
-                if (valueParts[partI] !== undefined) {
-                    partInput.value = valueParts[partI];
-                }
-            }
-        }
         function beforeSubmit(event) {
-            let hiddenInputs = document.getElementsByClassName('jumping-container')[0].getElementsByClassName('visually-hidden');
-            for (let i = 0; i < hiddenInputs.length; i++) {
-                let hiddenId = hiddenInputs[i].id;
-                let newValue = '';
-                for (let partI = 0; partI < 4; partI++) {
-                    let partInput = document.getElementById(`${hiddenId}-part${partI}`);
-                    let partValue = partInput.value;
-                    if (partValue !== undefined) {
-                        newValue += '.' + partValue
-                    }
-                }
-                newValue = newValue.slice(1);
-                console.log(`${hiddenId} - "${newValue}"`)
-                if (newValue) {
-                    hiddenInputs[i].value = newValue;
-                }
-            }
-
 	        let clientIDsInput = document.getElementById('client_ids');
             let clientIDInputsList = document.getElementById('clientIDsWrapper').getElementsByTagName('input');
             clientIDInputsList = [...clientIDInputsList].slice(1);
@@ -217,45 +174,6 @@
 
         const form = document.getElementById('masterForm');
         form.addEventListener('submit', beforeSubmit);
-
-        let container = document.getElementsByClassName("jumping-container")[0];
-        let visiblePartsId = [];
-        for (let i = 0; i < hiddenInputs.length; i++) {
-            let hiddenId = hiddenInputs[i].id;
-            for (let partI = 0; partI < 4; partI++) {
-                visiblePartsId.push(`${hiddenId}-part${partI}`);
-            }
-        }
-        console.log(`visible parts: ${visiblePartsId}`)
-
-        container.onkeyup = function (e) {
-            let target = e.srcElement || e.target;
-            let targetId = target.id;
-            let targetValue = target.value;
-
-            let isDotKey = '.' === e.key;
-            let shouldJumpToNext = (targetValue.length === 3 || isDotKey);
-
-            if (("0" <= e.key && e.key <= "9") || isDotKey) {
-                if (isDotKey) {
-                    if (targetValue && targetValue[targetValue.length - 1] === '.') {
-                        target.value = targetValue.slice(0, -1);
-                    }
-                }
-                if (shouldJumpToNext) {
-                    let nextPartIndex = visiblePartsId.indexOf(targetId) + 1;
-                    if (nextPartIndex < visiblePartsId.length) {
-                        let nextId = visiblePartsId[nextPartIndex];
-                        setTimeout(function () {
-                            document.getElementById(nextId).focus();
-                        }, 0);
-
-                    }
-                }
-            }
-
-        };
-
 
         const plusElement = document.getElementsByClassName('bx-plus')[0];
         plusElement.onclick = function() {

@@ -123,7 +123,7 @@ class TunnelMasterForm(FlaskForm):
     public_ip_or_ddns_hostname = StringField(
         "Public IP or (DDNS) Hostname",
         validators=[IPAddress(), ],
-        render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "192.168.0.10"},
+        render_kw={"placeholder": "192.168.0.10"},
     )
     tunnel_port = IntegerField(
         "Port",
