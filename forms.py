@@ -2,7 +2,7 @@ import re
 
 from flask_wtf import FlaskForm
 
-from wtforms import StringField, IntegerField, PasswordField, RadioField, BooleanField
+from wtforms import StringField, IntegerField, PasswordField, RadioField, BooleanField, SelectField
 from wtforms.validators import (
     DataRequired,
     Length,
@@ -117,27 +117,28 @@ class TunnelMasterForm(FlaskForm):
             ("bridge", "Bridge")
         ],
         default="normal",
-        render_kw={"class": "tunnel-type-popup mb-0"}
+        render_kw={"class": "tunnel-type-popup", "style": "padding-left: 0"}
     )
 
     public_ip_or_ddns_hostname = StringField(
         "Public IP or (DDNS) Hostname",
         validators=[IPAddress(), ],
-        render_kw={"placeholder": "192.168.0.10"},
+        render_kw={"placeholder": "192.168.0.10", "class": "col-12"},
     )
     tunnel_port = IntegerField(
         "Port",
         validators=[],
-        default=443
+        default=443,
+        render_kw={"class": "col-12"}
     )
-    protocol = RadioField(
+    protocol = SelectField(
         "Protocol",
         choices=[
             ("tcp", "TCP"),
             ("udp", "UDP")
         ],
         default="tcp",
-        render_kw={"class": "mb-0"}
+        render_kw={"class": "mb-0", "style": "height: 30px"}
     )
     client_ids = StringField(
         "Client device ID(s)",

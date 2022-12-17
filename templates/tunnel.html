@@ -5,6 +5,93 @@
         ul {
             list-style-type: none;
         }
+        #deviceType li:not(:last-child) {
+	        margin-bottom: 5px;
+        }
+
+		.help-tip{
+		    position: relative;
+			display: inline-block;
+		    text-align: center;
+			margin-left: 5px;
+		    background-color: #BCDBEA;
+		    border-radius: 50%;
+		    width: 24px;
+		    height: 24px;
+		    font-size: 14px;
+		    line-height: 26px;
+		    cursor: default;
+		}
+
+		.help-tip:before{
+		    content:'?';
+		    font-weight: bold;
+		    color:#fff;
+		}
+
+		.help-tip:hover p{
+		    display:block;
+		    transform-origin: 100% 0%;
+
+		    -webkit-animation: fadeIn 0.3s ease-in-out;
+		    animation: fadeIn 0.3s ease-in-out;
+
+		}
+
+		.help-tip p{    /* The tooltip */
+		    display: none;
+			z-index: 2;
+		    text-align: left;
+		    background-color: #1E2021;
+		    padding: 20px;
+		    width: 300px;
+		    position: absolute;
+		    border-radius: 3px;
+		    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+		    left: -4px;
+		    color: #FFF;
+		    font-size: 13px;
+		    line-height: 1.4;
+		}
+
+		.help-tip p:before{ /* The pointer of the tooltip */
+		    position: absolute;
+		    content: '';
+		    width:0;
+		    height: 0;
+		    border:6px solid transparent;
+		    border-bottom-color:#1E2021;
+		    left:10px;
+		    top:-12px;
+		}
+
+		.help-tip p:after{ /* Prevents the tooltip from being hidden */
+		    width:100%;
+		    height:40px;
+		    content:'';
+		    position: absolute;
+		    top:-40px;
+		    left:0;
+		}
+
+		/* CSS animation */
+
+		@-webkit-keyframes fadeIn {
+		    0% {
+		        opacity:0;
+		        transform: scale(0.6);
+		    }
+
+		    100% {
+		        opacity:100%;
+		        transform: scale(1);
+		    }
+		}
+
+		@keyframes fadeIn {
+		    0% { opacity:0; }
+		    100% { opacity:100%; }
+		}
 	</style>
 	<h3 class="mb-5">Tunnel</h3>
 	<div class="row g-5" style="overflow-y: auto">
@@ -18,10 +105,16 @@
 				<li>
 					<input id="deviceType-0" name="deviceType" type="radio" value="master" checked="">
 					<label for="deviceType-0">This device is the master</label>
+					<div class="help-tip" >
+					    <p>Master Device can have lots of NOT Masters</p>
+					</div>
 				</li>
 				<li>
 					<input id="deviceType-1" name="deviceType" type="radio" value="notMaster">
 					<label for="deviceType-1">This device is <b>NOT</b> master</label>
+					<div class="help-tip">
+					    <p>What a perfect chance to choose NOT master device!</p>
+					</div>
 				</li>
 			</ul>
 		</div>
@@ -29,9 +122,13 @@
 {#		<form method="POST" action="{{ url_for('tunnel') }}" id="masterForm">#}
 		<form method="POST" id="masterForm">
 			<div class="row g-3">
-				<div class="col-12 mt-0 {% if tunnel_master_form.tunnel_type.errors %}was-validated{% endif %}">
+				<div class="col-12 mt-0 row {% if tunnel_master_form.tunnel_type.errors %}was-validated{% endif %}">
+					<div class="col-3">
 					{{ tunnel_master_form.tunnel_type.label }}
+					</div>
+					<div class="col-9">
 					{{ tunnel_master_form.tunnel_type() }}
+					</div>
 					<br>
 					{% for err in tunnel_master_form.tunnel_type.errors %}
 						<div class="invalid-feedback">
@@ -40,40 +137,41 @@
 					{% endfor %}
 				</div>
 
-				<div class="col-12">
+				<div class="col-12 row">
+					<div class="col-3">
 					{{ tunnel_master_form.public_ip_or_ddns_hostname.label }}
+					</div>
+					<div class="col-4">
 					{{ tunnel_master_form.public_ip_or_ddns_hostname() }}
+					</div>
+					<div class="col-2">
+					{{ tunnel_master_form.tunnel_port() }}
+					</div>
+					<div class="col-3">
+					{{ tunnel_master_form.protocol() }}
+					</div>
 					<br>
-					<div class=" {% if tunnel_master_form.public_ip_or_ddns_hostname.errors %}was-validated{% endif %}">
+					<div class=" {% if
+					tunnel_master_form.public_ip_or_ddns_hostname.errors or
+					tunnel_master_form.tunnel_port.errors or
+					tunnel_master_form.protocol.errors
+							%}was-validated{% endif %}">
 						{% for err in tunnel_master_form.public_ip_or_ddns_hostname.errors %}
 							<div class="invalid-feedback">
 								{{ err }}
 							</div>
 						{% endfor %}
+						{% for err in tunnel_master_form.tunnel_port.errors %}
+							<div class="invalid-feedback">
+								{{ err }}
+							</div>
+						{% endfor %}
+						{% for err in tunnel_master_form.protocol.errors %}
+							<div class="invalid-feedback">
+								{{ err }}
+							</div>
+						{% endfor %}
 					</div>
-				</div>
-
-				<div class="col-12 {% if tunnel_master_form.tunnel_port.errors %}was-validated{% endif %}">
-					{{ tunnel_master_form.tunnel_port.label }}
-					<br>
-					{{ tunnel_master_form.tunnel_port() }}
-					<br>
-					{% for err in tunnel_master_form.tunnel_port.errors %}
-						<div class="invalid-feedback">
-							{{ err }}
-						</div>
-					{% endfor %}
-				</div>
-
-				<div class="col-12 {% if tunnel_master_form.protocol.errors %}was-validated{% endif %}">
-					{{ tunnel_master_form.protocol.label }}
-					{{ tunnel_master_form.protocol() }}
-					<br>
-					{% for err in tunnel_master_form.protocol.errors %}
-						<div class="invalid-feedback">
-							{{ err }}
-						</div>
-					{% endfor %}
 				</div>
 
 				<div id="clientIDsWrapper" class="col-12 mt-0 plus-sign {% if tunnel_master_form.client_ids.errors %}was-validated{% endif %}">
