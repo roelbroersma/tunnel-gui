@@ -5,7 +5,11 @@
         ul {
             list-style-type: none;
         }
-        #deviceType li:not(:last-child) {
+        #deviceType li:not(:last-child), #masterNetworks>div:not(:last-child) {
+	        margin-bottom: 5px;
+        }
+
+        #masterForm>.row>.row {
 	        margin-bottom: 5px;
         }
 
@@ -170,6 +174,19 @@
 							<div class="invalid-feedback">
 								{{ err }}
 							</div>
+						{% endfor %}
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-3">
+						Networks, this master is connected to
+					</div>
+					<div class="col-9" id="masterNetworks">
+						{% for nested_field in tunnel_master_form.master_networks %}
+						<div class="col-12 row">
+							{{ nested_field }}
+						</div>
 						{% endfor %}
 					</div>
 				</div>

@@ -2,7 +2,7 @@ import re
 
 from flask_wtf import FlaskForm
 
-from wtforms import StringField, IntegerField, PasswordField, RadioField, BooleanField, SelectField
+from wtforms import StringField, IntegerField, PasswordField, RadioField, BooleanField, SelectField, FieldList, FormField, Form
 from wtforms.validators import (
     DataRequired,
     Length,
@@ -14,6 +14,7 @@ from wtforms.validators import (
 )
 
 from utils import get_passwords, IpAddressChangeInfo
+from widgets import MasterRowWidget
 
 
 IP_INPUT_DEFAULT_CLASSES = "visually-hidden"
@@ -109,6 +110,24 @@ class PasswordForm(FlaskForm):
             raise ValidationError("Passwords didn't match")
 
 
+class MasterNetworkForm(Form):
+    server_ip = StringField(
+        '',
+        validators=[IPAddress(), ],
+        render_kw={"placeholder": "192.168.0.0", "style": "width: 94%"},
+    )
+    server_subnet = SelectField(
+        "",
+        choices=[
+            (x, x) for x in (
+                "/1", "/2", "/3", "/32"
+            )
+        ],
+        default="/3",
+        render_kw={"style": "height: 30px;" }
+    )
+
+
 class TunnelMasterForm(FlaskForm):
     tunnel_type = RadioField(
         "Type",
@@ -139,6 +158,15 @@ class TunnelMasterForm(FlaskForm):
         ],
         default="tcp",
         render_kw={"class": "mb-0", "style": "height: 30px"}
+    )
+    master_networks = FieldList(
+        FormField(
+            MasterNetworkForm,
+            widget=MasterRowWidget()
+        ),
+        min_entries=2,
+        max_entries=8,
+        render_kw={"class": "wow-item"}
     )
     client_ids = StringField(
         "Client device ID(s)",
