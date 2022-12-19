@@ -103,21 +103,21 @@
 			<p class="lead">Current Device ID is "{{ device_id }}"</p>
 		</div>
 		<div class="col-12">
-			<p>One device needs to be the <b>Master</b> and be accessible from outside (public IP or forwards a port on
+			<p>One device needs to be the <b>Master</b> and be accessible from outside (public IP or forward a port on
 				your router).<br>Do you want this device to be the Master?</p>
 			<ul id="deviceType">
 				<li>
 					<input id="deviceType-0" name="deviceType" type="radio" value="master" checked="">
 					<label for="deviceType-0">This device is the master</label>
 					<div class="help-tip" >
-					    <p>Master Device can have lots of NOT Masters</p>
+					    <p>The master device is listening and therefor need to be accessible on a public IP address or via a port forward on your router. If non-master devices are behind a firewall, you try to use TCP port 443 for the master since that's probably not blocked.</p>
 					</div>
 				</li>
 				<li>
 					<input id="deviceType-1" name="deviceType" type="radio" value="notMaster">
 					<label for="deviceType-1">This device is <b>NOT</b> master</label>
 					<div class="help-tip">
-					    <p>What a perfect chance to choose NOT master device!</p>
+					    <p>This non-master initiates a connection to the master and therefor it's enough that this device has access to internet (via NAT is allowed). All configurations are made on the Master and then imported to the other (non-master) device(s).</p>
 					</div>
 				</li>
 			</ul>
