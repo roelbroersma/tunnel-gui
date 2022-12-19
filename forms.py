@@ -2,7 +2,7 @@ import re
 
 from flask_wtf import FlaskForm
 
-from wtforms import StringField, PasswordField, RadioField, BooleanField
+from wtforms import StringField, IntegerField, PasswordField, RadioField, BooleanField, SelectField, FieldList, FormField, Form
 from wtforms.validators import (
     DataRequired,
     Length,
@@ -14,6 +14,7 @@ from wtforms.validators import (
 )
 
 from utils import get_passwords, IpAddressChangeInfo
+from widgets import MasterRowWidget
 
 
 IP_INPUT_DEFAULT_CLASSES = "visually-hidden"
@@ -109,7 +110,100 @@ class PasswordForm(FlaskForm):
             raise ValidationError("Passwords didn't match")
 
 
+class MasterNetworkForm(Form):
+    server_ip = StringField(
+        '',
+        validators=[IPAddress(), ],
+        render_kw={"placeholder": "192.168.0.0", "style": "width: 94%"},
+    )
+    server_subnet = SelectField(
+        "",
+        choices=[
+            (x, x) for x in (
+                "/1", "/2", "/3", "/32"
+            )
+        ],
+        default="/3",
+        render_kw={"style": "height: 30px;" }
+    )
+
+
+class TunnelMasterForm(FlaskForm):
+    tunnel_type = RadioField(
+        "Type",
+        choices=[
+            ("normal", "Normal"),
+            ("bridge", "Bridge")
+        ],
+        default="normal",
+        render_kw={"class": "tunnel-type-popup", "style": "padding-left: 0"}
+    )
+
+    public_ip_or_ddns_hostname = StringField(
+        "Public IP or (DDNS) Hostname",
+        validators=[IPAddress(), ],
+        render_kw={"placeholder": "192.168.0.10", "class": "col-12"},
+    )
+    tunnel_port = IntegerField(
+        "Port",
+        validators=[],
+        default=443,
+        render_kw={"class": "col-12"}
+    )
+    protocol = SelectField(
+        "Protocol",
+        choices=[
+            ("tcp", "TCP"),
+            ("udp", "UDP")
+        ],
+        default="tcp",
+        render_kw={"class": "mb-0", "style": "height: 30px"}
+    )
+    master_networks = FieldList(
+        FormField(
+            MasterNetworkForm,
+            widget=MasterRowWidget()
+        ),
+        min_entries=2,
+        max_entries=8,
+        render_kw={"class": "wow-item"}
+    )
+    client_ids = StringField(
+        "Client device ID(s)",
+        render_kw={"class": "add-more-items visually-hidden"}
+    )
+
+    # server_subnet_1 = StringField("", validators=[InputRequired()])
+    # server_subnet_2 = StringField("", validators=[InputRequired()])
+    # client_subnet_1 = StringField("", validators=[InputRequired()])
+    # client_subnet_2 = StringField("", validators=[InputRequired()])
+
+    mdns = BooleanField("Enable MDNS (Avahi Daemon)")
+    pimd = BooleanField("Enable PIMD (Multicast Routing)")
+
+
+
 class TunnelForm(FlaskForm):
+    tunnel_type = RadioField(
+        "Tunnel Type",
+        choices=[("normal", "Normal"), ("bridge", "Bridge")],
+        default="normal",
+    )
+    server_port_type = RadioField(
+        "", choices=[("tcp", "TCP"), ("udp", "UDP")], default="tcp"
+    )
+    client_port_type = RadioField(
+        "", choices=[("tcp", "TCP"), ("udp", "UDP")], default="tcp"
+    )
+    server_subnet_1 = StringField("", validators=[InputRequired()])
+    server_subnet_2 = StringField("", validators=[InputRequired()])
+    client_subnet_1 = StringField("", validators=[InputRequired()])
+    client_subnet_2 = StringField("", validators=[InputRequired()])
+    mdns = BooleanField("Enable MDNS (Avahi Daemon)")
+    pimd = BooleanField("Enable PIMD (Multicast Routing)")
+
+
+class OldTunnelForm(FlaskForm):
     tunnel_type = RadioField(
         "Tunnel Type",
         choices=[("normal", "Normal"), ("bridge", "Bridge")],

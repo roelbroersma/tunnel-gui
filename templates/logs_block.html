@@ -1,33 +1,35 @@
 {% block logs %}
-<div id="log" class="col-8" style="height: {{ height }}; overflow-y: scroll; background-color: white">
-</div>
-<script>
-	async function fetchAsync (url) {
-		let response = await fetch(url);
-		let data = await response.json();
-		return data;
-	}
-	function doF() {
-        let linesParent = document.getElementById("log");
+	<div id="log" class="col-8" style="height: {{ height }}; overflow-y: scroll; background-color: white">
+	</div>
+	<script>
+        async function fetchAsync(url) {
+            let response = await fetch(url);
+            let data = await response.json();
+            return data;
+        }
 
-        let oldLinesCount = linesParent.childNodes.length - 1;
-        fetchAsync('/log-file')
-        .then(
-            function (result) {
-                let newLinesCount = result.length;
-                if (newLinesCount > oldLinesCount) {
-                    let newLines = result.slice(oldLinesCount);
-                    newLines.forEach(function (text) {
-                        let elem = document.createElement('span');
-                        elem.style.display='block';
-                        elem.innerText = text;
-                        linesParent.insertBefore(elem, linesParent.firstChild);
-                    });
-                }
-            }
-        )
-    }
-    setInterval(doF, 1000);
+        function doF() {
+            let linesParent = document.getElementById("log");
 
-</script>
+            let oldLinesCount = linesParent.childNodes.length - 1;
+            fetchAsync('/log-file')
+                .then(
+                    function (result) {
+                        let newLinesCount = result.length;
+                        if (newLinesCount > oldLinesCount) {
+                            let newLines = result.slice(oldLinesCount);
+                            newLines.forEach(function (text) {
+                                let elem = document.createElement('span');
+                                elem.style.display = 'block';
+                                elem.innerText = text;
+                                linesParent.insertBefore(elem, linesParent.firstChild);
+                            });
+                        }
+                    }
+                )
+        }
+
+        setInterval(doF, 1000);
+
+	</script>
 {% endblock %}
