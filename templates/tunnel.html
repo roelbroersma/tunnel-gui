@@ -186,8 +186,11 @@
 						{% for nested_field in tunnel_master_form.master_networks %}
 						<div class="col-12 row">
 							{{ nested_field }}
-							<div class="col-2 action-remove">
+							<div class="col-1 action-remove">
 								(x)
+							</div>
+							<div class="col-1 action-add">
+								(+)
 							</div>
 						</div>
 						{% endfor %}
@@ -307,16 +310,42 @@
         // <input class="add-more-items" id="client_ids" name="client_ids" type="text" value="">
 
         const removeRowButtons = document.getElementsByClassName('action-remove');
+
+        function renameElement(element, newIndex) {
+            console.log(element);
+            if (element.children) {
+                let elementInput = [...element.children][0];
+                let nameParts = elementInput.name.split('-');
+                nameParts[1] = newIndex;
+                elementInput.name = nameParts.join('-');
+                elementInput.id = nameParts.join('-');
+            }
+        }
+
+        function renameRows(listElementId) {
+            const listElement = document.getElementById(listElementId);
+
+			[...listElement.children].forEach(function(rowDiv, index) {
+			   let rowElements = [...rowDiv.children];
+			   rowElements.slice(0, rowElements.length-2).forEach(function(element) {
+			      renameElement(element, index);
+			   });
+			});
+        }
+
         function removeRow() {
             this.parentElement.remove();
             const masterNetworks = document.getElementById('masterNetworks');
-            console.log(masterNetworks.childElementCount);
-            console.log(this);
             if (masterNetworks.childElementCount <= 1) {
                 const rowElements = [...[...masterNetworks.children][0].children];
-                rowElements[rowElements.length - 1].style.display = 'none';
+                rowElements[rowElements.length - 2].style.display = 'none';
             }
-            console.log(this);
+
+            renameRows('masterNetworks');
+        }
+        function addRow() {
+			this.parentElement.remove();
+
         }
         [...removeRowButtons].forEach(element => element.onclick = removeRow)
 
