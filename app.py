@@ -1,4 +1,5 @@
 import os
+import json
 from pathlib import Path
 import requests
 import shelve
@@ -148,7 +149,6 @@ def change_password():
 @do_response_from_context
 def tunnel():
     form = TunnelForm()
-    device_id = '.... my device id...'
     tunnel_master_form = TunnelMasterForm(request.form, meta={"csrf": False})
 
     if request.method == "POST":
@@ -161,6 +161,11 @@ def tunnel():
             # do_change_password(form.pass1.data)
             print(tunnel_master_form.data)
             return {'callback': lambda: redirect(url_for('tunnel'), code=302)}
+
+    device_id = json.loads(subprocess.Popen(
+        'scripts/show_machine_id.sh', stdout=subprocess.PIPE
+    ).communicate()[0])["machine_id"]
+
     return {'form': form, 'device_id': device_id, 'tunnel_master_form': tunnel_master_form}
 
 
