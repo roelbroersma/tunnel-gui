@@ -131,7 +131,25 @@
 					{{ tunnel_master_form.tunnel_type.label }}
 					</div>
 					<div class="col-9">
-					{{ tunnel_master_form.tunnel_type() }}
+						<ul>
+						{% for subfield in tunnel_master_form.tunnel_type: %}
+							<li>
+								{{ subfield.label }}
+								{{ subfield }}
+								<div class="help-tip" >
+									<p>
+										{% if subfield.label.text == "Normal": %}
+											Set tunnel type to Normal
+										{% elif subfield.label.text == "Bridge": %}
+											Set tunnel type to Bridge
+										{% else %}
+											{{ subfield.label.text }}
+										{% endif %}
+									</p>
+								</div>
+							</li>
+						{% endfor %}
+						</ul>
 					</div>
 					<br>
 					{% for err in tunnel_master_form.tunnel_type.errors %}
