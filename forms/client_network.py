@@ -3,7 +3,7 @@ from wtforms.validators import IPAddress
 
 
 class ClientNetworkForm(Form):
-    server_ip = StringField(
+    client_ip = StringField(
         '',
         validators=[IPAddress(), ],
         render_kw={"placeholder": "192.168.0.0", "style": "width: 94%"},

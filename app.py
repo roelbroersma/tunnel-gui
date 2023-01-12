@@ -4,6 +4,7 @@ from pathlib import Path
 import requests
 import shelve
 import subprocess
+import uuid
 
 from dotenv import load_dotenv
 from flask import Flask, redirect, url_for, request, session
@@ -159,8 +160,14 @@ def tunnel():
         if is_ok:
             # shelve sync
             # do_change_password(form.pass1.data)
-            print(tunnel_master_form.data)
-            return {'callback': lambda: redirect(url_for('tunnel'), code=302)}
+            print("is_ok")
+            return {'callback': lambda: redirect(url_for(
+                'tunnel_download',
+                dl_uuid=uuid.uuid4()
+            ), code=302)}
+        else:
+            print("not_ok")
+
 
     device_id = json.loads(subprocess.Popen(
         'scripts/show_machine_id.sh', stdout=subprocess.PIPE
@@ -171,6 +178,12 @@ def tunnel():
     ).communicate()[0])["public_ipv4"]
 
     return {'form': form, 'device_id': device_id, 'tunnel_master_form': tunnel_master_form}
+
+
+@app.route("/tunnel/download/<dl_uuid>", methods=["GET"])
+@do_response_from_context
+def tunnel_download(dl_uuid):
+    return {}
 
 
 @app.route("/old_tunnel", methods=["GET", "POST"])
