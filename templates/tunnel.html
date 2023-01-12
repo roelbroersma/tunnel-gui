@@ -220,7 +220,7 @@
 					<br>
 					{{ tunnel_master_form.client_ids() }}
 					<input id="client-ids-0" type="text" value="" class="mb-2">
-					<i class='bx bx-plus'></i>
+					<i class='bx bx-plus' id='plus-client-id'></i>
 					<br>
 					<div class="additional-inputs"></div>
 					{% for err in tunnel_master_form.client_ids.errors %}
@@ -314,7 +314,7 @@
         const form = document.getElementById('masterForm');
         form.addEventListener('submit', beforeSubmit);
 
-        const plusElement = document.getElementsByClassName('bx-plus')[0];
+        const plusElement = document.getElementById('plus-client-id');
         plusElement.onclick = function() {
             const additionalInputsWrapper = document.getElementsByClassName('additional-inputs')[0];
             const newInput = document.createElement('input');
