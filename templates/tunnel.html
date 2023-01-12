@@ -210,6 +210,20 @@
 					</div>
 				</div>
 
+				<div class="row">
+					<div class="col-3">
+						Networks the client is connected to
+					  (<i class='bx bx-plus' id='plus-client-network'></i>)
+					</div>
+					<div class="col-9" id="clientNetworks">
+						{% for nested_field in tunnel_master_form.client_networks %}
+						<div class="col-12 row">
+							{{ nested_field }}
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+
 				<div id="clientIDsWrapper" class="col-12 mt-0 plus-sign {% if tunnel_master_form.client_ids.errors %}was-validated{% endif %}">
 					{{ tunnel_master_form.client_ids.label }}
 					<br>
@@ -379,6 +393,25 @@
 					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
 
 					cloned.appendTo("#masterNetworks");
+				});
+
+				$("#plus-client-network").click(function () {
+					let original = $("#clientNetworks").children().last();
+					console.log(original);
+					let cloned = original.clone()
+					cloned.find("input").val("");
+
+					let incName = function(origName) {
+						let parts = origName.split("-");
+						let inc = [parts[0], parseInt(parts[1]) + 1, parts[2]].join("-");
+						console.log(inc);
+						return inc;
+					}
+
+					cloned.find("input").attr("name", incName(cloned.find("input").attr("name")));
+					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
+
+					cloned.appendTo("#clientNetworks");
 				});
 
 

@@ -10,7 +10,7 @@ from wtforms import (
 )
 from wtforms.validators import IPAddress
 
-from forms.master_network import MasterNetworkForm
+from forms import ClientNetworkForm, MasterNetworkForm
 from widgets import MasterRowWidget
 
 
@@ -48,6 +48,15 @@ class TunnelMasterForm(FlaskForm):
     master_networks = FieldList(
         FormField(
             MasterNetworkForm,
+            widget=MasterRowWidget()
+        ),
+        min_entries=1,
+        max_entries=8,
+        render_kw={"class": "wow-item"}
+    )
+    client_networks = FieldList(
+        FormField(
+            ClientNetworkForm,
             widget=MasterRowWidget()
         ),
         min_entries=1,
