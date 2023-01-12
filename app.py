@@ -166,6 +166,10 @@ def tunnel():
         'scripts/show_machine_id.sh', stdout=subprocess.PIPE
     ).communicate()[0])["machine_id"]
 
+    tunnel_master_form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(
+        'scripts/show_public_ip.sh', stdout=subprocess.PIPE
+    ).communicate()[0])["public_ipv4"]
+
     return {'form': form, 'device_id': device_id, 'tunnel_master_form': tunnel_master_form}
 
 
