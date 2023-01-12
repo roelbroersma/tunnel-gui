@@ -204,15 +204,10 @@
 						{% for nested_field in tunnel_master_form.master_networks %}
 						<div class="col-12 row">
 							{{ nested_field }}
-							<div class="col-1 action-remove">
-								(x)
-							</div>
-							<div class="col-1 action-add">
-								(+)
-							</div>
 						</div>
 						{% endfor %}
 					</div>
+					<i class='bx bx-plus' id='plus-master-network'></i>
 				</div>
 
 				<div id="clientIDsWrapper" class="col-12 mt-0 plus-sign {% if tunnel_master_form.client_ids.errors %}was-validated{% endif %}">
@@ -366,6 +361,25 @@
 
         }
         [...removeRowButtons].forEach(element => element.onclick = removeRow)
+
+				$("#plus-master-network").click(function () {
+					let original = $("#masterNetworks").children().last();
+					console.log(original);
+					let cloned = original.clone()
+					cloned.find("input").val("");
+
+					let incName = function(origName) {
+						let parts = origName.split("-");
+						let inc = [parts[0], parseInt(parts[1]) + 1, parts[2]].join("-");
+						console.log(inc);
+						return inc;
+					}
+
+					cloned.find("input").attr("name", incName(cloned.find("input").attr("name")));
+					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
+
+					cloned.appendTo("#masterNetworks");
+				});
 
 
 	</script>

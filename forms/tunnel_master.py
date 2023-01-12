@@ -50,7 +50,7 @@ class TunnelMasterForm(FlaskForm):
             MasterNetworkForm,
             widget=MasterRowWidget()
         ),
-        min_entries=2,
+        min_entries=1,
         max_entries=8,
         render_kw={"class": "wow-item"}
     )
