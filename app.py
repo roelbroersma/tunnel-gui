@@ -11,7 +11,7 @@ from flask import Flask, redirect, url_for, request, session
 from flask import render_template as flask_render_template
 from pydantic import BaseModel
 
-from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm, OldTunnelForm, TunnelMasterForm
+from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm, OldTunnelForm, TunnelMasterForm, TunnelNonMasterForm
 from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip
 
 
@@ -151,6 +151,7 @@ def change_password():
 def tunnel():
     form = TunnelForm()
     tunnel_master_form = TunnelMasterForm(request.form, meta={"csrf": False})
+    tunnel_non_master_form = TunnelNonMasterForm(request.form, meta={"csrf": False})
 
     if request.method == "POST":
         print('wow !! ')
@@ -177,12 +178,22 @@ def tunnel():
         'scripts/show_public_ip.sh', stdout=subprocess.PIPE
     ).communicate()[0])["public_ipv4"]
 
-    return {'form': form, 'device_id': device_id, 'tunnel_master_form': tunnel_master_form}
+    return {
+        'form': form,
+        'device_id': device_id,
+        'tunnel_master_form': tunnel_master_form,
+        'tunnel_non_master_form': tunnel_non_master_form,
+    }
 
 
 @app.route("/tunnel/download/<dl_uuid>", methods=["GET"])
 @do_response_from_context
 def tunnel_download(dl_uuid):
+    return {}
+
+@app.route("/tunnel/upload", methods=["GET", "POST"])
+@do_response_from_context
+def tunnel_upload():
     return {}
 
 
