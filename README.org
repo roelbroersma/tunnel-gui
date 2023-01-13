@@ -1,5 +1,5 @@
 * Tunnel GUI (T1)
-This is a very user friendly VPN Tunnel. Use it for connecting your House to your vacation House and don't worry about networking: Use printers, Sonos devices KNX or other Multicast protocols like it's ONE network.
+This is a very user friendly VPN Tunnel. Use it for connecting your House to your vacation House and don't worry about networking: Use printers, Sonos devices, KNX or other Multicast protocols like it's ONE network.
 
 The T1 is not limited to only two locations. You can even connect several houses, boats and cars (with networking) as if it's ONE network. Simple and very private and secure! No need to buy expensive firewalls and struggle with complex configurations!
 
