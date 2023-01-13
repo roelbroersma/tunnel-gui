@@ -15,17 +15,13 @@ We recommend setting up the Tunnel GUI on a Raspberry Pi 2/3/4. Running it on an
 3. Copy the modified dietpi.txt from ..here..todo...  to the /boot/dietpi.txt  (it will use it on first boot)
 4. Startup your device with the DietPi image.
 5. When you startup your device, it will automatically obtain an IP address from DHCP and install the tunnel-gui. If it didn't got an address from DHCP, the tunnel-gui couldn't be installed and you have to do it manually by typing the following at the prompt:
-#+begin_src shell
-  wget -q -O - https://github.com/roelbroersma/tunnel-gui/raw/main/install.txt | bash  at the shell
-#+end_src
+`wget -q -O - https://github.com/roelbroersma/tunnel-gui/raw/main/install.txt | bash`
 
 
 ## Running on Hyper-V
 1. Download the DietPi image for Hyper-V
 2. Run the following at the prompt:
-#+begin_src shell
-  wget -q -O - https://github.com/roelbroersma/tunnel-gui/raw/main/install.txt | bash  at the shell
-#+end_src
+`wget -q -O - https://github.com/roelbroersma/tunnel-gui/raw/main/install.txt | bash`
 
 
 ## Running on Docker (for development purposes)
@@ -52,6 +48,4 @@ The following files need to be modified when checking out the project but they a
 All script files which interface with the backend (openvpn, pimd, mdns, bridge-tools, ip address changes, etc.) are located in the /scripts/ folder. These files are developped and tested for the DietPi image, however they may work on other Debian-based Linux installations and other Linux installations as well because we try to keep the backend very flexible.
 
 Run the application with this command:
-#+begin_src shell
-  make -f Makefile start_flask
-#+end_src
+`make -f Makefile start_flask`
