@@ -127,11 +127,36 @@
 		<form method="POST" id="masterForm">
 			<div class="row g-3">
 				<div class="col-12 mt-0 row {% if tunnel_master_form.tunnel_type.errors %}was-validated{% endif %}">
+					{% for field in tunnel_master_form.errors %}
+					{% for error in tunnel_master_form.errors[field] %}
+					<div class="alert alert-error">
+						<strong>Error!</strong> {{error}}
+					</div>
+					{% endfor %}
+					{% endfor %}
 					<div class="col-3">
 					{{ tunnel_master_form.tunnel_type.label }}
 					</div>
 					<div class="col-9">
-					{{ tunnel_master_form.tunnel_type() }}
+						<ul>
+						{% for subfield in tunnel_master_form.tunnel_type: %}
+							<li>
+								{{ subfield.label }}
+								{{ subfield }}
+								<div class="help-tip" >
+									<p>
+										{% if subfield.label.text == "Normal": %}
+											Set tunnel type to Normal
+										{% elif subfield.label.text == "Bridge": %}
+											Set tunnel type to Bridge
+										{% else %}
+											{{ subfield.label.text }}
+										{% endif %}
+									</p>
+								</div>
+							</li>
+						{% endfor %}
+						</ul>
 					</div>
 					<br>
 					{% for err in tunnel_master_form.tunnel_type.errors %}
@@ -181,17 +206,26 @@
 				<div class="row">
 					<div class="col-3">
 						Networks, this master is connected to
+					  (<i class='bx bx-plus' id='plus-master-network'></i>)
 					</div>
 					<div class="col-9" id="masterNetworks">
 						{% for nested_field in tunnel_master_form.master_networks %}
 						<div class="col-12 row">
 							{{ nested_field }}
-							<div class="col-1 action-remove">
-								(x)
-							</div>
-							<div class="col-1 action-add">
-								(+)
-							</div>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-3">
+						Networks the client is connected to
+					  (<i class='bx bx-plus' id='plus-client-network'></i>)
+					</div>
+					<div class="col-9" id="clientNetworks">
+						{% for nested_field in tunnel_master_form.client_networks %}
+						<div class="col-12 row">
+							{{ nested_field }}
 						</div>
 						{% endfor %}
 					</div>
@@ -202,7 +236,7 @@
 					<br>
 					{{ tunnel_master_form.client_ids() }}
 					<input id="client-ids-0" type="text" value="" class="mb-2">
-					<i class='bx bx-plus'></i>
+					<i class='bx bx-plus' id='plus-client-id'></i>
 					<br>
 					<div class="additional-inputs"></div>
 					{% for err in tunnel_master_form.client_ids.errors %}
@@ -240,9 +274,14 @@
 			<button class="w-100 btn btn-primary btn-lg" type="submit">Save</button>
 		</form>
 
-		<form method="POST" action="{{ url_for('tunnel') }}" id="notMasterForm">
-			NOT MASTER FORM
-			<button class="w-100 btn btn-primary btn-lg" type="submit">Save</button>
+		<form method="POST" action="{{ url_for('tunnel_upload') }}" id="notMasterForm">
+			<div class="row g-5" style="overflow-y: auto">
+				<div class="py-5 text-center">
+					{{ tunnel_non_master_form.upload_zip.label }}
+					{{ tunnel_non_master_form.upload_zip }}
+				</div>
+			</div>
+			<button class="w-100 btn btn-primary btn-lg" type="submit">Upload</button>
 		</form>
 	</div>
 
@@ -296,7 +335,7 @@
         const form = document.getElementById('masterForm');
         form.addEventListener('submit', beforeSubmit);
 
-        const plusElement = document.getElementsByClassName('bx-plus')[0];
+        const plusElement = document.getElementById('plus-client-id');
         plusElement.onclick = function() {
             const additionalInputsWrapper = document.getElementsByClassName('additional-inputs')[0];
             const newInput = document.createElement('input');
@@ -348,6 +387,44 @@
 
         }
         [...removeRowButtons].forEach(element => element.onclick = removeRow)
+
+				$("#plus-master-network").click(function () {
+					let original = $("#masterNetworks").children().last();
+					console.log(original);
+					let cloned = original.clone()
+					cloned.find("input").val("");
+
+					let incName = function(origName) {
+						let parts = origName.split("-");
+						let inc = [parts[0], parseInt(parts[1]) + 1, parts[2]].join("-");
+						console.log(inc);
+						return inc;
+					}
+
+					cloned.find("input").attr("name", incName(cloned.find("input").attr("name")));
+					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
+
+					cloned.appendTo("#masterNetworks");
+				});
+
+				$("#plus-client-network").click(function () {
+					let original = $("#clientNetworks").children().last();
+					console.log(original);
+					let cloned = original.clone()
+					cloned.find("input").val("");
+
+					let incName = function(origName) {
+						let parts = origName.split("-");
+						let inc = [parts[0], parseInt(parts[1]) + 1, parts[2]].join("-");
+						console.log(inc);
+						return inc;
+					}
+
+					cloned.find("input").attr("name", incName(cloned.find("input").attr("name")));
+					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
+
+					cloned.appendTo("#clientNetworks");
+				});
 
 
 	</script>

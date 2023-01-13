@@ -4,13 +4,14 @@ from pathlib import Path
 import requests
 import shelve
 import subprocess
+import uuid
 
 from dotenv import load_dotenv
 from flask import Flask, redirect, url_for, request, session
 from flask import render_template as flask_render_template
 from pydantic import BaseModel
 
-from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm, OldTunnelForm, TunnelMasterForm
+from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm, OldTunnelForm, TunnelMasterForm, TunnelNonMasterForm
 from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip
 
 
@@ -150,6 +151,7 @@ def change_password():
 def tunnel():
     form = TunnelForm()
     tunnel_master_form = TunnelMasterForm(request.form, meta={"csrf": False})
+    tunnel_non_master_form = TunnelNonMasterForm(request.form, meta={"csrf": False})
 
     if request.method == "POST":
         print('wow !! ')
@@ -159,14 +161,40 @@ def tunnel():
         if is_ok:
             # shelve sync
             # do_change_password(form.pass1.data)
-            print(tunnel_master_form.data)
-            return {'callback': lambda: redirect(url_for('tunnel'), code=302)}
+            print("is_ok")
+            return {'callback': lambda: redirect(url_for(
+                'tunnel_download',
+                dl_uuid=uuid.uuid4()
+            ), code=302)}
+        else:
+            print("not_ok")
+
 
     device_id = json.loads(subprocess.Popen(
         'scripts/show_machine_id.sh', stdout=subprocess.PIPE
     ).communicate()[0])["machine_id"]
 
-    return {'form': form, 'device_id': device_id, 'tunnel_master_form': tunnel_master_form}
+    tunnel_master_form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(
+        'scripts/show_public_ip.sh', stdout=subprocess.PIPE
+    ).communicate()[0])["public_ipv4"]
+
+    return {
+        'form': form,
+        'device_id': device_id,
+        'tunnel_master_form': tunnel_master_form,
+        'tunnel_non_master_form': tunnel_non_master_form,
+    }
+
+
+@app.route("/tunnel/download/<dl_uuid>", methods=["GET"])
+@do_response_from_context
+def tunnel_download(dl_uuid):
+    return {}
+
+@app.route("/tunnel/upload", methods=["GET", "POST"])
+@do_response_from_context
+def tunnel_upload():
+    return {}
 
 
 @app.route("/old_tunnel", methods=["GET", "POST"])
