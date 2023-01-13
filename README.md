@@ -1,4 +1,4 @@
-* Tunnel GUI (T1)
+# Tunnel GUI (T1)
 This is a very user friendly VPN Tunnel. Use it for connecting your House to your vacation House and don't worry about networking: Use printers, Sonos devices, KNX or other Multicast protocols like it's ONE network.
 
 The T1 is not limited to two locations. You can even connect several houses, boats and cars (with networking) as if it's ONE network. Simple and very private and secure! No need to buy expensive firewalls and struggle with complex configurations!
@@ -8,7 +8,7 @@ This Github project is the Web Interface. You can enroll it yourself or buy a re
 When you want to enroll it yourself, you can use a **physical device** like a Raspberry Pi or a **virtual device** like VM on Hyper-V.
 
 
-** Physical device (T1)
+## Physical device (T1)
 We recommend setting up the Tunnel GUI on a Raspberry Pi 2/3/4. Running it on an Odroid or other devices which can run the DietPi image is possible and even devices with non-DietPi images might be possible but we still recommend the Raspberry Pi because of stability and because our developpers also use it.
 1. Download the [DietPi](https://dietpi.com/ image for your device) (eg. for Raspberry Pi 2/3/4)
 2. Install the DietPi image to a MicroSD card.
@@ -20,7 +20,7 @@ We recommend setting up the Tunnel GUI on a Raspberry Pi 2/3/4. Running it on an
 #+end_src
 
 
-** Running on Hyper-V
+## Running on Hyper-V
 1. Download the DietPi image for Hyper-V
 2. Run the following at the prompt:
 #+begin_src shell
@@ -28,7 +28,7 @@ We recommend setting up the Tunnel GUI on a Raspberry Pi 2/3/4. Running it on an
 #+end_src
 
 
-** Running from Docker (for development purposes)
+## Running from Docker (for development purposes)
 You can download this repo to your own computer and run web-server locally in Docker container:
  1. You need to have installed Docker Desktop (https://www.docker.com/products/docker-desktop/)
  2. Run Docker Desktop
@@ -39,7 +39,7 @@ You can download this repo to your own computer and run web-server locally in Do
  6. Run `make -f Makefile start`
 
 
-** Explanation about the files
+## Explanation about the files
 The following files need to be modified when checking out the project but they are automatically set for newly installed devices using the install script.
  1. A new file web_password.txt in project's directory with admin's password of RaspberryPI.
  2. An .env file with the following important values (See or renamce the example in .env.template file)
