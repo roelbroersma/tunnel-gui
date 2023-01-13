@@ -8,7 +8,7 @@ This Github project is the Web Interface. You can enroll it yourself or buy a re
 When you want to enroll it yourself, you can use a **physical device** like a Raspberry Pi or a **virtual device** like VM on Hyper-V.
 
 
-## Physical device (T1)
+## Running on a Physical device (T1)
 We recommend setting up the Tunnel GUI on a Raspberry Pi 2/3/4. Running it on an Odroid or other devices which can run the DietPi image is possible and even devices with non-DietPi images might be possible but we still recommend the Raspberry Pi because of stability and because our developpers also use it.
 1. Download the [DietPi](https://dietpi.com/ image for your device) (eg. for Raspberry Pi 2/3/4)
 2. Install the DietPi image to a MicroSD card.
@@ -28,7 +28,7 @@ We recommend setting up the Tunnel GUI on a Raspberry Pi 2/3/4. Running it on an
 #+end_src
 
 
-## Running from Docker (for development purposes)
+## Running on Docker (for development purposes)
 You can download this repo to your own computer and run web-server locally in Docker container:
  1. You need to have installed Docker Desktop (https://www.docker.com/products/docker-desktop/)
  2. Run Docker Desktop
