@@ -1,10 +1,16 @@
-* Tunnel GUI
-This is a very user friendly web interface for a creating a VPN Tunnel. A one-to-one tunnel or even a one-to-many (complete network overlay).
-The Tunnel GUI can be deployed to a physical device or to a virtal device.
+* Tunnel GUI (T1)
+This is a very user friendly VPN Tunnel. Use it for connecting your House to your vacation House and don't worry about networking: Use printers, Sonos devices KNX or other Multicast protocols like it's ONE network.
 
-** Physical device
-Setup the Tunnel GUI on a physical device like a Raspberry Pi. Odroid and other devices which can run the DietPi image are also supported. Even devices with non-DietPi images are supported but may need some more configuring.
-1. Download the [DietPi](https://dietpi.com/ image for your device) (eg. for Raspberry Pi)
+The T1 is not limited to only two locations. You can even connect several houses, boats and cars (with networking) as if it's ONE network. Simple and very private and secure! No need to buy expensive firewalls and struggle with complex configurations!
+
+This Github project is the Web Interface. You can enroll it yourself or buy a ready-to-go T1 device from ..here..todo.. It works out of the box and in case you need any support, give us a ring and we are happy to help you until it works, also in weekends!
+
+When you want to enroll it yourself, you can use a **physical device** like a Raspberry Pi or a **virtual device** like VM on Hyper-V.
+
+
+** Physical device (T1)
+We recommend setting up the Tunnel GUI on a Raspberry Pi 2/3/4. Running it on an Odroid or other devices which can run the DietPi image is possible and even devices with non-DietPi images might be possible but we still recommend the Raspberry Pi because of stability and because our developpers also use it.
+1. Download the [DietPi](https://dietpi.com/ image for your device) (eg. for Raspberry Pi 2/3/4)
 2. Install the DietPi image to a MicroSD card.
 3. Copy the modified dietpi.txt from ..here..todo...  to the /boot/dietpi.txt  (it will use it on first boot)
 4. Startup your device with the DietPi image.
