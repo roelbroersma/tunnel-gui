@@ -5,7 +5,7 @@ The T1 is not limited to two locations. You can even connect several houses, boa
 
 This Github project is the Web Interface. You can enroll it yourself or buy a ready-to-go T1 device from ..here..todo.. It works out of the box and in case you need any support, give us a ring and we are happy to help you until it works, also in weekends!
 
-When you want to enroll it yourself, you can use a **physical device** like a Raspberry Pi or a **virtual device** like VM on Hyper-V.
+When you want to enroll it yourself, you can use a _physical device_ like a Raspberry Pi or a _virtual device_ like VM on Hyper-V.
 
 
 ** Physical device (T1)
