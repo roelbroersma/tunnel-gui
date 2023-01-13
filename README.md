@@ -10,7 +10,7 @@ When you want to enroll it yourself, you can use a **physical device** like a Ra
 
 ## Running on a Physical device (T1)
 We recommend setting up the Tunnel GUI on a Raspberry Pi 2/3/4. Running it on an Odroid or other devices which can run the DietPi image is possible and even devices with non-DietPi images might be possible but we still recommend the Raspberry Pi because of stability and because our developpers also use it.
-1. Download the [DietPi](https://dietpi.com/ image for your device) (eg. for Raspberry Pi 2/3/4)
+1. Download the [DietPi](https://dietpi.com/) image for your device (eg. for Raspberry Pi 2/3/4)
 2. Install the DietPi image to a MicroSD card.
 3. Copy the modified dietpi.txt from ..here..todo...  to the /boot/dietpi.txt  (it will use it on first boot)
 4. Startup your device with the DietPi image.
