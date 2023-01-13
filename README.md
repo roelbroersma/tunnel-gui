@@ -3,7 +3,7 @@ This is a very user friendly VPN Tunnel. Use it for connecting your House to you
 
 The T1 is not limited to two locations. You can even connect several houses, boats and cars (with networking) as if it's ONE network. Simple and very private and secure! No need to buy expensive firewalls and struggle with complex configurations!
 
-This Github project is the Web Interface. You can enroll it yourself or buy a ready-to-go T1 device from ..here..todo.. It works out of the box and in case you need any support, give us a ring and we are happy to help you until it works, also in weekends!
+This Github project is the Web Interface. You can enroll it yourself or **buy a ready-to-go T1 device from ..here..todo..** It works out of the box and in case you need any support, give us a ring and we are happy to help you until it works, also in weekends!
 
 When you want to enroll it yourself, you can use a **physical device** like a Raspberry Pi or a **virtual device** like VM on Hyper-V.
 
