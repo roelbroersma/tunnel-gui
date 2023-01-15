@@ -5,10 +5,10 @@ fi
 
 pip install -r https://github.com/roelbroersma/tunnel-gui/raw/main/requirements.txt
 
-wget https://github.com/roelbroersma/tunnel-gui/archive/main.zip -O "tunnel-gui_main.zip"
-unzip ./tunnel-gui_main.zip
-rm ./tunnel-gui_main.zip
-cd ./tunnel-gui-main
+wget https://github.com/roelbroersma/tunnel-gui/archive/main.zip -O "/tmp/tunnel-gui_main.zip"
+unzip /tmp/tunnel-gui_main.zip -d /usr/bin/
+rm /tmp/tunnel-gui_main.zip
+cd /usr/bin/tunnel-gui-main
 
 echo "Succesfully installed the Tunneling GUI. Check the next steps in README.org file"
 
