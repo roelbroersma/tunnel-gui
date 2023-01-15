@@ -11,7 +11,9 @@ rm /tmp/tunnel-gui_main.zip
 cd /usr/bin/tunnel-gui-main
 
 echo "Setting default password to: defaultpassword"
-echo "Please change the default password immediately by changing the .env file!"
+echo "Please change the default password immediately by changing the .env file and the web_password.txt file!"
+
+echo 'defaultpassword' > web_password.txt;
 
 echo;
 echo "Generating .env file with random secret key..."
