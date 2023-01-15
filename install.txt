@@ -1,4 +1,4 @@
-if ! [ "$EUID" -eq 0 ]
+if [ "$EUID" -gt 0 ]
   then echo "Please run this script as Root, it will create a folder and install required Python libraries."
   exit
 fi
