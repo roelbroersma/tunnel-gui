@@ -1,4 +1,4 @@
-if [ "$EUID" -eq 0 ]
+if ! [ "$EUID" -eq 0 ]
   then echo "Please do not run this script as Root! Use it as the pi or dietpi user"
   exit
 fi
