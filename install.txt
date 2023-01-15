@@ -10,8 +10,8 @@ unzip -o /tmp/tunnel-gui_main.zip -d /usr/bin/
 rm /tmp/tunnel-gui_main.zip
 cd /usr/bin/tunnel-gui-main
 
-echo "Enter a Super Password."
-read -s -p "Super Password: " tunnelguipassword
+echo "Setting default password to: defaultpassword"
+echo "Please change the default password immediately by changing the .env file!"
 
 echo;
 echo "Generating .env file with random secret key..."
@@ -19,7 +19,7 @@ echo "Generating .env file with random secret key..."
   (echo 'SECRET_KEY='; head -c 80 /dev/random | base64) | tr -d [:cntrl:];
   echo;
   echo 'DEBUG=False';
-  echo 'SUPER_PASSWORD=$tunnelguipassword';
+  echo 'SUPER_PASSWORD=defaultpassword';
   echo LOG_PATH=/var/log/tunnel-gui.log
 ) > .env
 
