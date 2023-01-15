@@ -1,5 +1,5 @@
 if ! [ "$EUID" -eq 0 ]
-  then echo "Please do not run this script as Root! Use it as the pi or dietpi user"
+  then echo "Please run this script as Root, it will create a folder and install required Python libraries."
   exit
 fi
 
