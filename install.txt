@@ -25,5 +25,7 @@ echo "Generating .env file with random secret key..."
   echo LOG_PATH=/var/log/tunnel-gui.log
 ) > .env
 
+touch /var/log/tunnel-gui.log;
+
 echo "Succesfully installed the Tunneling GUI. Check the next steps in README.org file"
 echo;
