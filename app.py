@@ -159,8 +159,23 @@ def tunnel():
         print(tunnel_master_form.data)
 
         if is_ok:
-            # shelve sync
-            # do_change_password(form.pass1.data)
+            {'tunnel_type': 'normal', 'public_ip_or_ddns_hostname': '185.102.185.67', 'tunnel_port': 443, 'protocol': 'tcp', 'master_networks': [{'server_ip': '1.1.1.1', 'server_subnet': '255.255.255.0'}], 'client_networks': [{'client_ip': '2.2.2.2', 'server_subnet': '255.255.255.0'}], 'client_ids': '', 'mdns': False, 'pimd': False}
+
+            subprocess.Popen([
+                "scripts/change_vpn.sh",
+                "-t", "server",
+                "-b", {
+                    "normal": "off",
+                    "bridge": "on",
+                }[tunnel_master_form.data["tunnel_type"]],
+                "-h", tunnel_master_form.data["public_ip_or_ddns_hostname"],
+                "-p", tunnel_master_form.data["protocol"],
+                "-n", str(tunnel_master_form.data["tunnel_port"]),
+                "-s", "",  # TODO
+                "-c", "",  # TODO
+                "-d", "",  # TODO
+            ])
+
             print("is_ok")
             return {'callback': lambda: redirect(url_for(
                 'tunnel_download',
