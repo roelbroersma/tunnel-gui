@@ -16,6 +16,7 @@ We recommend setting up the Tunnel GUI on a Raspberry Pi 2/3/4. Running it on an
 4. Startup your device with the DietPi image.
 5. When you startup your device, it will automatically obtain an IP address from DHCP and install the tunnel-gui. If it didn't got an address from DHCP, the tunnel-gui couldn't be installed and you have to do it manually by typing the following at the prompt:
 `wget -q -O - https://github.com/roelbroersma/tunnel-gui/raw/main/install.txt | bash`
+6. The tunnel-gui is automatically started as a service at boot. If you want to start it manually, type `python3 app.py`
 
 
 ## Running on Hyper-V
