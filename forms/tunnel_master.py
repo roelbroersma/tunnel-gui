@@ -30,6 +30,10 @@ class MasterNetworkForm(Form):
 
 
 class ClientNetworkForm(Form):
+    client_id = StringField(
+        "Client device ID(s)",
+        render_kw={"placeholder": "Client device ID"},
+    )
     client_ip = StringField(
         '',
         validators=[IPAddress(), ],
@@ -84,23 +88,10 @@ class TunnelMasterForm(FlaskForm):
         render_kw={"class": "wow-item"}
     )
     client_networks = FieldList(
-        FormField(
-            ClientNetworkForm,
-            widget=MasterRowWidget()
-        ),
+        FormField(ClientNetworkForm),
         min_entries=1,
         max_entries=8,
         render_kw={"class": "wow-item"}
     )
-    client_ids = StringField(
-        "Client device ID(s)",
-        render_kw={"class": "add-more-items visually-hidden"}
-    )
-
-    # server_subnet_1 = StringField("", validators=[InputRequired()])
-    # server_subnet_2 = StringField("", validators=[InputRequired()])
-    # client_subnet_1 = StringField("", validators=[InputRequired()])
-    # client_subnet_2 = StringField("", validators=[InputRequired()])
-
     mdns = BooleanField("Enable MDNS (Avahi Daemon)")
     pimd = BooleanField("Enable PIMD (Multicast Routing)")

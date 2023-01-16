@@ -234,29 +234,15 @@
 					<div class="col-9" id="clientNetworks">
 						{% for nested_field in tunnel_master_form.client_networks %}
 						<div class="col-12 row">
-							{{ nested_field }}
+							{% for subfield in nested_field: %}
+							{{ subfield }}
+							{% endfor %}
 						</div>
 						{% endfor %}
 					</div>
 				</div>
 
-				<div id="clientIDsWrapper" class="col-12 mt-0 plus-sign {% if tunnel_master_form.client_ids.errors %}was-validated{% endif %}">
-					{{ tunnel_master_form.client_ids.label }}
-					<br>
-					{{ tunnel_master_form.client_ids() }}
-					<input id="client-ids-0" type="text" value="" class="mb-2">
-					<i class='bx bx-plus' id='plus-client-id'></i>
-					<br>
-					<div class="additional-inputs"></div>
-					{% for err in tunnel_master_form.client_ids.errors %}
-						<div class="invalid-feedback">
-							{{ err }}
-						</div>
-					{% endfor %}
-				</div>
 			</div>
-
-
 
 			<div class="col-12 {% if tunnel_master_form.mdns.errors %}was-validated{% endif %}">
 				{{ tunnel_master_form.mdns() }}
@@ -343,19 +329,6 @@
 
         const form = document.getElementById('masterForm');
         form.addEventListener('submit', beforeSubmit);
-
-        const plusElement = document.getElementById('plus-client-id');
-        plusElement.onclick = function() {
-            const additionalInputsWrapper = document.getElementsByClassName('additional-inputs')[0];
-            const newInput = document.createElement('input');
-            newInput.type="text";
-            newInput.classList.add("mb-2");
-            const brElemenet = document.createElement('br');
-            additionalInputsWrapper.appendChild(newInput);
-            additionalInputsWrapper.appendChild(brElemenet);
-        };
-        {#const#}
-        // <input class="add-more-items" id="client_ids" name="client_ids" type="text" value="">
 
         const removeRowButtons = document.getElementsByClassName('action-remove');
 
