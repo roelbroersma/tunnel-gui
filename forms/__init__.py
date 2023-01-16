@@ -14,7 +14,6 @@ from wtforms.validators import (
 from forms.tunnel_master import TunnelMasterForm
 from forms.tunnel_non_master import TunnelNonMasterForm
 from utils import IpAddressChangeInfo, get_passwords
-from widgets import MasterRowWidget
 
 IP_INPUT_DEFAULT_CLASSES = "visually-hidden"
 

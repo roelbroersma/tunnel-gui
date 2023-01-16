@@ -11,7 +11,6 @@ from wtforms import (
 )
 from wtforms.validators import IPAddress, NumberRange
 
-from widgets import MasterRowWidget
 from forms.subnet_choices import SUBNET_CHOICES
 
 
@@ -32,7 +31,7 @@ class MasterNetworkForm(Form):
 class ClientNetworkForm(Form):
     client_id = StringField(
         "Client device ID(s)",
-        render_kw={"placeholder": "Client device ID"},
+        render_kw={"placeholder": "Client device ID", "style": "width: 94%"},
     )
     client_ip = StringField(
         '',
