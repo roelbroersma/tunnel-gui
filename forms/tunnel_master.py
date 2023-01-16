@@ -39,7 +39,7 @@ class ClientNetworkForm(Form):
         validators=[IPAddress(), ],
         render_kw={"placeholder": "192.168.0.0", "style": "width: 94%"},
     )
-    server_subnet = SelectField(
+    client_subnet = SelectField(
         "",
         choices=SUBNET_CHOICES,
         default="255.255.255.0",
@@ -79,10 +79,7 @@ class TunnelMasterForm(FlaskForm):
         render_kw={"class": "mb-0", "style": "height: 30px"}
     )
     master_networks = FieldList(
-        FormField(
-            MasterNetworkForm,
-            widget=MasterRowWidget()
-        ),
+        FormField(MasterNetworkForm),
         min_entries=1,
         max_entries=8,
         render_kw={"class": "wow-item"}

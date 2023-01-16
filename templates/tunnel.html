@@ -220,7 +220,8 @@
 					<div class="col-9" id="masterNetworks">
 						{% for nested_field in tunnel_master_form.master_networks %}
 						<div class="col-12 row">
-							{{ nested_field }}
+							<div class="col-6">{{ nested_field["server_ip"] }}</div>
+							<div class="col-4">{{ nested_field["server_subnet"] }}</div>
 						</div>
 						{% endfor %}
 					</div>
@@ -234,9 +235,9 @@
 					<div class="col-9" id="clientNetworks">
 						{% for nested_field in tunnel_master_form.client_networks %}
 						<div class="col-12 row">
-							{% for subfield in nested_field: %}
-							{{ subfield }}
-							{% endfor %}
+							<div class="col-8">{{ nested_field["client_id"] }}</div>
+							<div class="col-6">{{ nested_field["client_ip"] }}</div>
+							<div class="col-3">{{ nested_field["client_subnet"] }}</div>
 						</div>
 						{% endfor %}
 					</div>
