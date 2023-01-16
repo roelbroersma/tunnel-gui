@@ -8,7 +8,7 @@ from wtforms import (
     SelectField,
     StringField,
 )
-from wtforms.validators import IPAddress
+from wtforms.validators import IPAddress, NumberRange
 
 from forms import ClientNetworkForm, MasterNetworkForm
 from widgets import MasterRowWidget
@@ -32,7 +32,7 @@ class TunnelMasterForm(FlaskForm):
     )
     tunnel_port = IntegerField(
         "Port",
-        validators=[],
+        validators=[NumberRange(min=1, max=65535)],
         default=443,
         render_kw={"class": "col-12"}
     )
