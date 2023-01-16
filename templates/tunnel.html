@@ -100,6 +100,13 @@
 		    0% { opacity:0; }
 		    100% { opacity:100%; }
 		}
+
+		.title {
+				font-weight: 700;
+				margin-bottom: 16px;
+		}
+
+
 	</style>
 	<h3 class="mb-5">Tunnel</h3>
 	<div class="row g-5" style="overflow-y: auto">
@@ -144,7 +151,7 @@
 					</div>
 					{% endfor %}
 					{% endfor %}
-					<div class="col-3">
+					<div class="col-3 title">
 					{{ tunnel_master_form.tunnel_type.label }}
 					</div>
 					<div class="col-9">
@@ -177,7 +184,7 @@
 				</div>
 
 				<div class="col-12 row">
-					<div class="col-3">
+					<div class="col-3 title">
 					{{ tunnel_master_form.public_ip_or_ddns_hostname.label }}
 					</div>
 					<div class="col-4">
@@ -214,9 +221,9 @@
 				</div>
 
 				<div class="row">
-					<div class="col-3">
+					<div class="col-3 title">
 						Networks, this master is connected to
-					  (<i class='bx bx-plus' id='plus-master-network'></i>)
+					  <i class='bx bx-plus' id='plus-master-network'></i>
 					</div>
 					<div class="col-9" id="masterNetworks">
 						{% for nested_field in tunnel_master_form.master_networks %}
@@ -230,9 +237,9 @@
 				</div>
 
 				<div class="row">
-					<div class="col-3">
+					<div class="col-3 title">
 						Networks the client is connected to
-					  (<i class='bx bx-plus' id='plus-client-network'></i>)
+					  <i class='bx bx-plus' id='plus-client-network'></i>
 					</div>
 					<div class="col-9" id="clientNetworks">
 						{% for nested_field in tunnel_master_form.client_networks %}
@@ -250,7 +257,7 @@
 			</div>
 
 			<div class="row">
-				<div class="col-3">Aditional services</div>
+				<div class="col-3 title">Aditional services</div>
 				<div class="col-9 {% if tunnel_master_form.mdns.errors %}was-validated{% endif %}">
 					<ul id="additionalServices">
 						<li>
