@@ -5,7 +5,10 @@
         ul {
             list-style-type: none;
         }
-        #deviceType li:not(:last-child), #masterNetworks>div:not(:last-child) {
+        #deviceType li:not(:last-child),
+				#masterNetworks>div:not(:last-child),
+        #tunnelType li:not(:last-child)
+				{
 	        margin-bottom: 5px;
         }
 
@@ -144,7 +147,7 @@
 					{{ tunnel_master_form.tunnel_type.label }}
 					</div>
 					<div class="col-9">
-						<ul>
+						<ul id="tunnelType">
 						{% for subfield in tunnel_master_form.tunnel_type: %}
 							<li>
 								{{ subfield.label }}
