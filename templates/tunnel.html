@@ -256,6 +256,9 @@
 						<li>
 						{{ tunnel_master_form.mdns() }}
 						{{ tunnel_master_form.mdns.label }}
+						<div class="help-tip" >
+							<p>Enable MDNS (Avahi Daemon)</p>
+						</div>
 						<br>
 						{% for err in tunnel_master_form.mdns.errors %}
 							<div class="invalid-feedback">
@@ -266,6 +269,9 @@
 						<li>
 						{{ tunnel_master_form.pimd() }}
 						{{ tunnel_master_form.pimd.label }}
+						<div class="help-tip" >
+							<p>Enable PIMD (Multicast Routing)</p>
+						</div>
 						<br>
 						{% for err in tunnel_master_form.pimd.errors %}
 							<div class="invalid-feedback">
