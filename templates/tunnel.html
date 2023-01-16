@@ -5,7 +5,11 @@
         ul {
             list-style-type: none;
         }
-        #deviceType li:not(:last-child), #masterNetworks>div:not(:last-child) {
+        #deviceType li:not(:last-child),
+				#masterNetworks>div:not(:last-child),
+        #tunnelType li:not(:last-child),
+        #additionalServices li:not(:last-child)
+				{
 	        margin-bottom: 5px;
         }
 
@@ -99,8 +103,14 @@
 	</style>
 	<h3 class="mb-5">Tunnel</h3>
 	<div class="row g-5" style="overflow-y: auto">
-		<div class="py-5 text-center">
-			<p class="lead">Current Device ID is "{{ device_id }}"</p>
+		<div class="py-5 text-left">
+			<p class="lead">
+				Current Device ID:
+				<input id="device-id-text" value="{{ device_id }}" readonly />
+				<button type="button" class="btn-clipboard" id="device-id-to-clipboard" title="Copy to clipboard">
+					<i class="bi bi-clipboard"></i>
+				</button>
+			</p>
 		</div>
 		<div class="col-12">
 			<p>One device needs to be the <b>Master</b> and be accessible from outside (public IP or forward a port on
@@ -138,7 +148,7 @@
 					{{ tunnel_master_form.tunnel_type.label }}
 					</div>
 					<div class="col-9">
-						<ul>
+						<ul id="tunnelType">
 						{% for subfield in tunnel_master_form.tunnel_type: %}
 							<li>
 								{{ subfield.label }}
@@ -211,7 +221,9 @@
 					<div class="col-9" id="masterNetworks">
 						{% for nested_field in tunnel_master_form.master_networks %}
 						<div class="col-12 row">
-							{{ nested_field }}
+							<div class="col-1"><i class='bx bx-minus minus-master-network'></i></div>
+							<div class="col-6">{{ nested_field["server_ip"] }}</div>
+							<div class="col-4">{{ nested_field["server_subnet"] }}</div>
 						</div>
 						{% endfor %}
 					</div>
@@ -225,50 +237,46 @@
 					<div class="col-9" id="clientNetworks">
 						{% for nested_field in tunnel_master_form.client_networks %}
 						<div class="col-12 row">
-							{{ nested_field }}
+							<div class="col-1"><i class='bx bx-minus minus-client-network'></i></div>
+							<div class="col-11">{{ nested_field["client_id"] }}</div>
+							<div class="col-1"></div>
+							<div class="col-6">{{ nested_field["client_ip"] }}</div>
+							<div class="col-3">{{ nested_field["client_subnet"] }}</div>
 						</div>
 						{% endfor %}
 					</div>
 				</div>
 
-				<div id="clientIDsWrapper" class="col-12 mt-0 plus-sign {% if tunnel_master_form.client_ids.errors %}was-validated{% endif %}">
-					{{ tunnel_master_form.client_ids.label }}
-					<br>
-					{{ tunnel_master_form.client_ids() }}
-					<input id="client-ids-0" type="text" value="" class="mb-2">
-					<i class='bx bx-plus' id='plus-client-id'></i>
-					<br>
-					<div class="additional-inputs"></div>
-					{% for err in tunnel_master_form.client_ids.errors %}
-						<div class="invalid-feedback">
-							{{ err }}
-						</div>
-					{% endfor %}
+			</div>
+
+			<div class="row">
+				<div class="col-3">Aditional services</div>
+				<div class="col-9 {% if tunnel_master_form.mdns.errors %}was-validated{% endif %}">
+					<ul id="additionalServices">
+						<li>
+						{{ tunnel_master_form.mdns() }}
+						{{ tunnel_master_form.mdns.label }}
+						<br>
+						{% for err in tunnel_master_form.mdns.errors %}
+							<div class="invalid-feedback">
+								{{ err }}
+							</div>
+						{% endfor %}
+						</li>
+						<li>
+						{{ tunnel_master_form.pimd() }}
+						{{ tunnel_master_form.pimd.label }}
+						<br>
+						{% for err in tunnel_master_form.pimd.errors %}
+							<div class="invalid-feedback">
+								{{ err }}
+							</div>
+						{% endfor %}
+						</li>
 				</div>
 			</div>
 
-
-
-			<div class="col-12 {% if tunnel_master_form.mdns.errors %}was-validated{% endif %}">
-				{{ tunnel_master_form.mdns() }}
-				{{ tunnel_master_form.mdns.label }}
-				<br>
-				{% for err in tunnel_master_form.mdns.errors %}
-					<div class="invalid-feedback">
-						{{ err }}
-					</div>
-				{% endfor %}
-			</div>
-
 			<div class="col-12 {% if tunnel_master_form.pimd.errors %}was-validated{% endif %}">
-				{{ tunnel_master_form.pimd() }}
-				{{ tunnel_master_form.pimd.label }}
-				<br>
-				{% for err in tunnel_master_form.pimd.errors %}
-					<div class="invalid-feedback">
-						{{ err }}
-					</div>
-				{% endfor %}
 			</div>
 
 			<button class="w-100 btn btn-primary btn-lg" type="submit">Save</button>
@@ -335,19 +343,6 @@
         const form = document.getElementById('masterForm');
         form.addEventListener('submit', beforeSubmit);
 
-        const plusElement = document.getElementById('plus-client-id');
-        plusElement.onclick = function() {
-            const additionalInputsWrapper = document.getElementsByClassName('additional-inputs')[0];
-            const newInput = document.createElement('input');
-            newInput.type="text";
-            newInput.classList.add("mb-2");
-            const brElemenet = document.createElement('br');
-            additionalInputsWrapper.appendChild(newInput);
-            additionalInputsWrapper.appendChild(brElemenet);
-        };
-        {#const#}
-        // <input class="add-more-items" id="client_ids" name="client_ids" type="text" value="">
-
         const removeRowButtons = document.getElementsByClassName('action-remove');
 
         function renameElement(element, newIndex) {
@@ -405,7 +400,14 @@
 					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
 
 					cloned.appendTo("#masterNetworks");
+					cloned.on("click", ".minus-master-network", minusMaster);
 				});
+				let minusMaster = function() {
+					if ($("#masterNetworks").children().length > 1) {
+						$(this).parent().parent().remove();
+					}
+				}
+				$(".minus-master-network").click(minusMaster);
 
 				$("#plus-client-network").click(function () {
 					let original = $("#clientNetworks").children().last();
@@ -424,6 +426,17 @@
 					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
 
 					cloned.appendTo("#clientNetworks");
+					cloned.on("click", ".minus-client-network", minusClient);
+				});
+				let minusClient = function() {
+					if ($("#clientNetworks").children().length > 1) {
+						$(this).parent().parent().remove();
+					}
+				}
+				$(".minus-client-network").click(minusClient);
+
+				$("#device-id-to-clipboard").click(function () {
+					navigator.clipboard.writeText($("#device-id-text").val());
 				});
 
 
