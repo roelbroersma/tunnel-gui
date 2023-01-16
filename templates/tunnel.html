@@ -220,7 +220,7 @@
 					<div class="col-9" id="masterNetworks">
 						{% for nested_field in tunnel_master_form.master_networks %}
 						<div class="col-12 row">
-							<div class="col-1"><i class='bx bx-minus' id='minus-master-network'></i></div>
+							<div class="col-1"><i class='bx bx-minus minus-master-network'></i></div>
 							<div class="col-6">{{ nested_field["server_ip"] }}</div>
 							<div class="col-4">{{ nested_field["server_subnet"] }}</div>
 						</div>
@@ -236,7 +236,7 @@
 					<div class="col-9" id="clientNetworks">
 						{% for nested_field in tunnel_master_form.client_networks %}
 						<div class="col-12 row">
-							<div class="col-1"><i class='bx bx-minus' id='minus-client-network'></i></div>
+							<div class="col-1"><i class='bx bx-minus minus-client-network'></i></div>
 							<div class="col-11">{{ nested_field["client_id"] }}</div>
 							<div class="col-1"></div>
 							<div class="col-6">{{ nested_field["client_ip"] }}</div>
@@ -391,7 +391,14 @@
 					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
 
 					cloned.appendTo("#masterNetworks");
+					cloned.on("click", ".minus-master-network", minusMaster);
 				});
+				let minusMaster = function() {
+					if ($("#masterNetworks").children().length > 1) {
+						$(this).parent().parent().remove();
+					}
+				}
+				$(".minus-master-network").click(minusMaster);
 
 				$("#plus-client-network").click(function () {
 					let original = $("#clientNetworks").children().last();
@@ -410,7 +417,14 @@
 					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
 
 					cloned.appendTo("#clientNetworks");
+					cloned.on("click", ".minus-client-network", minusClient);
 				});
+				let minusClient = function() {
+					if ($("#clientNetworks").children().length > 1) {
+						$(this).parent().parent().remove();
+					}
+				}
+				$(".minus-client-network").click(minusClient);
 
 				$("#device-id-to-clipboard").click(function () {
 					navigator.clipboard.writeText($("#device-id-text").val());
