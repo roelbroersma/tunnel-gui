@@ -123,6 +123,10 @@
 		<div class="col-12">
 			<p>One device needs to be the <b>Master</b> and be accessible from outside (public IP or forward a port on
 				your router).<br>Do you want this device to be the Master?</p>
+		</div>
+		<div class="col-12 row">
+			<div class="col-3 title">Master/Client</div>
+			<div class="col-8">
 			<ul id="deviceType">
 				<li>
 					<input id="deviceType-0" name="deviceType" type="radio" value="master" checked="">
@@ -139,7 +143,9 @@
 					</div>
 				</li>
 			</ul>
+				</div>
 		</div>
+		<p><br /></p>
 
 {#		<form method="POST" action="{{ url_for('tunnel') }}" id="masterForm">#}
 		<form method="POST" id="masterForm">
@@ -159,8 +165,8 @@
 						<ul id="tunnelType">
 						{% for subfield in tunnel_master_form.tunnel_type: %}
 							<li>
-								{{ subfield.label }}
 								{{ subfield }}
+								{{ subfield.label }}
 								<div class="help-tip" >
 									<p>
 										{% if subfield.label.text == "Normal": %}
