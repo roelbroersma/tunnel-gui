@@ -230,7 +230,6 @@
 				<div class="row">
 					<div class="col-3 title">
 						Networks, this master is connected to
-					  <i class='bx bx-plus' id='plus-master-network'></i>
 					</div>
 					<div class="col-9" id="masterNetworks">
 						{% for nested_field in tunnel_master_form.master_networks %}
@@ -239,14 +238,24 @@
 							<div class="col-4">{{ nested_field["server_subnet"] }}</div>
 							<div class="col-1"><i class='fa-solid fa-trash minus-master-network'></i></div>
 						</div>
+						</div>
 						{% endfor %}
 					</div>
+					<div class="col-12 row">
+					<div class="col-3"></div>
+					<div class="col-9">
+						<button type="button" id="plus-master-network" title="Add master network">
+						<i class='fa-solid fa-circle-plus'></i>
+						Add master network
+						</button>
+					</div>
 				</div>
+
+				<div><br/></div>
 
 				<div class="row">
 					<div class="col-3 title">
 						Networks the client is connected to
-					  <i class='bx bx-plus' id='plus-client-network'></i>
 					</div>
 					<div class="col-9" id="clientNetworks">
 						{% for nested_field in tunnel_master_form.client_networks %}
@@ -259,9 +268,20 @@
 						</div>
 						{% endfor %}
 					</div>
+					<div class="col-12 row">
+					<div class="col-3"></div>
+					<div class="col-9">
+						<button type="button" id="plus-client-network" title="Add client network">
+						<i class='fa-solid fa-circle-plus'></i>
+						Add client network
+						</button>
+					</div>
+				</div>
 				</div>
 
 			</div>
+
+			<div><br/></div>
 
 			<div class="row">
 				<div class="col-3 title">Aditional services</div>
