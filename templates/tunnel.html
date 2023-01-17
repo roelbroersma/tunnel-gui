@@ -126,8 +126,7 @@
 		</div>
 		<div class="col-12 row">
 			<div class="col-3 title">Master/Client</div>
-			<div class="col-8">
-			<ul id="deviceType">
+			<ul class="col-8" id="deviceType">
 				<li>
 					<input id="deviceType-0" name="deviceType" type="radio" value="master" checked="">
 					<label for="deviceType-0">This device is the master</label>
@@ -143,7 +142,6 @@
 					</div>
 				</li>
 			</ul>
-				</div>
 		</div>
 		<p><br /></p>
 
@@ -161,8 +159,7 @@
 					<div class="col-3 title">
 					{{ tunnel_master_form.tunnel_type.label }}
 					</div>
-					<div class="col-9">
-						<ul id="tunnelType">
+						<ul class="col-9" id="tunnelType">
 						{% for subfield in tunnel_master_form.tunnel_type: %}
 							<li>
 								{{ subfield }}
@@ -181,7 +178,6 @@
 							</li>
 						{% endfor %}
 						</ul>
-					</div>
 					<br>
 					{% for err in tunnel_master_form.tunnel_type.errors %}
 						<div class="invalid-feedback">
