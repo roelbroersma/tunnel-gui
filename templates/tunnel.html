@@ -290,16 +290,11 @@
 						{{ tunnel_master_form.mdns() }}
 						{{ tunnel_master_form.mdns.label }}
 						<div class="help-tip" >
-							<p><b>Multicast DNS (mDNS)</b> is used by Sonos, AirPrint, Apple<br />
-							(although Apple calls it 'Bonjour') and other devices to find each other.<br />
-							Devices can send a multicast queries like 'who can airprint?' or<br />
-							'who is sonos?'. Devices will answer using multicast so everyone in< br />
-							the network knows.<br />
+							<p><b>Multicast DNS (mDNS)</b> is used by Sonos, AirPrint, Apple (although Apple calls it 'Bonjour') and other devices to find each other.<br />
+							Devices can send a multicast queries like 'who can airprint?' or 'who is sonos?'. Devices will answer using multicast so everyone in the network knows.<br />
 							<br />
-							Since mDNS is a Multicast protocol, it's always been very difficult to<br />
-							use it with different networks and locations.<br />
-							By enabling this option, Avahi Daemon will cache all mDNS information it sees<br />
-							and proxy all requests to the other networks this device is connected to.<br />
+							Since mDNS is a Multicast protocol, it's always been very difficult to use it with different networks and locations.< br/>
+							By enabling this option, Avahi Daemon will cache all mDNS information it sees and proxy all requests to the other networks this device is connected to.
 							</p> 
 						</div>
 						<br>
@@ -313,12 +308,8 @@
 						{{ tunnel_master_form.pimd() }}
 						{{ tunnel_master_form.pimd.label }}
 						<div class="help-tip" >
-							<p><b>PIMD (Multicast Routing)<b/> is a service which will route multicast<br />
-							packets between the networks this device is connected to. It's probably<br />
-							the reason why you use the T1!<br />
-							By enabling Multicast routing, packets to/from IP: 224.0.0.0-239.255.255.255<br />
-							which are usually very difficult to route to other networks will now travel to<br />
-							all connected networks.<br />
+							<p><b>PIMD (Multicast Routing)</b> is a service which will route multicast packets between the networks this device is connected to. It's probably the reason why you use the T1!<br />
+							By enabling Multicast routing, packets to/from IP: 224.0.0.0-239.255.255.255 which are usually very difficult to route to other networks will now travel to all connected networks.
 							</p>
 						</div>
 						<br>
