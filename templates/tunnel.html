@@ -112,20 +112,24 @@
 
 	<div class="col-12 row">
 		<div class="col-3 title">Current Device ID:</div>
-		<div class="col-8">
-				<input id="device-id-text" value="{{ device_id }}" readonly />
+		<div class="col-6">
+				<input id="device-id-text" value="{{ device_id }}" readonly style="width:100% "/>
+		</div>
+		<div class="col-1">
+				&nbsp;
 				<button type="button" class="btn-clipboard" id="device-id-to-clipboard" title="Copy to clipboard">
 					<i class="fa-solid fa-copy"></i>
 				</button>
 		</div>
 	</div>
 
-		<div class="col-12">
+		<div class="col-12 row">
+			<div class="col-3 title">Master/Client </div>
+			<div class="col-8">
 			<p>One device needs to be the <b>Master</b> and be accessible from outside (public IP or forward a port on
 				your router).<br>Do you want this device to be the Master?</p>
-		</div>
-		<div class="col-12 row">
-			<div class="col-3 title">Master/Client</div>
+			</div>
+			<div class="col-3 title"></div>
 			<ul class="col-8" id="deviceType">
 				<li>
 					<input id="deviceType-0" name="deviceType" type="radio" value="master" checked="">
@@ -240,7 +244,7 @@
 					<div class="col-12 row">
 					<div class="col-3"></div>
 					<div class="col-9">
-						<button type="button" id="plus-master-network" title="Add master network">
+						&nbsp;<button type="button" id="plus-master-network" title="Add master network">
 						<i class='fa-solid fa-circle-plus'></i>
 						Add master network
 						</button>
@@ -267,7 +271,7 @@
 					<div class="col-12 row">
 					<div class="col-3"></div>
 					<div class="col-9">
-						<button type="button" id="plus-client-network" title="Add client network">
+						&nbsp;<button type="button" id="plus-client-network" title="Add client network">
 						<i class='fa-solid fa-circle-plus'></i>
 						Add client network
 						</button>
@@ -280,9 +284,8 @@
 			<div><br/></div>
 
 			<div class="row">
-				<div class="col-3 title">Aditional services</div>
-				<div class="col-9 {% if tunnel_master_form.mdns.errors %}was-validated{% endif %}">
-					<ul id="additionalServices">
+				<div class="col-3 title">Additional services</div>
+					<ul class="col-9" id="additionalServices">
 						<li>
 						{{ tunnel_master_form.mdns() }}
 						{{ tunnel_master_form.mdns.label }}
@@ -309,7 +312,7 @@
 							</div>
 						{% endfor %}
 						</li>
-				</div>
+				</ul>
 			</div>
 
 			<div class="col-12 {% if tunnel_master_form.pimd.errors %}was-validated{% endif %}">
