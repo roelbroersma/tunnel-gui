@@ -485,7 +485,7 @@
 					copyDeviceID.setSelectionRange(0, 99999); // For mobile devices
 
 					// Copy the text inside the text field
-					navigator.clipboard.writeText(copyDeviceID.value);
+					document.execCommand('copy');
 
 					// Alert the copied text
 					alert("Device ID: " + copyDeviceID.value + " copied to the clipboard.");
