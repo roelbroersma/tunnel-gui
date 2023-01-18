@@ -283,9 +283,8 @@
 			<div><br/></div>
 
 			<div class="row">
-				<div class="col-3 title">Aditional services</div>
-				<div class="col-9 {% if tunnel_master_form.mdns.errors %}was-validated{% endif %}">
-					<ul id="additionalServices">
+				<div class="col-3 title">Additional services</div>
+					<ul class="col-9" id="additionalServices">
 						<li>
 						{{ tunnel_master_form.mdns() }}
 						{{ tunnel_master_form.mdns.label }}
@@ -312,7 +311,7 @@
 							</div>
 						{% endfor %}
 						</li>
-				</div>
+				</ul>
 			</div>
 
 			<div class="col-12 {% if tunnel_master_form.pimd.errors %}was-validated{% endif %}">
