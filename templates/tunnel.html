@@ -261,11 +261,11 @@
 						{% for client in tunnel_master_form.clients %}
 						<div class="col-12 row">
 							<div class="col-9">{{ client["client_id"] }}</div>
+							<div class="col-1"><i class='fa-solid fa-trash minus-client-network'></i></div>
 								{% for client_network in client.client_networks %}
 									<div class="col-12 row">
 										<div class="col-5">{{ client_network["client_ip"] }}</div>
 										<div class="col-4">{{ client_network["client_subnet"] }}</div>
-										<div class="col-1"><i class='fa-solid fa-trash minus-client-network'></i></div>
 									</div>
 								{% endfor %}
 						</div>
