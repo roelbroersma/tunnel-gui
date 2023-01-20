@@ -448,6 +448,9 @@
 					let prefix = parts.slice(0, 2 * index + 1);
 					let suffix = parts.slice(2 * index + 2);
 					let infix = parseInt(parts[2 * index + 1]) + 1;
+					if (isNaN(infix)) {
+						infix = []
+					}
 
 					inc = prefix.concat(infix).concat(suffix).join("-");
 
@@ -491,8 +494,6 @@
 					let cloned = original.clone()
 					cloned.find("input").val("");
 
-					console.log(cloned.find("input"));
-
 					cloned.find("input").attr("name", incName(cloned.find("input").attr("name"), 1));
 					cloned.find("select").attr("name", incName(cloned.find("select").attr("name"), 1));
 
@@ -523,7 +524,9 @@
 					subcontainer.parent().on("click", ".plus-client-network", plusClientNetwork);
 					subcontainer.parent().on("click", ".minus-client-network", minusClientNetwork);
 
-					cloned.find("input").attr("name", incName(cloned.find("input").attr("name"), 0));
+					cloned.find("input").each(function (i, e) {
+						$(e).attr("name", incName($(e).attr("name"), 0));
+					});
 					cloned.find("select").attr("name", incName(cloned.find("select").attr("name"), 0));
 
 					cloned.appendTo("#clients");
