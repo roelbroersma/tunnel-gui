@@ -441,21 +441,28 @@
         }
         [...removeRowButtons].forEach(element => element.onclick = removeRow)
 
+
+
+				let incName = function(origName, index) {
+					let parts = origName.split("-");
+					let prefix = parts.slice(0, 2 * index + 1);
+					let suffix = parts.slice(2 * index + 2);
+					let infix = parseInt(parts[2 * index + 1]) + 1;
+
+					inc = prefix.concat(infix).concat(suffix).join("-");
+
+					console.log(origName + " >(" + index + ")> " + inc);
+					return inc;
+				}
+
 				$("#plus-master-network").click(function () {
 					let original = $("#masterNetworks").children().last();
 					console.log(original);
 					let cloned = original.clone()
 					cloned.find("input").val("");
 
-					let incName = function(origName) {
-						let parts = origName.split("-");
-						let inc = [parts[0], parseInt(parts[1]) + 1, parts[2]].join("-");
-						console.log(inc);
-						return inc;
-					}
-
-					cloned.find("input").attr("name", incName(cloned.find("input").attr("name")));
-					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
+					cloned.find("input").attr("name", incName(cloned.find("input").attr("name"), 0));
+					cloned.find("select").attr("name", incName(cloned.find("select").attr("name"), 0));
 
 					cloned.appendTo("#masterNetworks");
 					cloned.on("click", ".minus-master-network", minusMaster);
@@ -484,17 +491,10 @@
 					let cloned = original.clone()
 					cloned.find("input").val("");
 
-					let incName = function(origName) {
-						let parts = origName.split("-");
-						let inc = [parts[0], parseInt(parts[1]) + 1, parts[2]].join("-");
-						console.log(inc);
-						return inc;
-					}
-
 					console.log(cloned.find("input"));
 
-					cloned.find("input").attr("name", incName(cloned.find("input").attr("name")));
-					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
+					cloned.find("input").attr("name", incName(cloned.find("input").attr("name"), 1));
+					cloned.find("select").attr("name", incName(cloned.find("select").attr("name"), 1));
 
 					cloned.appendTo(container);
 					cloned.on("click", ".minus-client-network", minusClientNetwork);
@@ -523,15 +523,8 @@
 					subcontainer.parent().on("click", ".plus-client-network", plusClientNetwork);
 					subcontainer.parent().on("click", ".minus-client-network", minusClientNetwork);
 
-					let incName = function(origName) {
-						let parts = origName.split("-");
-						let inc = [parts[0], parseInt(parts[1]) + 1, parts[2]].join("-");
-						console.log(inc);
-						return inc;
-					}
-
-					cloned.find("input").attr("name", incName(cloned.find("input").attr("name")));
-					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
+					cloned.find("input").attr("name", incName(cloned.find("input").attr("name"), 0));
+					cloned.find("select").attr("name", incName(cloned.find("select").attr("name"), 0));
 
 					cloned.appendTo("#clients");
 					cloned.on("click", ".minus-client", minusClient);
