@@ -460,6 +460,7 @@
 					cloned.appendTo("#masterNetworks");
 					cloned.on("click", ".minus-master-network", minusMaster);
 				});
+
 				let minusMaster = function() {
 					if ($("#masterNetworks").children().length > 1) {
 						$(this).parent().parent().remove();
@@ -467,39 +468,17 @@
 				}
 				$(".minus-master-network").click(minusMaster);
 
-				$("#plus-client").click(function () {
-					let original = $("#clients").children().last();
-					console.log(original);
-					let cloned = original.clone()
-					cloned.find("input").val("");
 
-					let subcontainer = cloned.find(".client-networks");
-					alert(subcontainer);
-					while (subcontainer.children().length > 1) {
-						subcontainer.children().last().remove();
-					}
-
-					let incName = function(origName) {
-						let parts = origName.split("-");
-						let inc = [parts[0], parseInt(parts[1]) + 1, parts[2]].join("-");
-						console.log(inc);
-						return inc;
-					}
-
-					cloned.find("input").attr("name", incName(cloned.find("input").attr("name")));
-					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
-
-					cloned.appendTo("#clients");
-					cloned.on("click", ".minus-client", minusClient);
-				});
 				let minusClient = function() {
 					if ($("#clients").children().length > 1) {
 						$(this).parent().parent().remove();
 					}
 				}
-				$(".minus-client").click(minusClient);
+				$(".minus-client").on("click", minusClient);
 
-				$(".plus-client-network").click(function () {
+
+				let plusClientNetwork = function() {
+
 					let container = $(this).parent().parent().find(".client-networks");
 					let original = container.children().last();
 					console.log(original);
@@ -520,6 +499,35 @@
 
 					cloned.appendTo(container);
 					cloned.on("click", ".minus-client-network", minusClient);
+				}
+				$(".plus-client-network").on("click", plusClientNetwork);
+
+
+				$("#plus-client").click(function () {
+					let original = $("#clients").children().last();
+					console.log(original);
+					let cloned = original.clone()
+					cloned.find("input").val("");
+
+					let subcontainer = cloned.find(".client-networks");
+					while (subcontainer.children().length > 1) {
+						subcontainer.children().last().remove();
+					}
+
+					subcontainer.parent().find(".plus-client-network").on("click", plusClientNetwork);
+
+					let incName = function(origName) {
+						let parts = origName.split("-");
+						let inc = [parts[0], parseInt(parts[1]) + 1, parts[2]].join("-");
+						console.log(inc);
+						return inc;
+					}
+
+					cloned.find("input").attr("name", incName(cloned.find("input").attr("name")));
+					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
+
+					cloned.appendTo("#clients");
+					cloned.on("click", ".minus-client", minusClient);
 				});
 
 				$("#device-id-to-clipboard").click(function () {
