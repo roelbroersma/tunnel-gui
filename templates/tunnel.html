@@ -473,6 +473,12 @@
 					let cloned = original.clone()
 					cloned.find("input").val("");
 
+					let subcontainer = cloned.find(".client-networks");
+					alert(subcontainer);
+					while (subcontainer.children().length > 1) {
+						subcontainer.children().last().remove();
+					}
+
 					let incName = function(origName) {
 						let parts = origName.split("-");
 						let inc = [parts[0], parseInt(parts[1]) + 1, parts[2]].join("-");
