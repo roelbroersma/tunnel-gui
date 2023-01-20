@@ -469,16 +469,15 @@
 				$(".minus-master-network").click(minusMaster);
 
 
-				let minusClient = function() {
-					if ($("#clients").children().length > 1) {
-						$(this).parent().parent().remove();
+				let minusClientNetwork = function() {
+					let container = $(this).parent().parent();
+					if (container.parent().children().length > 1) {
+						container.remove();
 					}
 				}
-				$(".minus-client").on("click", minusClient);
-
+				$(".minus-client-network").on("click", minusClientNetwork);
 
 				let plusClientNetwork = function() {
-
 					let container = $(this).parent().parent().find(".client-networks");
 					let original = container.children().last();
 					console.log(original);
@@ -498,10 +497,17 @@
 					cloned.find("select").attr("name", incName(cloned.find("select").attr("name")));
 
 					cloned.appendTo(container);
-					cloned.on("click", ".minus-client-network", minusClient);
+					cloned.on("click", ".minus-client-network", minusClientNetwork);
 				}
 				$(".plus-client-network").on("click", plusClientNetwork);
 
+
+				let minusClient = function() {
+					if ($("#clients").children().length > 1) {
+						$(this).parent().parent().remove();
+					}
+				}
+				$(".minus-client").on("click", minusClient);
 
 				$("#plus-client").click(function () {
 					let original = $("#clients").children().last();
@@ -514,7 +520,8 @@
 						subcontainer.children().last().remove();
 					}
 
-					subcontainer.parent().find(".plus-client-network").on("click", plusClientNetwork);
+					subcontainer.parent().on("click", ".plus-client-network", plusClientNetwork);
+					subcontainer.parent().on("click", ".minus-client-network", minusClientNetwork);
 
 					let incName = function(origName) {
 						let parts = origName.split("-");
