@@ -156,7 +156,7 @@ def tunnel():
     if request.method == "POST":
         print('wow !! ')
         is_ok = tunnel_master_form.validate_on_submit()
-        print(tunnel_master_form.data)
+        print(json.dumps(tunnel_master_form.data, indent=2))
 
         if is_ok:
             {'tunnel_type': 'normal', 'public_ip_or_ddns_hostname': '185.102.185.67', 'tunnel_port': 443, 'protocol': 'tcp', 'master_networks': [{'server_ip': '1.1.1.1', 'server_subnet': '255.255.255.0'}], 'client_networks': [{'client_ip': '2.2.2.2', 'server_subnet': '255.255.255.0'}], 'client_ids': '', 'mdns': False, 'pimd': False}
