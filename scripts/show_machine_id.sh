@@ -10,7 +10,7 @@ MACHINE_ID=""
 json_output="{";
 
 #GET MACHINE ID
-MACHINE_ID="$(cat /etc/machine-id)"
+MACHINE_ID="$(cat /etc/machine-id  || echo n/a)"
 json_output="$json_output \"machine_id\" : \"$MACHINE_ID\""
 
 #END JSON OUTPUT

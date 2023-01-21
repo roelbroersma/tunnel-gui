@@ -153,41 +153,35 @@ def tunnel():
     tunnel_master_form = TunnelMasterForm(request.form, meta={"csrf": False})
     tunnel_non_master_form = TunnelNonMasterForm(request.form, meta={"csrf": False})
 
-    if request.method == "POST":
-        print('wow !! ')
-        is_ok = tunnel_master_form.validate_on_submit()
-        print(json.dumps(tunnel_master_form.data, indent=2))
-
-        if is_ok:
-            {'tunnel_type': 'normal', 'public_ip_or_ddns_hostname': '185.102.185.67', 'tunnel_port': 443, 'protocol': 'tcp', 'master_networks': [{'server_ip': '1.1.1.1', 'server_subnet': '255.255.255.0'}], 'client_networks': [{'client_ip': '2.2.2.2', 'server_subnet': '255.255.255.0'}], 'client_ids': '', 'mdns': False, 'pimd': False}
-
-            subprocess.Popen([
-                "scripts/change_vpn.sh",
-                "-t", "server",
-                "-b", {
-                    "normal": "off",
-                    "bridge": "on",
-                }[tunnel_master_form.data["tunnel_type"]],
-                "-h", tunnel_master_form.data["public_ip_or_ddns_hostname"],
-                "-p", tunnel_master_form.data["protocol"],
-                "-n", str(tunnel_master_form.data["tunnel_port"]),
-                "-s", "",  # TODO
-                "-c", "",  # TODO
-                "-d", "",  # TODO
-            ])
-
-            print("is_ok")
-            return {'callback': lambda: redirect(url_for(
-                'tunnel_download',
-                dl_uuid=uuid.uuid4()
-            ), code=302)}
-        else:
-            print("not_ok")
-
-
     device_id = json.loads(subprocess.Popen(
         'scripts/show_machine_id.sh', stdout=subprocess.PIPE
     ).communicate()[0])["machine_id"]
+
+    if tunnel_master_form.validate_on_submit():
+        print(json.dumps(tunnel_master_form.data, indent=2))
+
+        subprocess.Popen([
+            "scripts/change_vpn.sh",
+            "-t", "server",
+            "-b", {
+                "normal": "off",
+                "bridge": "on",
+            }[tunnel_master_form.data["tunnel_type"]],
+            "-h", tunnel_master_form.data["public_ip_or_ddns_hostname"],
+            "-p", tunnel_master_form.data["protocol"],
+            "-n", str(tunnel_master_form.data["tunnel_port"]),
+            "-s", "",  # TODO
+            "-c", "",  # TODO
+            "-d", "",  # TODO
+        ])
+
+        return {'callback': lambda: redirect(url_for(
+            'tunnel_download',
+            dl_uuid=uuid.uuid4()
+        ), code=302)}
+
+    else:
+        print("not_ok")
 
     tunnel_master_form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(
         'scripts/show_public_ip.sh', stdout=subprocess.PIPE
