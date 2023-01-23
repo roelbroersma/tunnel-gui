@@ -15,7 +15,7 @@ from forms.subnet_choices import SUBNET_CHOICES
 
 
 class MasterNetworkForm(Form):
-    server_ip = StringField(
+    server_network = StringField(
         "",
         validators=[IPAddress()],
         render_kw={"placeholder": "192.168.0.0", "style": "width: 94%"},
@@ -29,7 +29,7 @@ class MasterNetworkForm(Form):
 
 
 class ClientNetworkForm(Form):
-    client_ip = StringField(
+    client_network = StringField(
         "",
         validators=[IPAddress()],
         render_kw={"placeholder": "192.168.0.0", "style": "width: 94%"},
