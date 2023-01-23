@@ -153,13 +153,6 @@
 		<form method="POST" id="masterForm">
 			<div class="row g-3">
 				<div class="col-12 mt-0 row {% if tunnel_master_form.tunnel_type.errors %}was-validated{% endif %}">
-					{% for field in tunnel_master_form.errors %}
-					{% for error in tunnel_master_form.errors[field] %}
-					<div class="alert alert-error">
-						<strong>Error!</strong> {{error}}
-					</div>
-					{% endfor %}
-					{% endfor %}
 					<div class="col-3 title">
 					{{ tunnel_master_form.tunnel_type.label }}
 					</div>
@@ -265,10 +258,18 @@
 							<div class="col-12 row client-networks">
 								{% for client_network in client.client_networks %}
 									<div class="col-12 row" style="padding:4px">
-										<div class="col-5">{{ client_network["client_network"] }}</div>
+										<div class="col-5">{{ client_network["client_network"] }}
+										</div>
 										<div class="col-4">{{ client_network["client_subnet"] }}</div>
 										<div class="col-1"><i class='fa-solid fa-trash minus-client-network'></i></div>
 									</div>
+									{% if client_network.errors %}
+									<div class="col-12 row">
+										{% for err in client_network["client_network"].errors %}
+										<div class="alert alert-warning">{{ err }}</div>
+										{% endfor %}
+									</div>
+									{% endif %}
 								{% endfor %}
 							</div>
 							<div class="col-9" style="padding:8px; padding-bottom:24px">
