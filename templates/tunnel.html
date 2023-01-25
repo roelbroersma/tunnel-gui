@@ -189,6 +189,13 @@
 					</div>
 					<div class="col-4">
 					{{ tunnel_master_form.public_ip_or_ddns_hostname() }}
+					{% if tunnel_master_form.public_ip_or_ddns_hostname.errors %}
+					<ul class="alert alert-warning">
+						{% for error in tunnel_master_form.public_ip_or_ddns_hostname.errors %}
+						<li>{{ error }}</li>
+						{% endfor %}
+					</ul>
+					{% endif %}
 					</div>
 					<div class="col-2">
 					{{ tunnel_master_form.tunnel_port() }}
@@ -197,27 +204,6 @@
 					{{ tunnel_master_form.protocol() }}
 					</div>
 					<br>
-					<div class=" {% if
-					tunnel_master_form.public_ip_or_ddns_hostname.errors or
-					tunnel_master_form.tunnel_port.errors or
-					tunnel_master_form.protocol.errors
-							%}was-validated{% endif %}">
-						{% for err in tunnel_master_form.public_ip_or_ddns_hostname.errors %}
-							<div class="invalid-feedback">
-								{{ err }}
-							</div>
-						{% endfor %}
-						{% for err in tunnel_master_form.tunnel_port.errors %}
-							<div class="invalid-feedback">
-								{{ err }}
-							</div>
-						{% endfor %}
-						{% for err in tunnel_master_form.protocol.errors %}
-							<div class="invalid-feedback">
-								{{ err }}
-							</div>
-						{% endfor %}
-					</div>
 				</div>
 
 				<div class="row">

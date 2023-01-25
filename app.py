@@ -157,6 +157,11 @@ def tunnel():
         'scripts/show_machine_id.sh', stdout=subprocess.PIPE
     ).communicate()[0])["machine_id"]
 
+    if not tunnel_master_form.is_submitted():
+        tunnel_master_form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(
+            'scripts/show_public_ip.sh', stdout=subprocess.PIPE
+        ).communicate()[0])["public_ipv4"]
+
     if tunnel_master_form.validate_on_submit():
         print(json.dumps(tunnel_master_form.data, indent=2))
 
@@ -183,9 +188,6 @@ def tunnel():
     else:
         print("not_ok")
 
-    tunnel_master_form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(
-        'scripts/show_public_ip.sh', stdout=subprocess.PIPE
-    ).communicate()[0])["public_ipv4"]
 
     return {
         'form': form,
