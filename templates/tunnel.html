@@ -211,12 +211,20 @@
 						Networks, this master is connected to
 					</div>
 					<div class="col-9" id="masterNetworks">
-						{% for nested_field in tunnel_master_form.master_networks %}
+						{% for master_network in tunnel_master_form.master_networks %}
 						<div class="col-12 row">
-							<div class="col-5">{{ nested_field["server_network"] }}</div>
-							<div class="col-4">{{ nested_field["server_subnet"] }}</div>
+							<div class="col-5">
+								{{ master_network["server_network"] }}
+								{% if master_network["server_network"].errors %}
+								<ul class="alert alert-warning">
+									{% for error in master_network["server_network"].errors %}
+									<li>{{ error }}</li>
+									{% endfor %}
+								</ul>
+								{% endif %}
+							</div>
+							<div class="col-4">{{ master_network["server_subnet"] }}</div>
 							<div class="col-1"><i class='fa-solid fa-trash minus-master-network'></i></div>
-						</div>
 						</div>
 						{% endfor %}
 					</div>
