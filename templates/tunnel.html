@@ -253,18 +253,19 @@
 							<div class="col-12 row client-networks">
 								{% for client_network in client.client_networks %}
 									<div class="col-12 row" style="padding:4px">
-										<div class="col-5">{{ client_network["client_network"] }}
+										<div class="col-5">
+											{{ client_network["client_network"] }}
+											{% if client_network["client_network"].errors %}
+											<ul class="alert alert-warning">
+												{% for error in client_network["client_network"].errors %}
+												<li>{{ error }}</li>
+												{% endfor %}
+											</ul>
+											{% endif %}
 										</div>
 										<div class="col-4">{{ client_network["client_subnet"] }}</div>
 										<div class="col-1"><i class='fa-solid fa-trash minus-client-network'></i></div>
 									</div>
-									{% if client_network.errors %}
-									<div class="col-12 row">
-										{% for err in client_network["client_network"].errors %}
-										<div class="alert alert-warning">{{ err }}</div>
-										{% endfor %}
-									</div>
-									{% endif %}
 								{% endfor %}
 							</div>
 							<div class="col-9" style="padding:8px; padding-bottom:24px">
@@ -458,6 +459,7 @@
 					let original = $("#masterNetworks").children().last();
 					console.log(original);
 					let cloned = original.clone()
+					cloned.find(".alert").remove();
 					cloned.find("input").val("");
 
 					cloned.find("input").attr("name", incName(cloned.find("input").attr("name"), 0));
@@ -487,7 +489,9 @@
 					let container = $(this).parent().parent().find(".client-networks");
 					let original = container.children().last();
 					console.log(original);
+
 					let cloned = original.clone();
+					cloned.find(".alert").remove();
 					cloned.find("input").val("");
 
 					cloned.find("input").attr("name", incName(cloned.find("input").attr("name"), 1));
