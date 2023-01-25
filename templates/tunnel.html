@@ -261,7 +261,7 @@
 							<div class="col-12 row client-networks">
 								{% for client_network in client.client_networks %}
 									<div class="col-12 row" style="padding:4px">
-										<div class="col-5">
+										<div class="col-5" style="margin-left:8px">
 											{{ client_network["client_network"] }}
 											{% if client_network["client_network"].errors %}
 											<ul class="alert alert-warning">
@@ -272,7 +272,7 @@
 											{% endif %}
 										</div>
 										<div class="col-4">{{ client_network["client_subnet"] }}</div>
-										<div class="col-1"><i class='fa-solid fa-trash minus-client-network'></i></div>
+										<div class="col-1" style="margin-left:24px"><i class='fa-solid fa-trash minus-client-network'></i></div>
 									</div>
 								{% endfor %}
 							</div>
