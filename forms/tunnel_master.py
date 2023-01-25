@@ -9,7 +9,7 @@ from wtforms import (
     SelectField,
     StringField,
 )
-from wtforms.validators import IPAddress, NumberRange
+from wtforms.validators import IPAddress, Length, NumberRange
 
 from forms.subnet_choices import SUBNET_CHOICES
 
@@ -45,6 +45,7 @@ class ClientNetworkForm(Form):
 class ClientForm(Form):
     client_id = StringField(
         "Client device ID(s)",
+        validators=[Length(10, 60)],
         render_kw={"placeholder": "Client device ID", "style": "width: 94%"},
     )
     client_networks = FieldList(

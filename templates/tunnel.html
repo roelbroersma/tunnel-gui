@@ -253,7 +253,16 @@
 					<div class="col-9" id="clients">
 						{% for client in tunnel_master_form.clients %}
 						<div class="col-12 row client-networks">
-							<div class="col-9" style="padding-bottom:16px">{{ client["client_id"] }}</div>
+							<div class="col-9" style="padding-bottom:16px">
+								{{ client["client_id"] }}
+								{% if client["client_id"].errors %}
+								<ul class="alert alert-warning">
+									{% for error in client["client_id"].errors %}
+									<li>{{ error }}</li>
+									{% endfor %}
+								</ul>
+								{% endif %}
+							</div>
 							<div class="col-1"><i class='fa-solid fa-trash minus-client'></i></div>
 							<div class="col-12 row client-networks">
 								{% for client_network in client.client_networks %}
@@ -492,7 +501,7 @@
 					let container = $(this).parent().parent().find(".client-networks");
 					let original = container.children().last();
 					console.log(original);
-					let cloned = original.clone()
+					let cloned = original.clone();
 					cloned.find("input").val("");
 
 					cloned.find("input").attr("name", incName(cloned.find("input").attr("name"), 1));
@@ -513,8 +522,8 @@
 
 				$("#plus-client").click(function () {
 					let original = $("#clients").children().last();
-					console.log(original);
 					let cloned = original.clone()
+					cloned.find(".alert").remove();
 					cloned.find("input").val("");
 
 					let subcontainer = cloned.find(".client-networks");
