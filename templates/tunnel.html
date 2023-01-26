@@ -17,6 +17,8 @@
 	        margin-bottom: 5px;
         }
 
+		ul.alert { padding: 4px; }
+
 		.help-tip{
 		    position: relative;
 			display: inline-block;
@@ -190,7 +192,7 @@
 					<div class="col-4">
 					{{ tunnel_master_form.public_ip_or_ddns_hostname() }}
 					{% if tunnel_master_form.public_ip_or_ddns_hostname.errors %}
-					<ul class="alert alert-warning">
+					<ul class="alert alert-danger">
 						{% for error in tunnel_master_form.public_ip_or_ddns_hostname.errors %}
 						<li>{{ error }}</li>
 						{% endfor %}
@@ -216,7 +218,7 @@
 							<div class="col-5">
 								{{ master_network["server_network"] }}
 								{% if master_network["server_network"].errors %}
-								<ul class="alert alert-warning">
+								<ul class="alert alert-danger">
 									{% for error in master_network["server_network"].errors %}
 									<li>{{ error }}</li>
 									{% endfor %}
@@ -250,7 +252,7 @@
 							<div class="col-9" style="padding-bottom:16px">
 								{{ client["client_id"] }}
 								{% if client["client_id"].errors %}
-								<ul class="alert alert-warning">
+								<ul class="alert alert-danger">
 									{% for error in client["client_id"].errors %}
 									<li>{{ error }}</li>
 									{% endfor %}
@@ -264,7 +266,7 @@
 										<div class="col-5" style="margin-left:8px">
 											{{ client_network["client_network"] }}
 											{% if client_network["client_network"].errors %}
-											<ul class="alert alert-warning">
+											<ul class="alert alert-danger">
 												{% for error in client_network["client_network"].errors %}
 												<li>{{ error }}</li>
 												{% endfor %}
