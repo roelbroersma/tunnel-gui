@@ -345,8 +345,12 @@
 			<div class="col-12 {% if tunnel_master_form.pimd.errors %}was-validated{% endif %}">
 			</div>
 
-
 			<div class="col-12 row">
+
+				<button class="w-100 btn btn-primary btn-lg" type="submit">Save</button>
+
+				<p></p>
+
 				<div class="alert {{ download_msg_class}}">
 					<p class="text-center">
 						{% if not tunnel_master_form.is_submitted() %}
@@ -360,10 +364,7 @@
 					<button class="w-100 btn btn-success btn-lg" type="button" {{ download_btn_enabled }}>Download Keys</button>
 				</div>
 
-				<button class="w-100 btn btn-primary btn-lg" type="submit">Save</button>
-
 			</div>
-
 
 		</form>
 
