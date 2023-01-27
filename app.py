@@ -180,20 +180,23 @@ def tunnel():
             "-d", "",  # TODO
         ])
 
-        return {'callback': lambda: redirect(url_for(
-            'tunnel_download',
-            dl_uuid=uuid.uuid4()
-        ), code=302)}
+        return {
+            'form': form,
+            'device_id': device_id,
+            'tunnel_master_form': tunnel_master_form,
+            'tunnel_non_master_form': tunnel_non_master_form,
+            'download_btn_enabled': 'enabled',
+            'download_msg_class': 'alert-success',
+        }
 
-    else:
-        print("not_ok")
-
-
+    print(form.errors)
     return {
         'form': form,
         'device_id': device_id,
         'tunnel_master_form': tunnel_master_form,
         'tunnel_non_master_form': tunnel_non_master_form,
+        'download_btn_enabled': 'disabled',
+        'download_msg_class': 'alert-danger' if tunnel_master_form.errors else 'alert-primary',
     }
 
 
