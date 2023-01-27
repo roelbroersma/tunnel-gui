@@ -150,21 +150,6 @@
 			</ul>
 		</div>
 
-	<div class="col-12 row">
-		<div class="alert {{ download_msg_class}}">
-			<p class="text-center">
-				{% if not tunnel_master_form.is_submitted() %}
-				Please submit the form below to download the keys.
-				{% elif tunnel_master_form.errors %}
-				Please fix errors below to download the keys.
-				{% else %}
-				Settings saved successfully!
-				{% endif %}
-			</p>
-			<button class="w-100 btn btn-success btn-lg" type="button" {{ download_btn_enabled }}>Download Keys</button>
-		</div>
-	</div>
-
 		<p><br /></p>
 
 {#		<form method="POST" action="{{ url_for('tunnel') }}" id="masterForm">#}
@@ -360,7 +345,24 @@
 			<div class="col-12 {% if tunnel_master_form.pimd.errors %}was-validated{% endif %}">
 			</div>
 
+
+			<div class="col-12 row">
+				<div class="alert {{ download_msg_class}}">
+					<p class="text-center">
+						{% if not tunnel_master_form.is_submitted() %}
+						Please submit the form to download the keys.
+						{% elif tunnel_master_form.errors %}
+						Please fix errors to download the keys.
+						{% else %}
+						Settings saved successfully!
+						{% endif %}
+					</p>
+					<button class="w-100 btn btn-success btn-lg" type="button" {{ download_btn_enabled }}>Download Keys</button>
+				</div>
+			</div>
+
 			<button class="w-100 btn btn-primary btn-lg" type="submit">Save</button>
+
 		</form>
 
 		<form method="POST" action="{{ url_for('tunnel_upload') }}" id="notMasterForm">
