@@ -125,21 +125,6 @@
 		</div>
 	</div>
 
-	<div class="col-12 row">
-		<div class="alert {{ download_msg_class}}">
-			<p class="text-center">
-				{% if not tunnel_master_form.is_submitted() %}
-				Please submit the form below to download the keys.
-				{% elif tunnel_master_form.errors %}
-				Please fix errors below to download the keys.
-				{% else %}
-				Settings saved successfully!
-				{% endif %}
-			</p>
-			<button class="w-100 btn btn-success btn-lg" type="button" {{ download_btn_enabled }}>Download Keys</button>
-		</div>
-	</div>
-
 		<div class="col-12 row">
 			<div class="col-3 title">Master/Client </div>
 			<div class="col-8">
@@ -164,6 +149,22 @@
 				</li>
 			</ul>
 		</div>
+
+	<div class="col-12 row">
+		<div class="alert {{ download_msg_class}}">
+			<p class="text-center">
+				{% if not tunnel_master_form.is_submitted() %}
+				Please submit the form below to download the keys.
+				{% elif tunnel_master_form.errors %}
+				Please fix errors below to download the keys.
+				{% else %}
+				Settings saved successfully!
+				{% endif %}
+			</p>
+			<button class="w-100 btn btn-success btn-lg" type="button" {{ download_btn_enabled }}>Download Keys</button>
+		</div>
+	</div>
+
 		<p><br /></p>
 
 {#		<form method="POST" action="{{ url_for('tunnel') }}" id="masterForm">#}
