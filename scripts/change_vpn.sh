@@ -9,7 +9,7 @@ usage() {
                                 -p [udp|tcp]
                                 -n [port number, e.g. 443]
                                 -s [network,subnet. can be multiple lines, e.g. 192.168.5.0-255.255.255.0]
-                                -c [client_id;network-subnet, can be multiple lines, e.g. AB75DfdDF6;192.168.4.0-255.255.255.0]
+                                -c [client_id-network-subnet, can be multiple lines, e.g. AB75DfdDF6-192.168.4.0-255.255.255.0]
                                 -d [currently supported daemons: mdns|pimd, can be multiple lines]
 " 1>&2
 }
@@ -88,7 +88,7 @@ if [ "$TYPE" == "server" ]; then
                         fi
                 ;;
                 s)
-                        SUBNETS+=${OPTARG}
+                        SUBNETS+=(${OPTARG})
                         if ! [ $SUBNETS =~ $re_ip -o $SUBNETS == ":" ]; then
                                 echo "Invalid Subnets. No changes will be made."
                                 exit_abnormal
@@ -96,21 +96,27 @@ if [ "$TYPE" == "server" ]; then
                         fi
                 ;;
                 c)
-                        CLIENTS+=${OPTARG}
-                        if ! [ $CLIENT =~ $re_ip -o $CLIENT == ":" ]; then
-                                echo "Invalid Client ID with subnet and IPSubnets. No changes will be made."
-                                exit_abnormal
-                                exit 1
-                        fi
+                        CLIENTS+=(${OPTARG})
+                        for CLIENT in "${CLIENTS[@]}"; do
+                                CLIENTID=$(echo $CLIENT | cut --delimiter=';' --fields=1)
+                                CLIENTNETWORK=$(echo $CLIENT | cut --delimiter=';' --fields=2)
+                                CLIENTSUBNET=$(echo $CLIENT | cut --delimiter=';' --fields=3)
+                                if ! [ ${#CLIENTID} -gt 10 -a ${#CLIENTID} -lt 80 -o $CLIENT == ":" ]; then
+                                        echo "Invalid Client ID. Client ID should be between 10 - 60 characters. No changes will be made."
+                                        exit_abnormal
+                                        exit 1
+                                fi
+                        done
                 ;;
                 d)
-                        DAEMONS+=${OPTARG}
-                        #echo "waarde:${DAEMONS[-1]}"
-                        if ! [ $DAEMONS == "mdns" -o $DAEMONS == "pimd" -o $DAEMONS == ":" ]; then
-                                echo "Invalid Daemons specified. Currently only supporting mdns and pimd as options."
-                                exit_abnormal
-                                exit 1
-                        fi
+                        DAEMONS+=(${OPTARG})
+                        for DAEMON in "${DAEMONS[@]}"; do
+                                if ! [ $DAEMON == "mdns" -o $DAEMON == "pimd" -o $DAEMON == ":" ]; then
+                                        echo "Invalid Daemons specified: $DAEMON. Currently only supporting mdns and pimd as options."
+                                        exit_abnormal
+                                        exit 1
+                                fi
+                        done
                 ;;
                 esac
         done
