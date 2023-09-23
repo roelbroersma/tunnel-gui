@@ -14,13 +14,16 @@
 	<h4>IP Info</h4>
 	<div class="diagnostic-info">
 		<div class="row">
+			<p class="col-4">Mode:</p>
+			<p class="info col-6">{{ ip_type }}</p>
+		</div>
+		<div class="row">
 			<p class="col-4">IP Address:</p>
 			<p class="info col-6">{{ ip_address }}</p>
 		</div>
-		<br/>
 		<div class="row">
 			<p class="col-4">Subnet Mask: </p>
-			<p class="info col-6">{{ subnet_mask }}</p>
+			<p class="info col-6">{{ subnet }}</p>
 		</div>
 		<div class="row">
 			<p class="col-4">Gateway: </p>
@@ -28,7 +31,7 @@
 		</div>
 		<div class="row">
 			<p class="col-4">DNS Servers: </p>
-			<p class="info col-6">{{ dns_address }}</p>
+			<p class="info col-6">{{ dns_servers }}</p>
 		</div>
 		<div class="row">
 			<p class="col-4">Public IP Address: </p>

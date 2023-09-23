@@ -16,11 +16,11 @@
 			<form method="POST" action="{{ url_for('index') }}" id="ipForm">
 
 				<div class="row g-3">
-					<div class="col-12 {% if form.static_or_dhcp.errors %}was-validated{% endif %}">
-						{{ form.static_or_dhcp() }}
-						{{ form.static_or_dhcp.label }}
+					<div class="col-12 {% if form.ip_type.errors %}was-validated{% endif %}">
+						{{ form.ip_type() }}
+						{{ form.ip_type.label }}
 						<br>
-						{% for err in form.static_or_dhcp.errors %}
+						{% for err in form.ip_type.errors %}
 							<div class="invalid-feedback">
 								{{ err }}
 							</div>
@@ -63,8 +63,8 @@
 	</div>
 
 	<script>
-        let dhcpIpRadiobutton = document.getElementById("static_or_dhcp-0");
-        let staticIpRadiobutton = document.getElementById("static_or_dhcp-1");
+        let dhcpIpRadiobutton = document.getElementById("ip_type-0");
+        let staticIpRadiobutton = document.getElementById("ip_type-1");
         dhcpIpRadiobutton.onclick = function () {
             let additionalInputsContainer = document.getElementsByClassName("jumping-container")[0];
             additionalInputsContainer.style.display = "none";

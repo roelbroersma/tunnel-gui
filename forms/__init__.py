@@ -19,7 +19,7 @@ IP_INPUT_DEFAULT_CLASSES = "visually-hidden"
 
 
 class IpAddressChangeForm(FlaskForm):
-    static_or_dhcp = RadioField(
+    ip_type = RadioField(
         "",
         choices=[
             ("dhcp", "Get IP Address from DHCP"),
@@ -32,12 +32,12 @@ class IpAddressChangeForm(FlaskForm):
         validators=[IPAddress(), ],
         render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "192.168.0.10"},
     )
-    dns_address = StringField(
+    dns_servers = StringField(
         "DNS Server",
         validators=[IPAddress(), ],
         render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "8.8.8.8"},
     )
-    subnet_mask = StringField(
+    subnet = StringField(
         "Subnet Mask",
         validators=[IPAddress(), ],
         render_kw={"class": IP_INPUT_DEFAULT_CLASSES, "placeholder": "255.255.255.0"},
@@ -49,8 +49,8 @@ class IpAddressChangeForm(FlaskForm):
     )
 
     def validate(self, extra_validators=None):
-        static_or_dhcp = self.data['static_or_dhcp']
-        if static_or_dhcp == 'static':
+        ip_type = self.data['ip_type']
+        if ip_type == 'static':
             super_result = super().validate(extra_validators)
             return super_result
         else:
@@ -58,16 +58,16 @@ class IpAddressChangeForm(FlaskForm):
         return False
 
     def get_generated_data(self):
-        static_or_dhcp = self.static_or_dhcp.data
+        ip_type = self.ip_type.data
         ip = self.ip_address.data
         gateway = self.gateway.data
-        network = self.subnet_mask.data
-        dns = self.dns_address.data
+        network = self.subnet.data
+        dns = self.dns_servers.data
         return IpAddressChangeInfo(
-            static_or_dhcp=static_or_dhcp,
+            ip_type=ip_type,
             ip_address=ip,
-            subnet_mask=network,
-            dns_address=dns,
+            subnet=network,
+            dns_servers=dns,
             gateway=gateway
         )
 
@@ -127,22 +127,3 @@ class TunnelForm(FlaskForm):
     mdns = BooleanField("Enable MDNS (Avahi Daemon)")
     pimd = BooleanField("Enable PIMD (Multicast Routing)")
 
-
-class OldTunnelForm(FlaskForm):
-    tunnel_type = RadioField(
-        "Tunnel Type",
-        choices=[("normal", "Normal"), ("bridge", "Bridge")],
-        default="normal",
-    )
-    server_port_type = RadioField(
-        "", choices=[("tcp", "TCP"), ("udp", "UDP")], default="tcp"
-    )
-    client_port_type = RadioField(
-        "", choices=[("tcp", "TCP"), ("udp", "UDP")], default="tcp"
-    )
-    server_subnet_1 = StringField("", validators=[InputRequired()])
-    server_subnet_2 = StringField("", validators=[InputRequired()])
-    client_subnet_1 = StringField("", validators=[InputRequired()])
-    client_subnet_2 = StringField("", validators=[InputRequired()])
-    mdns = BooleanField("Enable MDNS (Avahi Daemon)")
-    pimd = BooleanField("Enable PIMD (Multicast Routing)")

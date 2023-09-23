@@ -10,22 +10,19 @@ IP_CONFIG_FILE = 'ip_config.json'
 
 
 class IpAddressChangeInfo:
-    def __init__(self, static_or_dhcp, ip_address, dns_address, subnet_mask, gateway):
-        self.static_or_dhcp = static_or_dhcp
-        is_static = self.static_or_dhcp == 'static'
-        def or_empty(val):
-            return val if is_static else ''
-        self.ip_address = or_empty(ip_address)
-        self.dns_address = or_empty(dns_address)
-        self.subnet_mask = or_empty(subnet_mask)
-        self.gateway = or_empty(gateway)
+    def __init__(self, ip_type, ip_address, dns_servers, subnet, gateway):
+        self.ip_type = ip_type
+        self.ip_address = ip_address
+        self.dns_servers = dns_servers
+        self.subnet = subnet
+        self.gateway = gateway
 
     def to_json(self):
         data = {
-            'staticOrDhcp': self.static_or_dhcp,
-            'ipAddress': self.ip_address,
-            'subnetMask': self.subnet_mask,
-            'dnsAddress': self.dns_address,
+            'ip_type': self.ip_type,
+            'ip_address': self.ip_address,
+            'subnet': self.subnet,
+            'dns_servers': self.dns_servers,
             'gateway': self.gateway
         }
         return json.dumps(data, indent=4)
@@ -34,10 +31,10 @@ class IpAddressChangeInfo:
     def from_json(cls, json_string):
         data = json.loads(json_string)
         return cls(
-            static_or_dhcp=data['staticOrDhcp'],
-            ip_address=data['ipAddress'],
-            subnet_mask=data['subnetMask'],
-            dns_address=data['dnsAddress'],
+            ip_type=data['ip_type'],
+            ip_address=data['ip_address'],
+            subnet=data['subnet'],
+            dns_servers=data['dns_servers'],
             gateway=data['gateway']
         )
 
@@ -47,10 +44,10 @@ class IpAddressChangeInfo:
         try:
             data = json.loads(output)
             return cls(
-                static_or_dhcp=data['type'],
+                ip_type=data['ip_type'],
                 ip_address=data['ip_address'],
-                subnet_mask=data['subnet'],
-                dns_address=data['dns_servers'][0],
+                subnet=data['subnet'],
+                dns_servers=data['dns_servers'],
                 gateway=data['gateway']
             )
         except Exception as e:
@@ -58,10 +55,10 @@ class IpAddressChangeInfo:
             print(e)
             print(output)
             return cls(
-                static_or_dhcp='',
+                ip_type='',
                 ip_address='',
-                subnet_mask='',
-                dns_address='',
+                subnet='',
+                dns_servers='',
                 gateway=''
             )
 
@@ -77,11 +74,11 @@ def change_ip(ip_address_info):
     subprocess.run(
         str(BASE_DIR / "scripts/change_ip.sh") +\
         " -t {} -a {} -n {} -g {} -d {}".format(
-            ip_address_info.static_or_dhcp,
+            ip_address_info.ip_type,
             ip_address_info.ip_address,
-            ip_address_info.subnet_mask,
+            ip_address_info.subnet,
             ip_address_info.gateway,
-            ip_address_info.dns_address
+            ip_address_info.dns_servers
         ),
         shell=True,
         executable=DEFAULT_EXECUTABLE,
@@ -97,8 +94,43 @@ def show_ip():
         executable=DEFAULT_EXECUTABLE,
         capture_output=True,
     )
-    output = result.stdout
+    output = result.stdout.decode('utf-8')
     return IpAddressChangeInfo.from_script_output(output)
+
+
+class PublicIpInfo:
+    def __init__(self, public_ipv4, public_ipv6):
+        self.public_ipv4 = public_ipv4
+        self.public_ipv6 = public_ipv6
+
+    @classmethod
+    def from_script_output(cls, output):
+        # Result from show_public_ip.sh script should be json string
+        try:
+            data = json.loads(output)
+            return cls(
+                public_ipv4=data['public_ipv4'],
+                public_ipv6=data['public_ipv6']
+            )
+        except Exception as e:
+            print('PROBLEM: ')
+            print(e)
+            print(output)
+            return cls(
+                public_ipv4='',
+                public_ipv6=''
+            )
+
+
+def show_public_ip():
+    result = subprocess.run(
+        str(BASE_DIR / "scripts/show_public_ip.sh"),
+        shell=True,
+        executable=DEFAULT_EXECUTABLE,
+        capture_output=True,
+    )
+    output = result.stdout.decode('utf-8')
+    return PublicIpInfo.from_script_output(output)
 
 
 def do_change_password(new_password):
@@ -136,3 +168,65 @@ def get_passwords():
     with open(BASE_DIR / "web_password.txt", "r+") as f:
         web_password = f.read().strip()
     return [web_password, super_password]
+
+def save_tunnel_configuration(data):
+    config_dir = 'configs'
+    server_conf_file = os.path.join(config_dir, 'server.conf')
+
+    with open(server_conf_file, "w") as server_config_file:
+        json.dump(data, server_config_file, indent=2)
+
+def load_tunnel_configuration(form):
+    config_dir = 'configs'
+    server_conf_file = os.path.join(config_dir, 'server.conf')
+
+    if os.path.exists(server_conf_file):
+        try:
+            with open(server_conf_file, 'r') as file:
+                config_data = json.load(file)
+                print(config_data)
+
+                # GET GENERAL TUNNEL CONFIG AND SET IT TO THE FORM
+                form.tunnel_type.data = config_data["tunnel_type"]
+                form.public_ip_or_ddns_hostname.data = config_data["public_ip_or_ddns_hostname"]
+                form.tunnel_port.data = config_data["tunnel_port"]
+                form.protocol.data = config_data["protocol"]
+                form.mdns.data = config_data["mdns"]
+                form.pimd.data = config_data["pimd"]
+
+                # LOOP THROUGH THE SERVER NETWORKS ANS SET THEM AS DEFAULT TO THE FORM
+                for i, server_network in enumerate(config_data["master_networks"]):
+                    form.master_networks.append_entry()
+                    form.master_networks[i].server_network.data = server_network["server_network"]
+                    form.master_networks[i].server_subnet.data = server_network["server_subnet"]
+
+                # LOOP THROUGH CLIENTS AND SET THEM AS DEFAULT TO THE FORM
+                for i, client in enumerate(config_data["clients"]):
+                    form.clients.append_entry()
+                    form.clients[i].client_id.data = client["client_id"]
+
+                    # AND ALSO LOOP THROUGH THE CLIENT NETWORKS FOR EACH CLIENT
+                    for j, client_network in enumerate(client["client_networks"]):
+                        form.clients[i].client_networks.append_entry()
+                        form.clients[i].client_networks[j].client_network.data = client_network["client_network"]
+                        form.clients[i].client_networks[j].client_subnet.data = client_network["client_subnet"]
+
+
+
+
+        except FileNotFoundError:
+            print(f"Configuratiebestand '{server_conf_file}' niet gevonden.")
+        except json.JSONDecodeError as e:
+            print(f"Fout bij het decoderen van JSON: {e}")
+    else:
+        print("Configuratiebestand '{server_conf_file}' bestaat niet.")
+        form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(
+            'scripts/show_public_ip.sh', stdout=subprocess.PIPE
+        ).communicate()[0])["public_ipv4"]
+        form.mdns.data = True
+
+    return form
+
+    # Als er een fout optreedt of het bestand niet bestaat, retourneer een lege dictionary.
+    return {}
+

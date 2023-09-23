@@ -11,8 +11,8 @@ from flask import Flask, redirect, url_for, request, session
 from flask import render_template as flask_render_template
 from pydantic import BaseModel
 
-from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm, OldTunnelForm, TunnelMasterForm, TunnelNonMasterForm
-from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip
+from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm, TunnelMasterForm, TunnelNonMasterForm
+from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, save_tunnel_configuration, load_tunnel_configuration
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -73,7 +73,7 @@ def do_response_from_context(make_context_func):
 
         context = make_context_func(*args, **kwargs)
         route_name = make_context_func.__name__
-        if 'callback' in context:
+        if context is not None and 'callback' in context:
             return context['callback']()
 
         return render_template(route_name, **context)
@@ -119,14 +119,14 @@ def index():
         ip_change_info = show_ip()
 
         form.ip_address.default = ip_change_info.ip_address or None
-        form.static_or_dhcp.default = ip_change_info.static_or_dhcp
-        form.subnet_mask.default = ip_change_info.subnet_mask or None
+        form.ip_type.default = ip_change_info.ip_type or None
+        form.subnet.default = ip_change_info.subnet or None
         form.gateway.default = ip_change_info.gateway or None
-        form.dns_address.default = ip_change_info.dns_address or None
+        form.dns_servers.default = ip_change_info.dns_servers[0] or None
         form.process()
 
     fields = []
-    for field_key in ['ip_address', 'subnet_mask', 'gateway', 'dns_address']:
+    for field_key in ['ip_address', 'subnet', 'gateway', 'dns_servers']:
         fields.append((field_key, form[field_key].label))
     return {'form': form, 'fields': fields}
 
@@ -158,27 +158,72 @@ def tunnel():
     ).communicate()[0])["machine_id"]
 
     if not tunnel_master_form.is_submitted():
-        tunnel_master_form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(
-            'scripts/show_public_ip.sh', stdout=subprocess.PIPE
-        ).communicate()[0])["public_ipv4"]
+       config_data = load_tunnel_configuration(tunnel_master_form)
+#        if config_data:
+#       print(config_data)
+            #LOOP THROUGH THE CONFIG_DATA AND ASSIGN IT TO THE TUNNEL_MASTER_FORM
+#            for field_name, field_value in config_data.items():
+#                if hasattr(tunnel_master_form, field_name):
+#                    setattr(tunnel_master_form, field_name, field_value)
+#        else:
+#            tunnel_master_form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(
+#            'scripts/show_public_ip.sh', stdout=subprocess.PIPE
+#            ).communicate()[0])["public_ipv4"]
+#            tunnel_master_form.mdns.data = True
 
     if tunnel_master_form.validate_on_submit():
         print(json.dumps(tunnel_master_form.data, indent=2))
 
-        subprocess.Popen([
-            "scripts/change_vpn.sh",
-            "-t", "server",
-            "-b", {
-                "normal": "off",
-                "bridge": "on",
-            }[tunnel_master_form.data["tunnel_type"]],
-            "-h", tunnel_master_form.data["public_ip_or_ddns_hostname"],
-            "-p", tunnel_master_form.data["protocol"],
-            "-n", str(tunnel_master_form.data["tunnel_port"]),
-            "-s", "",  # TODO
-            "-c", "",  # TODO
-            "-d", "",  # TODO
-        ])
+        #GET MAIN INFO
+#        tunnel_data = {
+#            "device_id": device_id,
+#            "type": tunnel_master_form.data["deviceType"],
+#            "public_ip_or_ddns_hostname": tunnel_master_form.data["public_ip_or_ddns_hostname"],
+#            "port": tunnel_master_form.data["tunnel_port"],
+#            "protocol": tunnel_master_form.data["protocol"],
+#            "master_networks": [],
+#            "clients": []
+#        }
+
+        # ADD MASTER NETWORKS TO THE DICTIONARY
+#        for i in range(len(tunnel_master_form.data.getlist("master_networks.server_network"))):
+#            network = {
+#                "server_network": tunnel_master_form.data.getlist("master_networks.server_network")[i],
+#                "server_subnet": tunnel_master_form.data.getlist("master_networks.server_subnet")[i]
+#            }
+#            tunnel_data["master_networks"].append(network)
+
+        # ADD CLIENTS AND THEIR CLIENT NETWORKS TO THE DICTIONARY
+#        for i in range(len(tunnel_master_form.data.getlist("clients.client_id"))):
+#            client = {
+#                "client_id": tunnel_master_form.data.getlist("clients.client_id")[i],
+#                "client_networks": []
+#            }
+#            for j in range(len(tunnel_master_form.data.getlist(f"clients.clients-{i}.client_networks.client_network"))):
+#                client_network = {
+#                    "client_network": tunnel_master_form.data.getlist(f"clients.clients-{i}.client_networks.client_network")[j],
+#                    "client_subnet": tunnel_master_form.data.getlist(f"clients.clients-{i}.client_networks.client_subnet")[j]
+#                }
+#                client["client_networks"].append(client_network)
+#            tunnel_data["clients"].append(client)
+#        print(tunnel_data)
+        save_tunnel_configuration(tunnel_master_form.data)
+
+
+#        subprocess.Popen([
+#            "scripts/change_vpn.sh",
+#            "-t", "server",
+#            "-b", {
+#                "normal": "off",
+#                "bridge": "on",
+#            }[tunnel_master_form.data["tunnel_type"]],
+#            "-h", tunnel_master_form.data["public_ip_or_ddns_hostname"],
+#            "-p", tunnel_master_form.data["protocol"],
+#            "-n", str(tunnel_master_form.data["tunnel_port"]),
+#            "-s", "",  # TODO
+#            "-c", "",  # TODO
+#            "-d", "",  # TODO
+#        ])
 
         return {
             'form': form,
@@ -211,27 +256,22 @@ def tunnel_upload():
     return {}
 
 
-@app.route("/old_tunnel", methods=["GET", "POST"])
-@do_response_from_context
-def old_tunnel():
-    form = OldTunnelForm()
-    return {'form': form}
-
-
 @app.route("/diagnostics", methods=["GET", "POST"])
 @do_response_from_context
 def diagnostics():
     ip_change_info = show_ip()
-
+    public_ip_info = show_public_ip()
     def or_info(val):
-        return val or 'info was not chosen (dhcp was chosen)'
+        return val or 'no info could be retrieved'
 
     return {
+        'ip_type': ip_change_info.ip_type,
         'ip_address': or_info(ip_change_info.ip_address),
-        'subnet_mask': or_info(ip_change_info.subnet_mask),
+        'subnet': or_info(ip_change_info.subnet),
         'gateway': or_info(ip_change_info.gateway),
-        'dns_address': or_info(ip_change_info.dns_address),
-        'public_ip_address': requests.get('https://icanhazip.com/').text
+        'dns_servers': ','.join(or_info(ip_change_info.dns_servers)),
+#        'public_ip_address': requests.get('https://ipv4.icanhazip.com/').text
+        'public_ip_address': or_info(public_ip_info.public_ipv4)
     }
 
 
@@ -243,6 +283,7 @@ def get_log_file():
 
 if __name__ == "__main__":
     is_debug = os.getenv('DEBUG', 'False').lower() == 'true'
+    port = os.getenv('PORT', 8080)
     try:
         with open(BASE_DIR / IP_CONFIG_FILE, 'r') as f:
             try_read = f.read()
@@ -255,4 +296,4 @@ if __name__ == "__main__":
         app.run(debug=is_debug, host="0.0.0.0")
     else:
         from waitress import serve
-        serve(app, host="0.0.0.0", port=8080)
+        serve(app, host="0.0.0.0", port=int(port))

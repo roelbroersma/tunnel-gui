@@ -90,10 +90,10 @@ fi
 
 #CHECK IF STATIC OR DYNAMIC (DHCP)
 if [[ $(ip -f inet addr show $interface | grep dynamic) ]]; then
-        json_output="$json_output, \"type\" : \"dhcp\"";
+        json_output="$json_output, \"ip_type\" : \"dhcp\"";
         type=dhcp
 else
-        json_output="$json_output, \"type\" : \"static\""
+        json_output="$json_output, \"ip_type\" : \"static\""
         type=static;
 fi
 
