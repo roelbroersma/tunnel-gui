@@ -27,5 +27,8 @@ echo "Generating .env file with random secret key..."
 
 touch /var/log/tunnel-gui.log;
 
+echo "Setting file permissions on scripts"
+chmod -R +x scripts/
+
 echo "Succesfully installed the Tunneling GUI. Check the next steps in README.md file"
 echo;
