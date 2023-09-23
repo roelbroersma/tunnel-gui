@@ -24,6 +24,7 @@ We recommend setting up the Tunnel GUI on a Raspberry Pi 2/3/4. Running it on an
 1. Download the DietPi image for Hyper-V
 2. Run the following at the prompt:
 `wget -q -O - https://github.com/roelbroersma/tunnel-gui/raw/main/install.txt | bash`
+This will download the latest repository and install all Python and Flask requiments. It will also create a default .env file and a log file.
 
 
 ## Running on Docker (for development purposes)
