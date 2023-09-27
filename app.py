@@ -158,12 +158,9 @@ def tunnel():
     ).communicate()[0])["machine_id"]
 
     if not tunnel_master_form.is_submitted():
-        print ("test1")
         tunnel_master_form = load_tunnel_configuration(tunnel_master_form)
 
     if tunnel_master_form.validate_on_submit():
-        print("test")
-
         #GET CLIENT IDS FROM OUR FORM
         client_ids = [client['client_id'] for client in tunnel_master_form.data['clients']]
 
@@ -179,8 +176,8 @@ def tunnel():
             daemons.append('mdns')
         if tunnel_master_form.data['pimd']:
             daemons.append('pimd')
-
-        generate_server_config ( bridge, tunnel_master_form.data["public_ip_or_ddns_hostname"], tunnel_master_form.data["protocol"], tunnel_master_form.data["tunnel_port"], tunnel_master_form.data["master_networks"], tunnel_master_form.data["client_networks"], daemons )
+        print(tunnel_master_form.data)
+        generate_server_config ( bridge, tunnel_master_form.data["public_ip_or_ddns_hostname"], tunnel_master_form.data["protocol"], tunnel_master_form.data["tunnel_port"], tunnel_master_form.data["master_networks"], tunnel_master_form.data["clients"], daemons )
 
         generate_client_config(tunnel_master_form.data)
 

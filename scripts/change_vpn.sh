@@ -260,7 +260,6 @@ ${KEY_CONTENT}
 
 	# ZIP ALL THE CONFIG FILES FOR DISTRIBUTION TO THE CLIENTS
 	cd ${SCRIPT_DIR}../configs/
-	pwd
 	zip -r client_config.zip *
 
 

@@ -175,42 +175,42 @@ def generate_keys(server, clients, regenerate=False):
     command = [str(BASE_DIR / "scripts/change_keys.sh")]
 
     if server:
-        command.extend(["-s", server])
+        command.extend(["-s", str(server)])
 
     for client in clients:
-        command.extend(["-c", client])
+        command.extend(["-c", str(client)])
 
     if regenerate:
         command.extend(["-r"])
     command_str = " ".join(command)
-    subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+    subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
 
 
 def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_networks, clients, daemons):
     command = [str(BASE_DIR / "scripts/change_vpn.sh")]
 
-    command.extend(["-t", server])
-    command.extend(["-b", bridge])
-    command.extend (["-h"], public_ip_or_ddns)
-    command.extend (["-p"], protocol)
-    command.extend (["-n"], port)
+    command.extend(["-t", "server"])
+    command.extend(["-b", str(bridge)])
+    command.extend (["-h", str(public_ip_or_ddns)])
+    command.extend (["-p", str(protocol)])
+    command.extend (["-n", str(port)])
 
     for server_network in server_networks:
         network_str = f"{server_network['server_network']}-{server_network['server_subnet']}"
-        command.extend(["-s", network_str])
+        command.extend(["-s", str(network_str)])
 
 
     for client in clients:
         client_id = client['client_id']
         for client_network in client['client_networks']:
             client_str = f"{client_id}-{client_network['client_network']}-{client_network['client_subnet']}"
-        command.extend(["-s", network_str])
+        command.extend(["-s", str(network_str)])
 
     for daemon in daemons:
-        command.extend(["-d", daemon])
+        command.extend(["-d", str(daemon)])
 
     command_str = " ".join(command)
-    subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+    subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
 
 
 def generate_client_config(data):
@@ -271,12 +271,12 @@ def load_tunnel_configuration(form):
 
 
         except FileNotFoundError:
-            print(f"Configuratiebestand '{server_conf_file}' niet gevonden.")
+            print(f"Config file '{server_conf_file}' not found.")
         except json.JSONDecodeError as e:
             print(f"Fout bij het decoderen van JSON: {e}")
     else:
         #THIS IS THE DEFAULT IF NO FILE CAN BE LOADED
-        print("Configuratiebestand '{server_conf_file}' bestaat niet.")
+        print(f"Config file '{server_conf_file}' does not exist.")
         form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(
             'scripts/show_public_ip.sh', stdout=subprocess.PIPE
         ).communicate()[0])["public_ipv4"]
@@ -284,6 +284,6 @@ def load_tunnel_configuration(form):
 
     return form
 
-    # Als er een fout optreedt of het bestand niet bestaat, retourneer een lege dictionary.
+    # IF AN ERRORS OCCURS OR THE CONFIG FILE DOES NOT EXIST, RETURN AN EMPTY DICTIONARY
     return {}
 
