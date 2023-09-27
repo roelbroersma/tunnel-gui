@@ -9,6 +9,7 @@ import uuid
 from dotenv import load_dotenv
 from flask import Flask, redirect, url_for, request, session
 from flask import render_template as flask_render_template
+from flask import send_file
 from pydantic import BaseModel
 
 from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm, TunnelMasterForm, TunnelNonMasterForm
@@ -206,10 +207,10 @@ def tunnel():
     }
 
 
-@app.route("/tunnel/download/<dl_uuid>", methods=["GET"])
-@do_response_from_context
-def tunnel_download(dl_uuid):
-    return {}
+@app.route("/tunnel/download-client-config", methods=["GET"])
+#@do_response_from_context
+def tunnel_download_client_config():
+    return send_file(str(BASE_DIR / 'configs' / 'client_config.zip'), as_attachment=True)
 
 @app.route("/tunnel/upload", methods=["GET", "POST"])
 @do_response_from_context

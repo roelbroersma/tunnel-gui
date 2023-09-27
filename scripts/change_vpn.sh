@@ -138,7 +138,7 @@ if [ "$TYPE" == "server" ]; then
                                 exit 1
                         fi
 
-                        CLIENTS+=("${OPTARG}")
+			CLIENTS+=("${OPTARG}")
                 ;;
                 d)
                         DAEMONS+=("${OPTARG}")
@@ -159,6 +159,9 @@ if [ "$TYPE" == "server" ]; then
                 echo ""
                 exit_abnormal
         fi
+
+	#EXECUTE CHANGE BRIDGE SCRIPT (ONLY DOES SOMETHING IF MODE IS DIFFERENT THAN CURRENT MODE)
+	${SCRIPT_DIR}change_bridge.sh -b $BRIDGE
 
 
         # DO EXTRA CHECKS FOR OPTIONS/ARGUMENTS

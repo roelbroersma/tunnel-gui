@@ -125,6 +125,10 @@ done
 json_output="$(echo $json_output | sed 's/,\s$//g')"
 json_output="$json_output ]"
 
+#GET MAC ADDRESS
+mac="$(ip address show $interface | awk '/link\/ether/ {print $2}' )"
+json_output="$json_output, \"mac_address\" : \"$mac\""
+
 
 #END JSON OUTPUT
 json_output="$json_output }"

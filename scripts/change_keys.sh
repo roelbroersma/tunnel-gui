@@ -111,7 +111,7 @@ if [ -n "$server_id" ]; then
 	# MOVE CREATED CERT AND KEY TO SERVER FOLDER
 	mv pki/issued/server.crt server/
 	mv pki/private/server.key server/
-    else
+else
     	#CERT ALREADY EXISTS, DO NOTHING
 	:
    fi
@@ -138,11 +138,15 @@ if [ "${#client_ids[@]}" -gt 0 ]; then
 	# GENERATE CLIENT CERT AND KEY
         echo "Creating Client Certificate and Key for: ${client_id}"
         ./easyrsa --batch --req-cn=$client_id --vars=${easyrsa_dir}openvpn-ca/vars gen-req $client_id nopass
-        ./easyrsa --batch --vars=${easyrsa_dir}openvpn-ca/vars sign-req client $client_id
+	./easyrsa --batch --vars=${easyrsa_dir}openvpn-ca/vars sign-req client $client_id
 
         # MOVE CREATED CERT AND KEY TO SERVER FOLDER
         mv pki/issued/$client_id.crt client/
         mv pki/private/$client_id.key client/
+
+	#FOR SOME STUPID REASON WE NEED TO REMOVE THE METADATA FROM THE CERTIFICATE, EASYRSA ALWAYS DOES THIS AND OPENVPN WILL NOT HANDLE IT WHEN PLACING INLINE
+	sed -i -n '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' client/$client_id.crt
+
     fi
   done
 fi

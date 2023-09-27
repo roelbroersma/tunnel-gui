@@ -51,16 +51,19 @@ CURRENT_IP_ADDRESS=""
 CURRENT_SUBNET=""
 CURRENT_GATEWAY=""
 CURRENT_DNS_SERVERS=""
+CURRENT_MAC_ADDRESS=""
 BUGFIX1=""
 
 # GET CURRENT IP ADDRESS INFO (DHCP/STATIC? IP, SUBNET, GATEWAY AND DNS)
-CURRENT_IP_INFO=$(./show_ip.sh)
-CURRENT_MODE=$(echo $CURRENT_IP_INFO | awk -f callbacks.awk -f JSON.awk - | grep mode | awk -F ' ' '{print $2}' | tr -d \")
-CURRENT_TYPE=$(echo $CURRENT_IP_INFO | awk -f callbacks.awk -f JSON.awk - | grep type | awk -F ' ' '{print $2}' | tr -d \")
-CURRENT_IP_ADDRESS=$(echo $CURRENT_IP_INFO | awk -f callbacks.awk -f JSON.awk - | grep ip_address | awk -F ' ' '{print $2}' | tr -d \")
-CURRENT_SUBNET=$(echo $CURRENT_IP_INFO | awk -f callbacks.awk -f JSON.awk - | grep subnet | awk -F ' ' '{print $2}' | tr -d \")
-CURRENT_GATEWAY=$(echo $CURRENT_IP_INFO | awk -f callbacks.awk -f JSON.awk - | grep gateway | awk -F ' ' '{print $2}' | tr -d \")
-CURRENT_DNS_SERVERS=$(echo $CURRENT_IP_INFO | awk -f callbacks.awk -f JSON.awk - | grep dns_servers | awk -F ' ' '{print $2}' | tr -d \" | paste -d " " - -)
+CURRENT_IP_INFO=$(${SCRIPT_DIR}/show_ip.sh)
+echo ${SCRIPT_DIR}
+CURRENT_MODE=$(echo $CURRENT_IP_INFO | awk -f ${SCRIPT_DIR}callbacks.awk -f ${SCRIPT_DIR}JSON.awk - | grep mode | awk -F ' ' '{print $2}' | tr -d \")
+CURRENT_TYPE=$(echo $CURRENT_IP_INFO | awk -f ${SCRIPT_DIR}callbacks.awk -f ${SCRIPT_DIR}JSON.awk - | grep type | awk -F ' ' '{print $2}' | tr -d \")
+CURRENT_IP_ADDRESS=$(echo $CURRENT_IP_INFO | awk -f ${SCRIPT_DIR}callbacks.awk -f ${SCRIPT_DIR}JSON.awk - | grep ip_address | awk -F ' ' '{print $2}' | tr -d \")
+CURRENT_SUBNET=$(echo $CURRENT_IP_INFO | awk -f ${SCRIPT_DIR}callbacks.awk -f ${SCRIPT_DIR}JSON.awk - | grep subnet | awk -F ' ' '{print $2}' | tr -d \")
+CURRENT_GATEWAY=$(echo $CURRENT_IP_INFO | awk -f ${SCRIPT_DIR}callbacks.awk -f ${SCRIPT_DIR}JSON.awk - | grep gateway | awk -F ' ' '{print $2}' | tr -d \")
+CURRENT_DNS_SERVERS=$(echo $CURRENT_IP_INFO | awk -f ${SCRIPT_DIR}callbacks.awk -f ${SCRIPT_DIR}JSON.awk - | grep dns_servers | awk -F ' ' '{print $2}' | tr -d \" | paste -d " " - -)
+CURRENT_MAC_ADDRESS=$(echo $CURRENT_IP_INFO | awk -f ${SCRIPT_DIR}callbacks.awk -f ${SCRIPT_DIR}JSON.awk - | grep mac_address | awk -F ' ' '{print $2}' | tr -d \")
 
 # CHECK IF WE NEED TO APPLY A DIRTY BUGFIX
 if grep -q "wpa-conf" /etc/network/interfaces; then
@@ -82,10 +85,12 @@ if [ "$CURRENT_MODE" == "normal" ] && [ $BRIDGE == "on" ]; then
         # NOW ADD THE BRIDGE INTERFACE
         #DO WE NEED TO ADD A BRIDGE WITH DHCP?
         if [ "$CURRENT_TYPE" == "dhcp" ]; then
-                echo "Adding Bridge interface with DHCP"
-                awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=br0 action=add mode=dhcp 'bridge_ports=eth0 tap0' > /tmp/tmp_interfaces
+                echo "Adding Bridge interface with DHCP and try to keep same MAC/IP Address"
+                awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=br0 action=add mode=dhcp > /tmp/tmp_interfaces
                 #WHEN SETTING A BRIDGE TO DHCP, THE BRIDGE_PORTS CONFIGURATION IS LOST, SO ADD IT HERE
-                echo "  bridge_ports eth0 tap0" >> /tmp/tmp_interfaces
+                echo "	bridge_ports eth0 tap0" >> /tmp/tmp_interfaces
+		#WHEN SETTING A BRIDGE TO DHCP, ANY OTHER VALUES CAN NOT BE WRITTEN, SO DO THAT HERE. HERE TRY TO KEEP THE SAME IP ADDRESS BY CLONING THE MAC ADDRESS, WHILE MOSTLY A UNIQUE IDENTIFIER (DUID) IS USED AS IN /etc/dhcp/dhcpclient.conf BUT WE WILL NOT CHANGE THAT BECAUSE THEN AFTER DOWNLOADING THIS TUNNEL1 SOFTWARE YOU WILL IMMEDIATELLY RECEIVE A NEW IP ADDRESS.
+		echo "	hwaddress ether ${CURRENT_MAC_ADDRESS}" >> /tmp/tmp_interfaces
 
         #OTHERWISE, ADD BRIDGE WITH STATIC IP
         else

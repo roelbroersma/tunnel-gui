@@ -204,7 +204,7 @@ def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_net
         client_id = client['client_id']
         for client_network in client['client_networks']:
             client_str = f"{client_id}-{client_network['client_network']}-{client_network['client_subnet']}"
-        command.extend(["-s", str(network_str)])
+        command.extend(["-c", str(client_str)])
 
     for daemon in daemons:
         command.extend(["-d", str(daemon)])
