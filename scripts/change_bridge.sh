@@ -42,7 +42,8 @@ fi
 
 
 # INITIALIZE VARIABLES AND MAKE SURE THEY ARE EMTPY
-SCRIPT_DIR=$(dirname -- "$0")
+SCRIPT_PATH="$(realpath "$0")"
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")/"
 CURRENT_IP_INFO=""
 CURRENT_MODE=""
 CURRENT_TYPE=""
@@ -73,7 +74,7 @@ if [ "$CURRENT_MODE" == "normal" ] && [ $BRIDGE == "on" ]; then
 
         # SET ETH0 TO MANUAL
         echo "Changing Interface eth0 to manual"
-        awk -f $SCRIPT_DIR/changeInterface.awk /etc/network/interfaces dev=eth0 mode=manual > /tmp/tmp_interfaces
+        awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=eth0 mode=manual > /tmp/tmp_interfaces
 
         # FOR SOME REASON WE CAN NOT WRITE TO THE /ETC/NETWORK/INTERFACES FILE DIRECTLY, SO WE DO IT THIS WAY, VIA A TMP FILE.
         cp /tmp/tmp_interfaces /etc/network/interfaces
@@ -82,14 +83,14 @@ if [ "$CURRENT_MODE" == "normal" ] && [ $BRIDGE == "on" ]; then
         #DO WE NEED TO ADD A BRIDGE WITH DHCP?
         if [ "$CURRENT_TYPE" == "dhcp" ]; then
                 echo "Adding Bridge interface with DHCP"
-                awk -f $SCRIPT_DIR/changeInterface.awk /etc/network/interfaces dev=br0 action=add mode=dhcp 'bridge_ports=eth0 tap0' > /tmp/tmp_interfaces
+                awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=br0 action=add mode=dhcp 'bridge_ports=eth0 tap0' > /tmp/tmp_interfaces
                 #WHEN SETTING A BRIDGE TO DHCP, THE BRIDGE_PORTS CONFIGURATION IS LOST, SO ADD IT HERE
                 echo "  bridge_ports eth0 tap0" >> /tmp/tmp_interfaces
 
         #OTHERWISE, ADD BRIDGE WITH STATIC IP
         else
                 echo "Adding Bridge interface with Static IP"
-                awk -f $SCRIPT_DIR/changeInterface.awk /etc/network/interfaces dev=br0 action=add mode=static 'bridge_ports=eth0 tap0' address=$CURRENT_IP_ADDRESS netmask=$CURRENT_SUBNET gateway=$CURRENT_GATEWAY "dns=$CURRENT_DNS_SERVERS" > /tmp/tmp_interfaces
+                awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=br0 action=add mode=static 'bridge_ports=eth0 tap0' address=$CURRENT_IP_ADDRESS netmask=$CURRENT_SUBNET gateway=$CURRENT_GATEWAY "dns=$CURRENT_DNS_SERVERS" > /tmp/tmp_interfaces
         fi
 
         #SHOULD WE APPLY BUGFIX1?
@@ -111,7 +112,7 @@ elif [ "$CURRENT_MODE" == "bridge" ] && [ $BRIDGE == "off" ]; then
 
         #REMOVE THE BRIDGE INTERFACE
         echo "Removing Bridge Interface"
-        awk -f $SCRIPT_DIR/changeInterface.awk /etc/network/interfaces dev=br0 action=remove > /tmp/tmp_interfaces
+        awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=br0 action=remove > /tmp/tmp_interfaces
 
        # FOR SOME REASON WE CAN NOT WRITE TO THE /ETC/NETWORK/INTERFACES FILE DIRECTLY, SO WE DO IT THIS WAY, VIA A TMP FILE.
         cp /tmp/tmp_interfaces /etc/network/interfaces
@@ -121,12 +122,12 @@ elif [ "$CURRENT_MODE" == "bridge" ] && [ $BRIDGE == "off" ]; then
         if [ "$CURRENT_TYPE" == "dhcp" ]; then
 
                 echo "Changing eth0 Interface to DHCP"
-                awk -f $SCRIPT_DIR/changeInterface.awk /etc/network/interfaces dev=eth0 mode=dhcp > /tmp/tmp_interfaces
+                awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=eth0 mode=dhcp > /tmp/tmp_interfaces
 
         #OTHERWISE, SET ETH0 WITH A STATIC IP
         else
                 echo "Changing eth0 Interface to Static IP"
-                awk -f $SCRIPT_DIR/changeInterface.awk /etc/network/interfaces dev=eth0 mode=static address=$CURRENT_IP_ADDRESS netmask=$CURRENT_SUBNET gateway=$CURRENT_GATEWAY "dns=$CURRENT_DNS_SERVERS" > /tmp/tmp_interfaces
+                awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=eth0 mode=static address=$CURRENT_IP_ADDRESS netmask=$CURRENT_SUBNET gateway=$CURRENT_GATEWAY "dns=$CURRENT_DNS_SERVERS" > /tmp/tmp_interfaces
         fi
 
         #SHOULD WE APPLY BUGFIX1?

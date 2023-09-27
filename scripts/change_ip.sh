@@ -16,7 +16,8 @@ exit_abnormal() {
 }
 
 # INITIALIZE VARIABLES AND MAKE SURE THEY ARE EMTPY
-SCRIPT_DIR=$(dirname -- "$0")
+SCRIPT_PATH="$(realpath "$0")"
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")/"
 IP=""
 NETWORK=""
 GATEWAY=""
@@ -121,11 +122,11 @@ if [ "$TYPE" == "static" ]; then
 	if [ "$BRIDGE" == "ACTIVE" ]; then
 		#USING BRIDGE MODE, SO CHANGE IP ADDRESS OF BRIDGE
 		echo "Changing IP Address of br0 to new Static IP"
-		awk -f $SCRIPT_DIR/changeInterface.awk /etc/network/interfaces dev=br0 mode=static 'bridge_ports=eth0 tap0' address=$IP netmask=$NETWORK gateway=$GATEWAY "dns=$DNS" > /tmp/tmp_interfaces
+		awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=br0 mode=static 'bridge_ports=eth0 tap0' address=$IP netmask=$NETWORK gateway=$GATEWAY "dns=$DNS" > /tmp/tmp_interfaces
 	else
 		#USING NON-BRIDGE MODE, SO ONLY CHANGE IP ADDRESS OF ETH0
 		echo "Changing IP Address of eth0 to new Static IP"
-		awk -f $SCRIPT_DIR/changeInterface.awk /etc/network/interfaces dev=eth0 mode=static address=$IP netmask=$NETWORK gateway=$GATEWAY "dns=$DNS" > /tmp/tmp_interfaces
+		awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=eth0 mode=static address=$IP netmask=$NETWORK gateway=$GATEWAY "dns=$DNS" > /tmp/tmp_interfaces
 	fi
 
 fi
@@ -136,13 +137,13 @@ if [ "$TYPE" == "dhcp" ]; then
 	if [ "$BRIDGE" == "ACTIVE" ]; then
 		#USING BRIDGE MODE, SO CHANGE IP ADDRESS OF BRIDGE
 		echo "Changing IP Address of br0 to DHCP Mode"
-		awk -f $SCRIPT_DIR/changeInterface.awk /etc/network/interfaces dev=br0 mode=dhcp > /tmp/tmp_interfaces
+		awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=br0 mode=dhcp > /tmp/tmp_interfaces
 		#WHEN SETTING A BRIDGE TO DHCP, THE BRIDGE_PORTS CONFIGURATION IS LOST, SO ADD IT HERE
 		echo "  bridge_ports eth0 tap0" >> /tmp/tmp_interfaces
 	else
 		#USING NON-BRIDGE MODE, SO ONLY CHANGE IP ADDRESS OF ETH0
 		echo "Changing IP Address of eth0 to DHCP Mode"
-		awk -f $SCRIPT_DIR/changeInterface.awk /etc/network/interfaces dev=eth0 mode=dhcp > /tmp/tmp_interfaces
+		awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=eth0 mode=dhcp > /tmp/tmp_interfaces
 	fi
 fi
 

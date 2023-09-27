@@ -12,7 +12,7 @@ from flask import render_template as flask_render_template
 from pydantic import BaseModel
 
 from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm, TunnelMasterForm, TunnelNonMasterForm
-from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, save_tunnel_configuration, load_tunnel_configuration
+from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_tunnel_configuration
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -158,72 +158,36 @@ def tunnel():
     ).communicate()[0])["machine_id"]
 
     if not tunnel_master_form.is_submitted():
-       config_data = load_tunnel_configuration(tunnel_master_form)
-#        if config_data:
-#       print(config_data)
-            #LOOP THROUGH THE CONFIG_DATA AND ASSIGN IT TO THE TUNNEL_MASTER_FORM
-#            for field_name, field_value in config_data.items():
-#                if hasattr(tunnel_master_form, field_name):
-#                    setattr(tunnel_master_form, field_name, field_value)
-#        else:
-#            tunnel_master_form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(
-#            'scripts/show_public_ip.sh', stdout=subprocess.PIPE
-#            ).communicate()[0])["public_ipv4"]
-#            tunnel_master_form.mdns.data = True
+        print ("test1")
+        tunnel_master_form = load_tunnel_configuration(tunnel_master_form)
 
     if tunnel_master_form.validate_on_submit():
-        print(json.dumps(tunnel_master_form.data, indent=2))
+        print("test")
 
-        #GET MAIN INFO
-#        tunnel_data = {
-#            "device_id": device_id,
-#            "type": tunnel_master_form.data["deviceType"],
-#            "public_ip_or_ddns_hostname": tunnel_master_form.data["public_ip_or_ddns_hostname"],
-#            "port": tunnel_master_form.data["tunnel_port"],
-#            "protocol": tunnel_master_form.data["protocol"],
-#            "master_networks": [],
-#            "clients": []
-#        }
+        #GET CLIENT IDS FROM OUR FORM
+        client_ids = [client['client_id'] for client in tunnel_master_form.data['clients']]
 
-        # ADD MASTER NETWORKS TO THE DICTIONARY
-#        for i in range(len(tunnel_master_form.data.getlist("master_networks.server_network"))):
-#            network = {
-#                "server_network": tunnel_master_form.data.getlist("master_networks.server_network")[i],
-#                "server_subnet": tunnel_master_form.data.getlist("master_networks.server_subnet")[i]
-#            }
-#            tunnel_data["master_networks"].append(network)
+        #CALL THE GENERATE_KEYS FUNCTION
+        generate_keys( device_id, client_ids, bool(tunnel_master_form.data["newkeys"]) )
 
-        # ADD CLIENTS AND THEIR CLIENT NETWORKS TO THE DICTIONARY
-#        for i in range(len(tunnel_master_form.data.getlist("clients.client_id"))):
-#            client = {
-#                "client_id": tunnel_master_form.data.getlist("clients.client_id")[i],
-#                "client_networks": []
-#            }
-#            for j in range(len(tunnel_master_form.data.getlist(f"clients.clients-{i}.client_networks.client_network"))):
-#                client_network = {
-#                    "client_network": tunnel_master_form.data.getlist(f"clients.clients-{i}.client_networks.client_network")[j],
-#                    "client_subnet": tunnel_master_form.data.getlist(f"clients.clients-{i}.client_networks.client_subnet")[j]
-#                }
-#                client["client_networks"].append(client_network)
-#            tunnel_data["clients"].append(client)
-#        print(tunnel_data)
+        #SET BRIDGE TO ON OR OFF
+        bridge = "on" if tunnel_master_form.data['tunnel_type'] == "bridge" else "off"
+
+        # CREATE DAEMONS ARRAY
+        daemons = []
+        if tunnel_master_form.data['mdns']:
+            daemons.append('mdns')
+        if tunnel_master_form.data['pimd']:
+            daemons.append('pimd')
+
+        generate_server_config ( bridge, tunnel_master_form.data["public_ip_or_ddns_hostname"], tunnel_master_form.data["protocol"], tunnel_master_form.data["tunnel_port"], tunnel_master_form.data["master_networks"], tunnel_master_form.data["client_networks"], daemons )
+
+        generate_client_config(tunnel_master_form.data)
+
+        # ALWAYS SET NEWKEYS TO FALSE
+        tunnel_master_form.newkeys.data = None
+
         save_tunnel_configuration(tunnel_master_form.data)
-
-
-#        subprocess.Popen([
-#            "scripts/change_vpn.sh",
-#            "-t", "server",
-#            "-b", {
-#                "normal": "off",
-#                "bridge": "on",
-#            }[tunnel_master_form.data["tunnel_type"]],
-#            "-h", tunnel_master_form.data["public_ip_or_ddns_hostname"],
-#            "-p", tunnel_master_form.data["protocol"],
-#            "-n", str(tunnel_master_form.data["tunnel_port"]),
-#            "-s", "",  # TODO
-#            "-c", "",  # TODO
-#            "-d", "",  # TODO
-#        ])
 
         return {
             'form': form,
@@ -234,7 +198,7 @@ def tunnel():
             'download_msg_class': 'alert-success',
         }
 
-    print(form.errors)
+    #print(form.errors)
     return {
         'form': form,
         'device_id': device_id,

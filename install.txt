@@ -3,6 +3,35 @@ if [ "$EUID" -gt 0 ]
   exit
 fi
 
+# MULTI-PLATFORM REQUIREMENTS INSTALLER
+install_packages() {
+  if grep -q "DietPi" /etc/os-release; then
+    echo "Detected DietPi, using dietpi-software to install Packages..."
+    dietpi-software install 16 # openVPN
+    dietpi-software install 152 # Avahi-Daemon
+    apt-get install -y easy-rsa zip unzip
+  elseif command -v apt-get > /dev/null 2>&1; then
+    echo "Using apt-get to install Packages..."
+    sudo apt-get update
+    sudo apt-get install -y zip unzip wget openssl openvpn easy-rsa
+  elif command -v yum > /dev/null 2>&1; then
+    echo "Using yum to install Packages..."
+    sudo yum update -y
+    sudo yum install -y zip unzip wget openssl openvpn easy-rsa
+  elif command -v dnf > /dev/null 2>&1; then
+    echo "Using dnf to install Packages..."
+    sudo dnf update -y
+    sudo dnf install -y zip unzip wget openssl openvpn easy-rsa
+  else
+    echo "No known package manager found, exiting."
+    exit 1
+  fi
+}
+
+# Install required packages
+install_packages
+
+
 pip install -r https://github.com/roelbroersma/tunnel-gui/raw/main/requirements.txt
 
 wget https://github.com/roelbroersma/tunnel-gui/archive/main.zip -O "/tmp/tunnel-gui_main.zip"

@@ -345,6 +345,30 @@
 			<div class="col-12 {% if tunnel_master_form.pimd.errors %}was-validated{% endif %}">
 			</div>
 
+                        <div><br/></div>
+
+                        <div class="row">
+                                <div class="col-3 title">Advanced</div>
+                                        <ul class="col-9" id="advanced">
+                                                <li>
+                                                {{ tunnel_master_form.newkeys() }}
+                                                {{ tunnel_master_form.newkeys.label }}
+                                                <div class="help-tip" >
+                                                        <p><b>Generate new Keys</b> is used when your keys were accidentally exposed. You can generate new ones but you should then replace the config on all you client devices.<br />
+                                                        </p>
+                                                </div>
+                                                <br>
+                                                {% for err in tunnel_master_form.newkeys.errors %}
+                                                        <div class="invalid-feedback">
+                                                                {{ err }}
+                                                        </div>
+                                                {% endfor %}
+                                                </li>
+                                                </li>
+                                </ul>
+                        </div>
+
+
 			<div class="col-12 row">
 
 				<button class="w-100 btn btn-primary btn-lg" type="submit">Save</button>

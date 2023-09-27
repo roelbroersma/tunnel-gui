@@ -169,22 +169,72 @@ def get_passwords():
         web_password = f.read().strip()
     return [web_password, super_password]
 
+
+
+def generate_keys(server, clients, regenerate=False):
+    command = [str(BASE_DIR / "scripts/change_keys.sh")]
+
+    if server:
+        command.extend(["-s", server])
+
+    for client in clients:
+        command.extend(["-c", client])
+
+    if regenerate:
+        command.extend(["-r"])
+    command_str = " ".join(command)
+    subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+
+
+def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_networks, clients, daemons):
+    command = [str(BASE_DIR / "scripts/change_vpn.sh")]
+
+    command.extend(["-t", server])
+    command.extend(["-b", bridge])
+    command.extend (["-h"], public_ip_or_ddns)
+    command.extend (["-p"], protocol)
+    command.extend (["-n"], port)
+
+    for server_network in server_networks:
+        network_str = f"{server_network['server_network']}-{server_network['server_subnet']}"
+        command.extend(["-s", network_str])
+
+
+    for client in clients:
+        client_id = client['client_id']
+        for client_network in client['client_networks']:
+            client_str = f"{client_id}-{client_network['client_network']}-{client_network['client_subnet']}"
+        command.extend(["-s", network_str])
+
+    for daemon in daemons:
+        command.extend(["-d", daemon])
+
+    command_str = " ".join(command)
+    subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+
+
+def generate_client_config(data):
+    pass
+
+
+
+
 def save_tunnel_configuration(data):
     config_dir = 'configs'
-    server_conf_file = os.path.join(config_dir, 'server.conf')
+    server_conf_file = os.path.join(config_dir, 't1config.json')
 
     with open(server_conf_file, "w") as server_config_file:
         json.dump(data, server_config_file, indent=2)
 
 def load_tunnel_configuration(form):
     config_dir = 'configs'
-    server_conf_file = os.path.join(config_dir, 'server.conf')
+    server_conf_file = os.path.join(config_dir, 't1config.json')
 
     if os.path.exists(server_conf_file):
         try:
             with open(server_conf_file, 'r') as file:
                 config_data = json.load(file)
-                print(config_data)
+                #print(config_data)
 
                 # GET GENERAL TUNNEL CONFIG AND SET IT TO THE FORM
                 form.tunnel_type.data = config_data["tunnel_type"]
@@ -194,17 +244,23 @@ def load_tunnel_configuration(form):
                 form.mdns.data = config_data["mdns"]
                 form.pimd.data = config_data["pimd"]
 
+                # EMTY MASTER FORM (OTHERWISE IT HAS A NEW LINE)
+                form.master_networks.pop_entry()
                 # LOOP THROUGH THE SERVER NETWORKS ANS SET THEM AS DEFAULT TO THE FORM
                 for i, server_network in enumerate(config_data["master_networks"]):
                     form.master_networks.append_entry()
                     form.master_networks[i].server_network.data = server_network["server_network"]
                     form.master_networks[i].server_subnet.data = server_network["server_subnet"]
 
+                #EMPTY CLIENTS (OTHERWISE IT HAS A NEW LINE)
+                form.clients.pop_entry()
                 # LOOP THROUGH CLIENTS AND SET THEM AS DEFAULT TO THE FORM
                 for i, client in enumerate(config_data["clients"]):
                     form.clients.append_entry()
                     form.clients[i].client_id.data = client["client_id"]
 
+                    #CLEAR CLIENT NETWORKS FORM FOR EACH CLIENT (OTHERWISE IT HAS A NEW LINE)
+                    form.clients[i].client_networks.pop_entry()
                     # AND ALSO LOOP THROUGH THE CLIENT NETWORKS FOR EACH CLIENT
                     for j, client_network in enumerate(client["client_networks"]):
                         form.clients[i].client_networks.append_entry()
@@ -219,6 +275,7 @@ def load_tunnel_configuration(form):
         except json.JSONDecodeError as e:
             print(f"Fout bij het decoderen van JSON: {e}")
     else:
+        #THIS IS THE DEFAULT IF NO FILE CAN BE LOADED
         print("Configuratiebestand '{server_conf_file}' bestaat niet.")
         form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(
             'scripts/show_public_ip.sh', stdout=subprocess.PIPE

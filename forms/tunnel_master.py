@@ -91,3 +91,4 @@ class TunnelMasterForm(FlaskForm):
     )
     mdns = BooleanField("Enable MDNS (Avahi Daemon)")
     pimd = BooleanField("Enable PIMD (Multicast Routing)")
+    newkeys = BooleanField("Generate new keys")
