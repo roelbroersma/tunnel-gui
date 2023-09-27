@@ -1,6 +1,7 @@
 /ip_config.json
 /web_password.txt
 /configs/*
+!/config/
 #
 # https://github.com/github/gitignore/blob/main/Python.gitignore
 #
