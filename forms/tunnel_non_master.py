@@ -1,5 +1,10 @@
 from flask_wtf import FlaskForm
-from wtforms import FileField
+from wtforms import (
+        FileField,
+)
+
+from wtforms.validators import DataRequired
 
 class TunnelNonMasterForm(FlaskForm):
-    upload_zip = FileField()
+    file_upload = FileField('Upload Client Keys', validators=[DataRequired()])
+

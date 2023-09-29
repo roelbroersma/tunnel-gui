@@ -226,6 +226,21 @@ def save_tunnel_configuration(data):
     with open(server_conf_file, "w") as server_config_file:
         json.dump(data, server_config_file, indent=2)
 
+def load_device_type():
+    config_dir = 'configs'
+    server_conf_file = os.path.join(config_dir, 't1config.json')
+
+    if os.path.exists(server_conf_file):
+        try:
+            with open(server_conf_file, 'r') as file:
+                return "master"
+        except:
+            return "notMaster"
+    else:
+        return "notMaster"
+
+
+
 def load_tunnel_configuration(form):
     config_dir = 'configs'
     server_conf_file = os.path.join(config_dir, 't1config.json')
@@ -266,9 +281,6 @@ def load_tunnel_configuration(form):
                         form.clients[i].client_networks.append_entry()
                         form.clients[i].client_networks[j].client_network.data = client_network["client_network"]
                         form.clients[i].client_networks[j].client_subnet.data = client_network["client_subnet"]
-
-
-
 
         except FileNotFoundError:
             print(f"Config file '{server_conf_file}' not found.")

@@ -134,14 +134,14 @@
 			<div class="col-3 title"></div>
 			<ul class="col-8" id="deviceType">
 				<li>
-					<input id="deviceType-0" name="deviceType" type="radio" value="master" checked="">
+					<input id="deviceType-0" name="deviceType" type="radio" value="master" {% if device_type == "master" %}checked{% endif %}>
 					<label for="deviceType-0">This device is the master</label>
 					<div class="help-tip" >
 					    <p>The master device is listening and therefor need to be accessible on a public IP address or via a port forward on your router. If non-master devices are behind a firewall, you try to use TCP port 443 for the master since that's probably not blocked.</p>
 					</div>
 				</li>
 				<li>
-					<input id="deviceType-1" name="deviceType" type="radio" value="notMaster">
+					<input id="deviceType-1" name="deviceType" type="radio" value="notMaster" {% if device_type == "notMaster" %}checked{% endif %}>
 					<label for="deviceType-1">This device is <b>NOT</b> master</label>
 					<div class="help-tip">
 					    <p>This non-master initiates a connection to the master and therefor it's enough that this device has access to internet (via NAT is allowed). All configurations are made on the Master and then imported to the other (non-master) device(s).</p>
@@ -154,6 +154,7 @@
 
 {#		<form method="POST" action="{{ url_for('tunnel') }}" id="masterForm">#}
 		<form method="POST" id="masterForm">
+			<input type="hidden" name="deviceType" value="master">
 			<div class="row g-3">
 				<div class="col-12 mt-0 row {% if tunnel_master_form.tunnel_type.errors %}was-validated{% endif %}">
 					<div class="col-3 title">
@@ -385,21 +386,27 @@
 						Settings saved successfully!
 						{% endif %}
 					</p>
-					<button class="w-100 btn btn-success btn-lg" type="button" {{ download_btn_enabled }}>Download Keys</button>
+					<button class="w-100 btn btn-success btn-lg" type="button" {{ download_btn_enabled }}>Download Client Keys</button>
 				</div>
 
 			</div>
 
 		</form>
 
-		<form method="POST" action="{{ url_for('tunnel_upload') }}" id="notMasterForm">
+		<form method="POST" id="notMasterForm">
+			<input type="hidden" name="deviceType" value="notMaster">
 			<div class="row g-5" style="overflow-y: auto">
 				<div class="py-5 text-center">
-					{{ tunnel_non_master_form.upload_zip.label }}
-					{{ tunnel_non_master_form.upload_zip }}
+					{{ tunnel_non_master_form.file_upload.label }}
+					{{ tunnel_non_master_form.file_upload }}
+                                        <div class="help-tip" >
+		                                <p>Create a Tunnel configuration on a device when you've selecter MASTER mode. Then download the Client Keys from there and upload it here. You can only create and change a configuration at the device which is in MASTER mode.
+                                                 </p>
+                         		</div>
+
 				</div>
 			</div>
-			<button class="w-100 btn btn-primary btn-lg" type="submit">Upload</button>
+			<button class="w-100 btn btn-primary btn-lg" type="submit">Upload and Save</button>
 		</form>
 	</div>
 

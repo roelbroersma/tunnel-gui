@@ -12,8 +12,8 @@ from flask import render_template as flask_render_template
 from flask import send_file
 from pydantic import BaseModel
 
-from forms import IpAddressChangeForm, PasswordForm, TunnelForm, SignInForm, TunnelMasterForm, TunnelNonMasterForm
-from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_tunnel_configuration
+from forms import IpAddressChangeForm, PasswordForm, SignInForm, TunnelMasterForm, TunnelNonMasterForm
+from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -150,7 +150,7 @@ def change_password():
 @app.route("/tunnel", methods=["GET", "POST"])
 @do_response_from_context
 def tunnel():
-    form = TunnelForm()
+#    form = TunnelForm()
     tunnel_master_form = TunnelMasterForm(request.form, meta={"csrf": False})
     tunnel_non_master_form = TunnelNonMasterForm(request.form, meta={"csrf": False})
 
@@ -158,14 +158,19 @@ def tunnel():
         'scripts/show_machine_id.sh', stdout=subprocess.PIPE
     ).communicate()[0])["machine_id"]
 
-    if not tunnel_master_form.is_submitted():
+
+
+    if (not tunnel_master_form.is_submitted() and not tunnel_non_master_form.is_submitted()):
+        deviceType = load_device_type() 
+        print(deviceType)
         tunnel_master_form = load_tunnel_configuration(tunnel_master_form)
 
     if tunnel_master_form.validate_on_submit():
+
         #GET CLIENT IDS FROM OUR FORM
         client_ids = [client['client_id'] for client in tunnel_master_form.data['clients']]
 
-        #CALL THE GENERATE_KEYS FUNCTION
+        #CALL THE GENERATE_KEYS FUNCTION (IF GENERATE KEYS IS CHECKED OR IF NEW CLIENTS ARE SET OR IF NO-MASTER KEYS ARE SET)
         generate_keys( device_id, client_ids, bool(tunnel_master_form.data["newkeys"]) )
 
         #SET BRIDGE TO ON OR OFF
@@ -188,7 +193,8 @@ def tunnel():
         save_tunnel_configuration(tunnel_master_form.data)
 
         return {
-            'form': form,
+#            'form': form,
+            'device_type': 'master',
             'device_id': device_id,
             'tunnel_master_form': tunnel_master_form,
             'tunnel_non_master_form': tunnel_non_master_form,
@@ -196,9 +202,21 @@ def tunnel():
             'download_msg_class': 'alert-success',
         }
 
+
+    if tunnel_non_master_form.validate_on_submit():
+        return {
+            'device_type': 'notMaster',
+            'device_id': device_id,
+            'tunnel_master_form': tunnel_master_form,
+            'tunnel_non_master_form': tunnel_non_master_form,
+            'download_btn_enabled': 'disabled',
+            'download_msg_class': 'alert-danger' if tunnel_master_form.errors else 'alert-primary',
+     }
+
     #print(form.errors)
     return {
-        'form': form,
+#        'form': form,
+        'device_type': deviceType,
         'device_id': device_id,
         'tunnel_master_form': tunnel_master_form,
         'tunnel_non_master_form': tunnel_non_master_form,
