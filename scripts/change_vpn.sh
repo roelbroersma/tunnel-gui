@@ -20,12 +20,37 @@ EASY_RSA_DIR=${OPEN_VPN_DIR}"easy-rsa/"
 SCRIPT_PATH="$(realpath "$0")"
 SCRIPT_DIR="$(dirname "$SCRIPT_PATH")/"
 
+#INITIALIZE VARIABLES
+unset TYPE
+unset BRIDGE
+unset HOST
+unset PROTOCOL
+unset PORT_NUMBER
+unset SUBNETS
+unset CLIENTS
+unset DAEMONS
+
 # EXIT ERROR FUNCTION
 exit_abnormal() {
 	echo ""
         usage
 	exit 1
 }
+
+# FUNCTION WHICH CONVERTS A NETMASK TO A CIDR. EXAMPLE: 255.255.0.0 => /16
+mask_to_cidr() {
+    local mask=$1
+    local -i cidr=0
+    IFS='.' read -r i1 i2 i3 i4 <<< "$mask"
+    for octet in $i1 $i2 $i3 $i4; do
+        while [ $octet -gt 0 ]; do
+            cidr=$((cidr + (octet % 2)))
+            octet=$((octet / 2))
+        done
+    done
+    echo $cidr
+}
+
 
 # CHECK THE -b ARGUMENT, SEE IF WE NEED TO SET TO SET THE BRIDGE ON OR OFF
 while getopts ":t:" options; do
@@ -89,7 +114,7 @@ if [ "$TYPE" == "server" ]; then
                 ;;
                 n)
                         PORT_NUMBER=${OPTARG}
-                        if ! [[ $PORT_NUMBER>0 && $PORT_NUMBER<65536 ]]; then
+                        if ! [[ $PORT_NUMBER > 0 && $PORT_NUMBER < 65536 ]]; then
                                 echo "Invalid Port Number. No changes will be made."
                                 exit_abnormal
                                 exit 1
@@ -192,15 +217,26 @@ if [ "$TYPE" == "server" ]; then
         sed -i "s/^proto .*/proto ${PROTOCOL}/g" ${OPEN_VPN_DIR}server/server.conf
 
         #REMOVE THE PUSH ROUTES
-        sed -i '/^push "route *"$/d' ${OPEN_VPN_DIR}server/server.conf
+        sed -i '/^push "route .*"$/d' ${OPEN_VPN_DIR}server/server.conf
 
         #ADD THE PUSH ROUTES (IF NOT EMPTY)
 	if [ ! -z "$SUBNETS" ]; then
 	  for SUBNET in "${SUBNETS[@]}"; do
 	    IFS='-' read -ra SERVER_NETWORK <<< "${SUBNET}"
 	    SERVER_NET="${SERVER_NETWORK[0]}"
-	    SERVET_MASK="${SERVER_NETWORK[1]}"
+	    SERVER_MASK="${SERVER_NETWORK[1]}"
 	    echo "push \"route ${SERVER_NET} ${SERVER_MASK}\"" >> ${OPEN_VPN_DIR}server/server.conf
+	  done
+	fi
+
+	#ALSO ADD ALL THE CLIENT NETWORKS AS PUSH ROUTES (SO EACH CLIENT KNOWS HOW TO REACH ANOTHER CLIENT)
+        if [ ! -z "$CLIENTS" ]; then
+	  for CLIENT in "${CLIENTS[@]}"; do
+            IFS='-' read -ra CLIENT_NETWORK <<< "${CLIENT}"
+            CLIENT_ID="${CLIENT_NETWORK[0]}"
+            CLIENT_NET="${CLIENT_NETWORK[1]}"
+            CLIENT_MASK="${CLIENT_NETWORK[2]}"
+	    echo "push \"route ${CLIENT_NET} ${CLIENT_MASK}" >> ${OPEN_VPN_DIR}server/server.conf
 	  done
 	fi
 
@@ -215,9 +251,14 @@ if [ "$TYPE" == "server" ]; then
 	    IFS='-' read -ra CLIENT_NETWORK <<< "${SUBNET}"
             CLIENT_ID="${CLIENT_NETWORK[0]}"
             CLIENT_NET="${CLIENT_NETWORK[1]}"
-            CLIENT_MASK="${CLIENT_NETWORK[1]}"
-            touch ${OPEN_VPN_DIR}server/ccd/${CLIENT_ID}
-          done
+            CLIENT_MASK="${CLIENT_NETWORK[2]}"
+	    #CHECK IF FILE EXISTS, IF NOT CREATE IT
+            if [ ! -f ${OPEN_VPN_DIR}server/ccd/${CLIENT_ID} ]; then
+              touch ${OPEN_VPN_DIR}server/ccd/${CLIENT_ID}
+            fi
+	    #ADD THE NETWORKS TO THE RIGHT CLIENT'S FILE
+	    echo "iroute ${CLIENT_NET} ${CLIENT_MASK}" >> ${OPEN_VPN_DIR}server/ccd/${CLIENT_ID}
+	  done
         fi
 
 
@@ -255,6 +296,14 @@ ${CERT_CONTENT}
 <key>
 ${KEY_CONTENT}
 </key>
+########################
+#----T1 CONFIG BEGIN----
+#BRIDGE: ${BRIDGE}
+#DAEMONS: ${DAEMONS}
+#SERVER_NETWORKS: ${SUBNETS}
+#CLIENT: ${CLIENTS}
+#-----T1 CONFIG END-----
+########################
 "
 	    #WRITE THE CONFIG
 	    echo "${CONFIG}" > ${SCRIPT_DIR}../configs/${CLIENT_ID}.conf
@@ -268,31 +317,112 @@ ${KEY_CONTENT}
 
 
 elif [ "$TYPE" == "client" ]; then
-        #PROCES THE ZIPFILE  (UNZIP IT, PARSE SOME THINGS IN THE CLIENT CONFIG AND COPY IT)
+
+	if [ "$BRIDGE" ] || [ "$HOST" ] || [ "$PROTOCOL" ] || [ "$PORT_NUMBER" ] || [ "$SUBNETS" ] || [ "$CLIENTS" ] || [ "$DAEMONS" ]; then
+	  echo "ERROR: When setting -t to client, all other options like -b, -h, -p, -n, -s and -c are not allowed! The config is created at the server and save to a config file. Clients will only parse that config file."
+	  echo ""
+	  exit_abnormal
+        fi
+
+	#PROCES THE ZIPFILE  (UNZIP IT, PARSE SOME THINGS IN THE CLIENT CONFIG AND COPY IT)
+
+	#GET MACHINE ID
+	MACHINE_ID=$("${SCRIPT_DIR}show_machine_id.sh" | grep -oP '(?<=machine_id" : ")[^"]+')
+
+	#GO TO THE CONFIG FOLDER
+	cd ${SCRIPT_DIR}../configs/
 
 	#CHECK IF CLIENT_CONFIG.ZIP EXISTS
-	if [ -f "${SCRIPT_DIR}../configs/client_config.zip" ]; then
-	  #GET MACHINE ID
-	  MACHINE_ID=$("${SCRIPT_DIR}show_machine_id.sh" | grep -oP '(?<=machine_id" : ")[^"]+')
-
-	  cd ${SCRIPT_DIR}../configs/
-
+	if [ -f "client_config.zip" ]; then
 	  #UNZIP CLIENT_CONFIGS.ZIP
-	  unzip "${SCRIPT_DIR}../configs/client_config.zip"
-
-	  #CHECK IF A CONFIG EXISTS FOR THIS CLIENT
-  	  if [ -f "${MACHINE_ID}.conf" ]; then
-            # COPY THE FILE TO TO THE OPENVPN CLIENT CONFIG
-            cp "${MACHINE_ID}.conf" "${OPEN_VPN_DIR}client/client.conf"
-	  else
-	    echo "ERROR: A client config does not exists for this client, did you specify this machine ID: ${MACHINE_ID} correctly?"
-	    exit_abnormal
-	  fi
-
-	else
-	  echo "ERROR: No client_config.zip file found!"
-	  exit_abnormal
+	  unzip "client_config.zip"
 	fi
+
+	#CHECK IF A CONFIG FILE FOR THIS MACHINE_ID EXISTS
+	if [ ! -f "${MACHINE_ID}.conf" ]; then
+	  echo "ERROR: No config file for this client found with <machine_id>.conf (we also checked the client_config.zip file)!"
+	  exit_abnormal
+	else	
+	  # COPY THE FILE TO TO THE OPENVPN CLIENT CONFIG
+          cp "${MACHINE_ID}.conf" "${OPEN_VPN_DIR}client/client.conf"
+	  CONFIG_FILE="${MACHINE_ID}.conf"
+	fi
+
+	#GET THE BRIDGE VARIABLE
+	BRIDGE=$(sed -n '/#BRIDGE:/s/.*: \(.*\)/\1/p' "$CONFIG_FILE")
+
+	#GET THE DAEMONS VARIABLE
+	DAEMONS_LINE=$(sed -n '/#DAEMONS:/s/.*: \(.*\)/\1/p' "$CONFIG_FILE")
+	#PUT IT INTO AN ARRAY
+	IFS=' ' read -r -a DAEMONS <<< "$DAEMONS_LINE"
+
+	#CHANGE TO BRIDGE OR NORMAL MODE
+	if [ "$BRIDGE" == "on" ] || [ "$BRIDGE" == "off" ]; then
+	  ${SCRIPT_DIR}change_bridge.sh -b $BRIDGE
+	fi
+
+	#FIRST, DEACTIVATE ALL DAEMONS
+	systemctl stop avahi-daemon && systemctl disable avahi-daemon
+	systemctl stop pimd && systemctl disable pimd
+
+	#ACTIVATE DAEMONS
+	for DAEMON in "${DAEMONS[@]}"; do
+
+	  if [ $DAEMON == "mdns" ]; then
+	    #SET THE MDNS CONFIG
+	    sed -i 's#^enable-reflector=.*#enable-reflector=yes#g' /etc/avahi/avahi-daemon.conf
+	    systemctl start avahi-daemon && systemctl enable avahi-daemon
+
+	  elif [ $DAEMON == "pimd" ]; then
+	    #SET THE PIMD CONFIG
+
+	    #GET THE CLIENTS VARIABLE
+	    CLIENTS_LINE=$(sed -n '/#CLIENT:/s/.*: \(.*\)/\1/p' "$CONFIG_FILE")
+	    #PUT IT INTO AN ARRAY
+	    IFS=' ' read -r -a CLIENTS <<< "$CLIENTS_LINE"
+
+	    #GET THE SERVER NETWORKS VARIABLE
+	    SERVER_NETWORKS_LINE=$(sed -n '/#SERVER_NETWORKS:/s/.*: \(.*\)/\1/p' "$CONFIG_FILE")
+	    #PUT IT INTO AN ARRAY
+	    IFS=' ' read -r -a SUBNETS <<< "$SERVER_NETWORKS_LINE"
+
+	    #REMOVE THE phyint LINES
+	    sed -i '/^phyint .*"$/d' /etc/pimd.conf
+
+	    ETH0_ALTNET=""
+	    #ADD ALL ALTNETS OF THE SERVER
+	    if [ ! -z "$SUBNETS" ]; then
+	      for SUBNET in "${SUBNETS[@]}"; do
+		IFS='-' read -ra SERVER_NETWORK <<< "${SUBNET}"
+		SERVER_NET="${SERVER_NETWORK[0]}"
+		SERVER_MASK="${SERVER_NETWORK[1]}"
+		SERVER_CIDR=$(mask_to_cidr $SERVER_MASK)
+		ETH0_ALTNET="${ETH0_ALTNET}altnet ${SERVER_NET}/${SERVER_CIDR} "
+	      done
+	    fi
+
+	    #ALSO ALLOW ALL ALTNETS OF ALL CLIENTS (INCLUDING THIS CLIENT, WE CAN OMMIT OURSELVE BUT THATS TOO HARD FOR NOW)
+	    if [ ! -z "$CLIENTS" ]; then
+              for CLIENT in "${CLIENTS[@]}"; do
+                IFS='-' read -ra CLIENT_NETWORK <<< "${CLIENT}"
+                CLIENT_NET="${CLIENT_NETWORK[1]}"
+                CLIENT_MASK="${CLIENT_NETWORK[2]}"
+                CLIENT_CIDR=$(mask_to_cidr $CLIENT_MASK)
+                ETH0_ALTNET="${ETH0_ALTNET}altnet ${CLIENT_NET}/${CLIENT_CIDR} "
+              done
+            fi
+
+	    echo "phyint eth0 enable ${ETH0_ENABLE}" >> /etc/pimd.conf
+	    echo "phyint tap0 enable ${ETH0_ENABLE}" >> /etc/pimd.conf
+	    systemctl start pimd && systemctl enable pimd
+
+	  else
+	    echo "Invalid Daemons specified: $DAEMON. Currently only supporting mdns and pimd as options."
+	  fi
+	done
+
+	#DELETE ALL FILES FROM CONFIG DIRECTORY
+	rm -f ${SCRIPT_DIR}../configs/*
 
 fi
 

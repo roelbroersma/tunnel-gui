@@ -213,10 +213,9 @@ def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_net
     subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
 
 
-def generate_client_config(data):
-    pass
-
-
+def generate_client_config()
+    command = [str(BASE_DIR / "scripts/change_vpn.sh")]
+    command.extend(["-t", "client"])
 
 
 def save_tunnel_configuration(data):
@@ -299,3 +298,16 @@ def load_tunnel_configuration(form):
     # IF AN ERRORS OCCURS OR THE CONFIG FILE DOES NOT EXIST, RETURN AN EMPTY DICTIONARY
     return {}
 
+
+def handle_uploaded_file(file)
+    config_dir = 'configs'
+    client_conf_file = os.path.join(config_dir, 'client_config.zip')
+
+    if file:
+        filename=file.filename
+        file.save(file.save(client_conf_file))
+        print("File succesfully saved!")
+        return True
+    else:
+        print("No file part")
+        return False

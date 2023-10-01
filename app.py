@@ -13,7 +13,7 @@ from flask import send_file
 from pydantic import BaseModel
 
 from forms import IpAddressChangeForm, PasswordForm, SignInForm, TunnelMasterForm, TunnelNonMasterForm
-from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration
+from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration, handle_uploaded_file
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -162,8 +162,8 @@ def tunnel():
 
     if (not tunnel_master_form.is_submitted() and not tunnel_non_master_form.is_submitted()):
         deviceType = load_device_type() 
-        print(deviceType)
         tunnel_master_form = load_tunnel_configuration(tunnel_master_form)
+
 
     if tunnel_master_form.validate_on_submit():
 
@@ -182,14 +182,14 @@ def tunnel():
             daemons.append('mdns')
         if tunnel_master_form.data['pimd']:
             daemons.append('pimd')
-        print(tunnel_master_form.data)
-        generate_server_config ( bridge, tunnel_master_form.data["public_ip_or_ddns_hostname"], tunnel_master_form.data["protocol"], tunnel_master_form.data["tunnel_port"], tunnel_master_form.data["master_networks"], tunnel_master_form.data["clients"], daemons )
 
-        generate_client_config(tunnel_master_form.data)
+        #GENERATE THE CONFIG FOR THE SERVER, THIS WILL ALSO CREATE A CLIENT_CONFIG.ZIP FILE TO DOWNLOAD FOR THE CLIENTS
+        generate_server_config ( bridge, tunnel_master_form.data["public_ip_or_ddns_hostname"], tunnel_master_form.data["protocol"], tunnel_master_form.data["tunnel_port"], tunnel_master_form.data["master_networks"], tunnel_master_form.data["clients"], daemons )
 
         # ALWAYS SET NEWKEYS TO FALSE
         tunnel_master_form.newkeys.data = None
 
+        #SAVE A JSON FILE
         save_tunnel_configuration(tunnel_master_form.data)
 
         return {
@@ -204,6 +204,11 @@ def tunnel():
 
 
     if tunnel_non_master_form.validate_on_submit():
+        #SAVE UPLOADED FILE
+        if (handle_uploaded_file(request.files['file_upload'])):
+            #GENERATE THE CLIENT CONFIG, BASED ON THE UPLOADED FILE
+            generate_client_config()
+
         return {
             'device_type': 'notMaster',
             'device_id': device_id,
