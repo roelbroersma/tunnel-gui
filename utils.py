@@ -186,7 +186,7 @@ def generate_keys(server, clients, regenerate=False):
     subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
 
 
-def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_networks, clients, daemons):
+def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_networks, clients, features):
     command = [str(BASE_DIR / "scripts/change_vpn.sh")]
 
     command.extend(["-t", "server"])
@@ -206,14 +206,14 @@ def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_net
             client_str = f"{client_id}-{client_network['client_network']}-{client_network['client_subnet']}"
         command.extend(["-c", str(client_str)])
 
-    for daemon in daemons:
-        command.extend(["-d", str(daemon)])
+    for feature in features:
+        command.extend(["-f", str(features)])
 
     command_str = " ".join(command)
     subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
 
 
-def generate_client_config()
+def generate_client_config():
     command = [str(BASE_DIR / "scripts/change_vpn.sh")]
     command.extend(["-t", "client"])
 
@@ -299,7 +299,7 @@ def load_tunnel_configuration(form):
     return {}
 
 
-def handle_uploaded_file(file)
+def handle_uploaded_file(file):
     config_dir = 'configs'
     client_conf_file = os.path.join(config_dir, 'client_config.zip')
 
@@ -311,3 +311,5 @@ def handle_uploaded_file(file)
     else:
         print("No file part")
         return False
+
+

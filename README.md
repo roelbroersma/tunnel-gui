@@ -45,7 +45,7 @@ The following files need to be modified when checking out the project but they a
     * SECRET_KEY - secret value for web-project
     * DEBUG - True or False.
     * SUPER_PASSWORD - password value for web admin's purposes (web-project allows login with this password or with RaspberryPI password)
-    * LOG_PATH - path to file which tail will be showed on IP Address page
+    * OPENVPN_LOG_PATH - set this to the log path as defined in openvpn config, default is: /var/log/openvpn/openvpn-status.log
     * PORT - The port the application is running on, like 80 or 8080
 
 All script files which interface with the backend (openvpn, pimd, mdns, bridge-tools, ip address changes, etc.) are located in the /scripts/ folder. These files are developped and tested for the DietPi image, however they may work on other Debian-based Linux installations and other Linux installations as well because we try to keep the backend very flexible.

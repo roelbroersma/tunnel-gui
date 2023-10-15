@@ -153,15 +153,16 @@ def tunnel():
 #    form = TunnelForm()
     tunnel_master_form = TunnelMasterForm(request.form, meta={"csrf": False})
     tunnel_non_master_form = TunnelNonMasterForm(request.form, meta={"csrf": False})
+    deviceType = request.form.get('deviceType', default=None)
+    if deviceType is None:
+        deviceType = load_device_type()
 
     device_id = json.loads(subprocess.Popen(
         'scripts/show_machine_id.sh', stdout=subprocess.PIPE
     ).communicate()[0])["machine_id"]
 
 
-
     if (not tunnel_master_form.is_submitted() and not tunnel_non_master_form.is_submitted()):
-        deviceType = load_device_type() 
         tunnel_master_form = load_tunnel_configuration(tunnel_master_form)
 
 
@@ -177,14 +178,16 @@ def tunnel():
         bridge = "on" if tunnel_master_form.data['tunnel_type'] == "bridge" else "off"
 
         # CREATE DAEMONS ARRAY
-        daemons = []
+        features = []
         if tunnel_master_form.data['mdns']:
-            daemons.append('mdns')
+            features.append('mdns')
         if tunnel_master_form.data['pimd']:
-            daemons.append('pimd')
+            features.append('pimd')
+        if tunnel_master_form.data['stp']:
+            features.append('stp')
 
         #GENERATE THE CONFIG FOR THE SERVER, THIS WILL ALSO CREATE A CLIENT_CONFIG.ZIP FILE TO DOWNLOAD FOR THE CLIENTS
-        generate_server_config ( bridge, tunnel_master_form.data["public_ip_or_ddns_hostname"], tunnel_master_form.data["protocol"], tunnel_master_form.data["tunnel_port"], tunnel_master_form.data["master_networks"], tunnel_master_form.data["clients"], daemons )
+        generate_server_config ( bridge, tunnel_master_form.data["public_ip_or_ddns_hostname"], tunnel_master_form.data["protocol"], tunnel_master_form.data["tunnel_port"], tunnel_master_form.data["master_networks"], tunnel_master_form.data["clients"], features )
 
         # ALWAYS SET NEWKEYS TO FALSE
         tunnel_master_form.newkeys.data = None
@@ -262,7 +265,7 @@ def diagnostics():
 
 @app.route("/log-file", methods=["GET", ])
 def get_log_file():
-    with open(os.getenv('LOG_PATH', '/'), 'r+') as f:
+    with open(os.getenv('OPENVPN_LOG_PATH', '/'), 'r+') as f:
         return f.readlines()
 
 

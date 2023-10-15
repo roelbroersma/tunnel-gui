@@ -48,13 +48,18 @@ exit_abnormal() {
 disable_features() {
 	systemctl stop avahi-daemon && systemctl disable avahi-daemon
 	systemctl stop pimd && systemctl disable pimd
-	brctl stp br0 off
-	ebtables -A FORWARD -d 01:00:0c:cc:cc:00/ff:ff:ff:ff:ff:00 -j DROP #ALL PVSTP VLANS
-	ebtables -A FORWARD -d 01:80:C2:00:00:00/ff:ff:ff:ff:ff:f0 -j DROP #ALL STP, RSTP and MST
+
+	if [ $BRIDGE == "on" ]; then
+		echo "Disabling the Spanning Tree over the Bridge..."
+		brctl stp br0 off
+		ebtables -A FORWARD -d 01:00:0c:cc:cc:00/ff:ff:ff:ff:ff:00 -j DROP #ALL PVSTP VLANS
+		ebtables -A FORWARD -d 01:80:C2:00:00:00/ff:ff:ff:ff:ff:f0 -j DROP #ALL STP, RSTP and MST
+	fi
 }
 
 # FUNCTION TO ENABLE FEATURES
 #VARIABLES NEEDED: FEATURES,CLIENTS,SUBNETS
+#WHEN FEATURE STP IS SET, IT ALSO NEEDS BRIDGE VARIABLE
 enable_features() {
 	#ACTIVATE FEATURES
 	for FEATURE in "${FEATURES[@]}"; do
@@ -97,11 +102,11 @@ enable_features() {
 			echo "phyint tap0 enable ${ETH0_ENABLE}" >> /etc/pimd.conf
 			systemctl start pimd && systemctl enable pimd
 
-		elif [ $FEATURE == "stp" ]; then
+		elif [ $FEATURE == "stp" -a $BRIDGE == "on" ]; then
 			brctl stp br0 on
 			ebtables -F FORWARD #DELETE THE FORWARDING CHAIN
 
-			else
+		else
 			echo "Invalid Features specified: $FEATURE. Currently only supporting mdns, pimd and stp as options."
 			exit_abnormal
 		fi
@@ -122,13 +127,13 @@ start_stop_openvpn (){
 	fi
 
 	#START OPENVPN SERVER (SERVER MODE)
-	if [ "${start_or_stop}" == "start" -a "${client_or_server}" == "server" ]; then
+	if [ "${start_or_stop}" == "start" -a "${TYPE}" == "server" ]; then
 		systemctl start openvpn-server@server.service
 		systemctl enable openvpn-server@server.service
 	fi
 
 	#START OPENVPN SERVER (CLIENT MODE)
-	if [ "${start_or_stop}" == "start" -a "${client_or_server}" == "client" ]; then
+	if [ "${start_or_stop}" == "start" -a "${TYPE}" == "client" ]; then
 		systemctl start openvpn-client@client.service
 		systemctl enable openvpn-client@client.service
 	fi

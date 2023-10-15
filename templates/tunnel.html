@@ -314,16 +314,38 @@
 						</div>
 					{% endfor %}
 					</li>
+
 					<li>
 					{{ tunnel_master_form.pimd() }}
 					{{ tunnel_master_form.pimd.label }}
 					<div class="help-tip" >
 						<p><b>PIMD (Multicast Routing)</b> is a service which will route multicast packets between the networks this device is connected to. It's probably the reason why you use the T1!<br />
+						<br />
 						By enabling Multicast routing, packets to/from IP: 224.0.0.0-239.255.255.255 which are usually very difficult to route to other networks will now travel to all connected networks.
 						</p>
 					</div>
 					<br />
 					{% for err in tunnel_master_form.pimd.errors %}
+						<div class="invalid-feedback">
+							{{ err }}
+						</div>
+					{% endfor %}
+					</li>
+
+					<li>
+					{{ tunnel_master_form.stp() }}
+					{{ tunnel_master_form.stp.label }}
+					<div class="help-tip" >
+						<p><b>STP (Spanning Tree Protocol)</b> is protocol for loop detection in a network.
+						<br />
+						By default the Tunnel BLOCKS BPDUs for STP/RSTP/PVSTP/MST in Bridge mode, when enabling this it will not block those BPDUs.<br />
+						<br />
+						<b>BE CAREFULL WHEN ENABLING THIS OPTION!</b><br />
+						The switch connected to the Master or Client device might block the port to the T1 because it will see a BPDU comming from it while it doesn't allow a BPDU on that switch port. This will result in a so called: Error-Disabled state of that switch port.
+						</p>
+					</div>
+					<br />
+					{% for err in tunnel_master_form.stp.errors %}
 						<div class="invalid-feedback">
 							{{ err }}
 						</div>
