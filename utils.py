@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import json
 import subprocess
+import requests
 
 BASE_DIR = Path(__file__).parent
 DEFAULT_EXECUTABLE = '/bin/bash'
@@ -187,35 +188,47 @@ def generate_keys(server, clients, regenerate=False):
 
 
 def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_networks, clients, features):
-    command = [str(BASE_DIR / "scripts/change_vpn.sh")]
+    try:
+        command = [str(BASE_DIR / "scripts/change_vpn.sh")]
 
-    command.extend(["-t", "server"])
-    command.extend(["-b", str(bridge)])
-    command.extend (["-h", str(public_ip_or_ddns)])
-    command.extend (["-p", str(protocol)])
-    command.extend (["-n", str(port)])
+        command.extend(["-t", "server"])
+        command.extend(["-b", str(bridge)])
+        command.extend (["-h", str(public_ip_or_ddns)])
+        command.extend (["-p", str(protocol)])
+        command.extend (["-n", str(port)])
 
-    for server_network in server_networks:
-        network_str = f"{server_network['server_network']}-{server_network['server_subnet']}"
-        command.extend(["-s", str(network_str)])
+        for server_network in server_networks:
+            network_str = f"{server_network['server_network']}-{server_network['server_subnet']}"
+            command.extend(["-s", str(network_str)])
 
 
-    for client in clients:
-        client_id = client['client_id']
-        for client_network in client['client_networks']:
-            client_str = f"{client_id}-{client_network['client_network']}-{client_network['client_subnet']}"
-        command.extend(["-c", str(client_str)])
+        for client in clients:
+            client_id = client['client_id']
+            for client_network in client['client_networks']:
+                client_str = f"{client_id}-{client_network['client_network']}-{client_network['client_subnet']}"
+                command.extend(["-c", str(client_str)])
 
-    for feature in features:
-        command.extend(["-f", str(features)])
+        for feature in features:
+            command.extend(["-f", str(feature)])
 
-    command_str = " ".join(command)
-    subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+        command_str = " ".join(command)
+
+        subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+        return True
+
+    except:
+        return False
 
 
 def generate_client_config():
-    command = [str(BASE_DIR / "scripts/change_vpn.sh")]
-    command.extend(["-t", "client"])
+    try:
+        command = [str(BASE_DIR / "scripts/change_vpn.sh")]
+        command.extend(["-t", "client"])
+        command_str = " ".join(command)
+        subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+        return True
+    except:
+        return False
 
 
 def save_tunnel_configuration(data):
@@ -257,6 +270,7 @@ def load_tunnel_configuration(form):
                 form.protocol.data = config_data["protocol"]
                 form.mdns.data = config_data["mdns"]
                 form.pimd.data = config_data["pimd"]
+                form.stp.data = config_data["stp"]
 
                 # EMTY MASTER FORM (OTHERWISE IT HAS A NEW LINE)
                 form.master_networks.pop_entry()
@@ -305,11 +319,47 @@ def handle_uploaded_file(file):
 
     if file:
         filename=file.filename
-        file.save(file.save(client_conf_file))
+        file.save(client_conf_file)
         print("File succesfully saved!")
         return True
     else:
         print("No file part")
         return False
+
+
+def get_version(repo_url):
+    #GET CURRENT APP VERSION
+    try:
+        with open('VERSION', 'r') as file:
+            local_app_version = file.read().strip()
+    except:
+        local_app_version = None
+
+    #GET LATEST APP VERSION (ONLINE)
+    try:
+        response = requests.get(f"{repo_url}/blob/main/VERSION", timeout=10)
+        if response.status_code == 200:
+            latest_app_version = response.text.strip()
+        else:
+            latest_app_version = None
+    except:
+        latest_app_version = None
+
+    try:
+        result = subprocess.Popen(['scripts/get_core_version.sh'], stdout=subprocess.PIPE).communicate()[0]
+        data = json.loads(result)
+        core_local = data.get("core_local", None)
+        core_latest = data.get("core_version", None)
+    except:
+        core_local = None
+        core_latest = None
+
+    #RETURN ARRAY WITH SOFTWARE VERSIONS
+    return {
+        'app_local': local_app_version,
+        'app_latest': latest_app_version,
+        'core_local': core_local,
+        'core_latest': core_latest,
+    }
 
 

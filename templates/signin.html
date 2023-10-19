@@ -91,6 +91,7 @@
 
 <main class="form-signin w-100 m-auto">
 	<form method="POST" action="{{ url_for('signin') }}">
+	{{ form.csrf_token }}
 
 		<img class="mb-4" src="https://img.icons8.com/bubbles/512/enter-2.png" alt="" style="width: 100%">
 		<h1 class="h3 mb-3 fw-normal">Please sign in</h1>

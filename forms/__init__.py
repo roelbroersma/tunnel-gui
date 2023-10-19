@@ -1,7 +1,9 @@
 import re
 
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, FieldList, PasswordField, RadioField, StringField
+
+from wtforms import BooleanField, FieldList, PasswordField, RadioField, StringField, SubmitField
+
 from wtforms.validators import (
     DataRequired,
     InputRequired,
@@ -108,22 +110,12 @@ class PasswordForm(FlaskForm):
             raise ValidationError("Passwords didn't match")
 
 
-#class TunnelForm(FlaskForm):
-#    tunnel_type = RadioField(
-#        "Tunnel Type",
-#        choices=[("normal", "Normal"), ("bridge", "Bridge")],
-#        default="normal",
-#    )
-#    server_port_type = RadioField(
-#        "", choices=[("tcp", "TCP"), ("udp", "UDP")], default="tcp"
-#    )
-#    client_port_type = RadioField(
-#        "", choices=[("tcp", "TCP"), ("udp", "UDP")], default="tcp"
-#    )
-#    server_subnet_1 = StringField("", validators=[InputRequired()])
-#    server_subnet_2 = StringField("", validators=[InputRequired()])
-#    client_subnet_1 = StringField("", validators=[InputRequired()])
-#    client_subnet_2 = StringField("", validators=[InputRequired()])
-#    mdns = BooleanField("Enable MDNS (Avahi Daemon)")
-#    pimd = BooleanField("Enable PIMD (Multicast Routing)")
+class UpdateForm(FlaskForm):
+    check_online = SubmitField("Check for Software Updates")
+    update_app = SubmitField("Update T1 Sofware")
+    update_app_force = BooleanField("Force/Overwrite update?")
+    update_core = SubmitField("Update Core Operating System")
+
+class RebootForm(FlaskForm):
+    reboot = SubmitField("Reboot system")
 

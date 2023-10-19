@@ -16,9 +16,14 @@
 	</style>
 
 	<script>
+	var csrf_token = "{{ csrf_token }}";
+
         async function fetchAsync(url) {
 	    try {
-		let response = await fetch(url);
+	 	let response = await fetch(url, {
+						  method: 'GET',
+						  'X-CSRFToken': csrf_token
+						});
 		if(!response.ok) {
 		    throw new Error('Network problem while retrieving logfile: ' + response.statusText)
 		}

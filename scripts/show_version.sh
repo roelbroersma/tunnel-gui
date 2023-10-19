@@ -1,5 +1,4 @@
 #!/usr/bin/bash
-
 #THIS SCRIPT SHOWS THE CURRENT VERSIONS IN JSON
 
 # USAGE FUNCTION
@@ -43,81 +42,168 @@ fi
 
 #INITIALISE AND EMPTY VARIABLES
 json_output=""
-AUTO_UPDATE=""
-CURRENT_T1_VERSION=""
-DIETPI_CORE_VERSION=""
-DIETPI_SUB_VERSION=""
-DIETPI_RC_VERSION=""
-
-FUTURE_T1_VERSION=""
-FUTURE_DIETPI_VERSION=""
-FUTURE_DIETPI_CORE_VERSION=""
-FUTURE_DIETPI_SUB_VERSION=""
-FUTURE_DIETPI_RC_VERSION=""
-
-SCRIPT_DIR=$(dirname -- "$0")
+CORE_OS=""
+CORE_VERSION_FULL=""
+CORE_VERSION=""
+CORE_SUB_VERSION=""
+CORE_RC_VERSION=""
+CORE_AUTO_UPDATE=""
+APP_VERSION=""
+OPENVPN_VERSION=""
 
 #START JSON OUTPUT
 json_output="{";
 
 
+# GET CURRENT APP VERSION
+get_app_version() {
+	if [[ -f $SCRIPT_DIR/../.version ]]; then
+		source $SCRIPT_DIR/../.version
+		echo $APP_VERSION
+	else
+		echo ""
+	fi
+}
+
+# GET LATEST APP VERSION
+get_app_latest_version() {
+    #GET FUTURE APP VERSION (THE VERSION TO WHICH WE CAN UPGRADE)
+    FUTURE_APP_VERSION="$(curl --silent --fail --location --max-time 8 --connect-timeout 8 https://raw.githubusercontent.com/roelbroersma/tunnel-gui/main/.version)"
+    echo "$FUTURE_APP_VERSION" | /usr/bin/awk -F "=" '/APP_VERSION/ {print $2;exit}'
+}
+
+
+
+# GET OPENVPN VERSION
+get_openvpn_version() {
+    local openvpn_path=$(which openvpn)
+    if [[ -z "$openvpn_path" ]]; then
+        echo ""
+    else
+        local openvpn_version=$($openvpn_path --version | head -n 1 | awk '{print $2}')
+        echo "$openvpn_version"
+    fi
+}
+
+
+# GET CURRENT DIETPI VERSION
+get_diepi_version() {
+	local version_file="/boot/dietpi/.version"
+	if [[ -f $version_file ]]; then
+		local dietpi_version=$(grep 'G_DIETPI_VERSION_CORE' $version_file | cut -d '=' -f2)
+		echo "$dietpi_version"
+    	else
+		echo ""
+    	fi
+}
+
+
+# GET LATEST AVAILABLE DIETPI VERSION (WHEN DOING DIETPI-UDATE)
+get_dietpi_latest_version() {
+	local dietpi_latest=$(/boot/dietpi/dietpi-update 2>&1 | awk -F': ' '/Latest version/ {print $2}' | tr -d 'v')
+	if [[ $? -eq 0 ]]; then # CHECK EXIT STATUS
+		echo "$dietpi_latest"
+	else
+		echo ""
+	fi
+}
+
+
+# GET KERNEL VERSION FOR NON-DIETPI SYSTEMS
+get_kernel_version() {
+	if command -v lsb_release >/dev/null 2>&1; then
+        	os_type=$(lsb_release -is)
+		os_version_full=$(lsb_release -rs)
+	elif [[ -f /etc/os-release ]]; then
+		os_type=$(grep ^ID= /etc/os-release | cut -d'=' -f2 | tr -d '"')
+		os_version_full=$(grep ^VERSION_ID= /etc/os-release | cut -d'=' -f2 | tr -d '"')
+	elif [[ -f /etc/*release ]]; then
+		os_info=$(head -n1 /etc/*release)
+		os_type=$(echo $os_info | awk '{print $1}')
+		os_version_full=$(echo $os_info | awk '{print $3}')
+	else
+		os_type=$(uname -o)
+		os_version_full=$(uname -r)
+	fi
+}
+
+# GET LATEST AVAILABLE KERNEL VERSION NUMBER FOR NON-DIETPI SYSTEMS
+get_kernel_latest_version() {
+	if command -v apt >/dev/null 2>&1; then
+		apt update > /dev/null 2>&1
+		local latest_kernel=$(apt list --upgradable 2>/dev/null | grep -E 'linux-image|linux-headers' | head -n 1 | awk -F/ '{print $2}')
+		echo "$latest_kernel"
+	else
+		echo ""
+	fi
+}
+
+
+
+
 if [ "$LOCATION" == "local" ] || [ "$LOCATION" == "all" ]; then
 
-    #GET INFO ABOUT THE AUTO UPDATE FEATURE
-    AUTO_UPDATE=$(/usr/bin/awk -F "=" '/CONFIG_CHECK_APT_UPDATES/ {print $2;exit}' /boot/dietpi.txt)
-    if [ "$AUTO_UPDATE" == "2" ]; then
-            AUTO_UPDATE="auto"
-    else
-            AUTO_UPDATE="manual"
-    fi
+	#IF DIETPI:
+	if [[ -f /boot/dietpi/.version ]]; then
+		source /boot/dietpi/.version
+		CORE_OS="DietPi"
+		CORE_VERSION_FULL="$G_DIETPI_VERSION_CORE.$G_DIETPI_VERSION_SUB.$G_DIETPI_VERSION_RC"
+		CORE_VERSION=$G_DIETPI_VERSION_CORE
+		CORE_SUB_VERSION=$G_DIETPI_VERSION_SUB
+		CORE_RC_VERSION=$G_DIETPI_VERSION_RC
 
-    #GET CURRENT DIETPI VERSION
-    DIETPI_CORE_VERSION=$(/usr/bin/awk -F "=" '/G_DIETPI_VERSION_CORE/ {print $2}' /boot/dietpi/.version)
-    DIETPI_SUB_VERSION=$(/usr/bin/awk -F "=" '/G_DIETPI_VERSION_SUB/ {print $2}' /boot/dietpi/.version)
-    DIETPI_RC_VERSION=$(/usr/bin/awk -F "=" '/G_DIETPI_VERSION_RC/ {print $2}' /boot/dietpi/.version)
+		#GET INFO ABOUT THE AUTO UPDATE FEATURE
+		if [[ -f /boot/dietpi.txt ]]; then
+			CORE_AUTO_UPDATE=$(/usr/bin/awk -F "=" '/CONFIG_CHECK_APT_UPDATES/ {print $2;exit}' /boot/dietpi.txt)
+			if [ "$CORE_AUTO_UPDATE" == "2" ]; then
+				CORE_AUTO_UPDATE="auto"
+			else
+				CORE_AUTO_UPDATE="manual"
+			fi
+		fi
+	else
+	#FOR ALL OTHER SYSTEMS
+		get_kernel_version
+		CORE_OS="$(os_type)"
+		CORE_VERSION_FULL="$(os_version_full)"
+	fi
 
-    #GET CURRENT T1 VERSION
-    CURRENT_T1_VERSION="$(cat $SCRIPT_DIR/../.version)"
+	#GET CURRENT APP VERSION
+	APP_VERSION=$(get_app_version)
 
-    json_output="$json_output \"auto_update\" : \"$AUTO_UPDATE\"";
-    json_output="$json_output, \"current_dietpi_version\" : \"$DIETPI_CORE_VERSION.$DIETPI_SUB_VERSION.$DIETPI_RC_VERSION\"";
-    json_output="$json_output, \"current_t1_version\" : \"$CURRENT_T1_VERSION\"";
+	#GET CURRENT OPENVPN VERSION
+	OPENVPN_VERSION=$(get_openvpn_version)
+
+	json_output="$json_output \"core_auto_update\" : \"$CORE_AUTO_UPDATE\"";
+	json_output="$json_output, \"core_os\" : \"$CORE_OS\"";
+	json_output="$json_output, \"core_version_full\" : \"$CORE_VERSION_FULL\"";
+	json_output="$json_output, \"core_version\" : \"$CORE_VERSION\"";
+	json_output="$json_output, \"core_sub_version\" : \"$CORE_SUB_VERSION\"";
+	json_output="$json_output, \"core_rc_version\" : \"$CORE_RC_VERSION\"";
+	json_output="$json_output, \"app_version\" : \"$APP_VERSION\"";
+	json_output="$json_output, \"openvpn_version\" : \"$OPENVPN_VERSION\"";
+
 fi
 
 
 if [ "$LOCATION" == "remote" ] || [ "$LOCATION" == "all" ]; then
 
-    #GET FUTURE DIETPI VERSION (THE VERSION TO WHICH WE CAN UPGRADE)
-    # Git repo to update from
-    GITOWNER_TARGET=$(sed -n '/^[[:blank:]]*DEV_GITOWNER=/{s/^[^=]*=//p;q}' /boot/dietpi.txt)
-    GITOWNER_TARGET=${GITOWNER_TARGET:-MichaIng}
-    GITBRANCH_TARGET=$(sed -n '/^[[:blank:]]*DEV_GITBRANCH=/{s/^[^=]*=//p;q}' /boot/dietpi.txt)
-    GITBRANCH_TARGET=${GITBRANCH_TARGET:-master}
-    FUTURE_DIETPI_VERSION="$(curl --silent --fail --location --max-time 8 --connect-timeout 8 https://raw.githubusercontent.com/$GITOWNER_TARGET/DietPi/$GITBRANCH_TARGET/.update/version)"
-    FUTURE_DIETPI_CORE_VERSION=$(echo "$FUTURE_DIETPI_VERSION" | /usr/bin/awk -F "=" '/G_REMOTE_VERSION_CORE/ {print $2;exit}')
-    FUTURE_DIETPI_SUB_VERSION=$(echo "$FUTURE_DIETPI_VERSION"  | /usr/bin/awk -F "=" '/G_REMOTE_VERSION_SUB/ {print $2;exit}')
-    FUTURE_DIETPI_RC_VERSION=$(echo "$FUTURE_DIETPI_VERSION"   | /usr/bin/awk -F "=" '/G_REMOTE_VERSION_RC/ {print $2;exit}')
+	#IF DIETPI:
+	if [[ -f /boot/dietpi/.version ]]; then
+		FUTURE_CORE_VERSION="$(get_dietpi_latest_version)"
+	else
+		FUTURE_CORE_VERSION="$(get_kernel_latest_version)"
+	fi
 
-    #IF WE DID NOT GET ANY VERSION NUMBER SHOW "Not available.." IN THE OUTPUT.
-    if [ -z "$FUTURE_DIETPI_CORE_VERSION" ]; then
-            FUTURE_DIETPI_CORE_VERSION="Not available"
-    fi
+	#GET LATEST APP VERSION
+	FUTURE_APP_VERSION=$(get_app_latest_version)
 
-    #GET FUTURE T1 VERSION (THE VERSION TO WHICH WE CAN UPGRADE)
-    FUTURE_T1_VERSION="$(curl --silent --fail --location --max-time 8 --connect-timeout 8 https://raw.githubusercontent.com/roelbroersma/tunnel-gui/main/.version)"
-    FUTURE_T1_VERSION=$(echo "$FUTURE_T1_VERSION" | /usr/bin/awk -F "=" '/T1_VERSION/ {print $2;exit}')
+	if [ "$LOCATION" == "all" ]; then
+		json_output="$json_output,"
+	fi
 
-    #IF WE DID NOT GET ANY VERSION NUMBER SHOW "Not available.." IN THE OUTPUT.
-    if [ -z "$FUTURE_T1_VERSION" ]; then
-        FUTURE_T1_VERSION="Not available"
-    fi
-
-    if [ "$LOCATION" == "all" ]; then
-        json_output="$json_output,"
-    fi
-
-    json_output="$json_output \"future_dietpi_version\" : \"$FUTURE_DIETPI_CORE_VERSION.$FUTURE_DIETPI_SUB_VERSION.$FUTURE_DIETPI_RC_VERSION\"";
-    json_output="$json_output, \"future_t1_version\" : \"$FUTURE_T1_VERSION\"";
+	json_output="$json_output \"future_core_version\" : \"$FUTURE_CORE_VERSION\"";
+	json_output="$json_output, \"future_app_version\" : \"$FUTURE_APP_VERSION\"";
 fi
 
 #END JSON OUTPUT

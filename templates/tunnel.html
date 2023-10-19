@@ -19,6 +19,12 @@
 
 		ul.alert { padding: 4px; margin-top:8px;}
 
+	.disabled-link {
+		pointer-events: none;
+		cursor: default;
+		color: grey;
+	}
+
 		.help-tip{
 		    position: relative;
 			display: inline-block;
@@ -153,6 +159,7 @@
 
 	<form method="POST" id="masterForm">
 		<input type="hidden" name="deviceType" value="master">
+		{{ tunnel_master_form.csrf_token }}
 
 		<div class="row">
 			<div class="col-12 row mt-0 {% if tunnel_master_form.tunnel_type.errors %}was-validated{% endif %}">
@@ -393,15 +400,17 @@
 						Settings saved successfully!
 						{% endif %}
 					</p>
-					<button class="w-100 btn btn-success btn-lg" type="button" {{ download_btn_enabled }}>Download Client Keys</button>
+					<a href="/tunnel/download-client-config" id="download-link" class="w-100 btn btn-success btn-lg {{ 'disabled-link' if tunnel_master_form.errors else '' }}">Download Client Keys</a>
 				</div>
 			</div>
 		</div>
 
 	</form>
 
-	<form method="POST" id="notMasterForm">
+	<form method="POST" id="notMasterForm" enctype="multipart/form-data">
 		<input type="hidden" name="deviceType" value="notMaster">
+		{{ tunnel_non_master_form.csrf_token }}
+
 		<div class="row g-5" style="overflow-y: auto">
 			<div class="py-5 text-center">
 				{{ tunnel_non_master_form.file_upload.label }}
@@ -411,7 +420,25 @@
 				</div>
 			</div>
 		</div>
-		<button class="w-100 btn btn-primary btn-lg" type="submit">Upload and Save</button>
+		<div class="alert {{ download_msg_class }}">
+			<p class="text-center">
+				{% if not tunnel_non_master_form.is_submitted() %}
+        	                        Please upload the client keys and click Upload and Save.
+				{% elif tunnel_non_master_form.file_upload.errors %}
+					{% for err in tunnel_non_master_form.file_upload.errors %}
+						{{ err }}
+					{% endfor %}
+				{% elif tunnel_non_master_form.submit.errors %}
+					{% for err in tunnel_non_master_form.submit.errors %}
+                        			{{ err }}
+					{% endfor %}
+				{% else %}
+					Client Keys uploaded and tunnel Started!
+				{% endif %}
+			</p>
+			<button class="w-100 btn btn-primary btn-lg" type="submit">Upload and Save</button>
+                </div>
+
 	</form>
 
 	<script>

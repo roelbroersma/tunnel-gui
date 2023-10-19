@@ -12,15 +12,21 @@ from flask import render_template as flask_render_template
 from flask import send_file
 from pydantic import BaseModel
 
-from forms import IpAddressChangeForm, PasswordForm, SignInForm, TunnelMasterForm, TunnelNonMasterForm
+from forms import IpAddressChangeForm, PasswordForm, SignInForm, UpdateForm, RebootForm, TunnelMasterForm, TunnelNonMasterForm
 from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration, handle_uploaded_file
 
 
+from flask_wtf.csrf import CSRFProtect
+
 BASE_DIR = Path(__file__).resolve().parent
+DEFAULT_EXECUTABLE = '/bin/bash'
 load_dotenv(BASE_DIR / ".env")
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+
+csrf = CSRFProtect(app)
 
 # db = shelve.open
 
@@ -47,6 +53,16 @@ def render_template(route_name: str, **kwargs):
             linked_route_method_name='tunnel',
             title='Tunnel',
             svg_icon_id='route'
+        ),
+        MenuItemInfo(
+            linked_route_method_name='update',
+            title='Update',
+            svg_icon_id='update'
+        ),
+        MenuItemInfo(
+            linked_route_method_name='reboot',
+            title='Reboot',
+            svg_icon_id='reboot'
         ),
         MenuItemInfo(
             linked_route_method_name='diagnostics',
@@ -84,7 +100,7 @@ def do_response_from_context(make_context_func):
 
 @app.route("/signin", methods=["GET", "POST"])
 def signin():
-    form = SignInForm(request.form, meta={"csrf": False})
+    form = SignInForm(request.form, meta={"csrf": True})
 
     if request.method == "POST":
         is_ok = form.validate_on_submit()
@@ -108,7 +124,7 @@ def signout():
 @do_response_from_context
 def index():
     """This renders IP Address template"""
-    form = IpAddressChangeForm(request.form, meta={"csrf": False})
+    form = IpAddressChangeForm(request.form, meta={"csrf": True})
 
     if request.method == "POST":
         is_ok = form.validate_on_submit()
@@ -135,7 +151,7 @@ def index():
 @app.route("/change-password", methods=["GET", "POST"])
 @do_response_from_context
 def change_password():
-    form = PasswordForm(request.form, meta={"csrf": False})
+    form = PasswordForm(request.form, meta={"csrf": True})
 
     if request.method == "POST":
         is_ok = form.validate_on_submit()
@@ -151,8 +167,9 @@ def change_password():
 @do_response_from_context
 def tunnel():
 #    form = TunnelForm()
-    tunnel_master_form = TunnelMasterForm(request.form, meta={"csrf": False})
-    tunnel_non_master_form = TunnelNonMasterForm(request.form, meta={"csrf": False})
+    tunnel_master_form = TunnelMasterForm(request.form, meta={"csrf": True})
+    tunnel_non_master_form = TunnelNonMasterForm(meta={"csrf": True}) #REMOVE THE request.form here, so it will automtically see we have also request.files
+
     deviceType = request.form.get('deviceType', default=None)
     if deviceType is None:
         deviceType = load_device_type()
@@ -206,24 +223,35 @@ def tunnel():
         }
 
 
+    print(tunnel_non_master_form.file_upload)
     if tunnel_non_master_form.validate_on_submit():
         #SAVE UPLOADED FILE
-        if (handle_uploaded_file(request.files['file_upload'])):
+        success1 = handle_uploaded_file(request.files['file_upload'])
+
+        message_class = 'alert-danger'
+
+        if success1:
             #GENERATE THE CLIENT CONFIG, BASED ON THE UPLOADED FILE
-            generate_client_config()
+            success2 = generate_client_config()
+            if success2:
+                message_class = 'alert-success'
+            else:
+               print(success2)
+               tunnel_non_master_form.submit.errors.append("File for this Client/Device ID not found or problems with starting!")
+        else:
+            tunnel_non_master_form.submit.errors.append("File could not be uploaded!")
 
         return {
-            'device_type': 'notMaster',
-            'device_id': device_id,
-            'tunnel_master_form': tunnel_master_form,
-            'tunnel_non_master_form': tunnel_non_master_form,
-            'download_btn_enabled': 'disabled',
-            'download_msg_class': 'alert-danger' if tunnel_master_form.errors else 'alert-primary',
-     }
+                'device_type': 'notMaster',
+                'device_id': device_id,
+                'tunnel_master_form': tunnel_master_form,
+                'tunnel_non_master_form': tunnel_non_master_form,
+                'download_btn_enabled': 'disabled',
+                'download_msg_class': message_class,
+            }
 
-    #print(form.errors)
+    #ALWAYS RETURN THE FORMS WHEN NOT SUBMITTED OR NOT VALIDATED
     return {
-#        'form': form,
         'device_type': deviceType,
         'device_id': device_id,
         'tunnel_master_form': tunnel_master_form,
@@ -242,6 +270,58 @@ def tunnel_download_client_config():
 @do_response_from_context
 def tunnel_upload():
     return {}
+
+@app.route("/update", methods=["GET", "POST"])
+@do_response_from_context
+def update():
+
+    form = UpdateForm(request.form, meta={"csrf": True})
+
+    message=''
+    if form.is_submitted():
+        print("ja")
+
+    if 'check_online' in request.form:
+        print("erin")
+    try:
+        if form.is_submitted() and 'check_online' in request.form:
+            version = json.loads(subprocess.Popen([str(BASE_DIR / 'scripts/show_version.sh'), '-l', 'all' ], stdout=subprocess.PIPE).communicate()[0])
+            print("1")
+        elif form.is_submitted() and 'update_app' in request.form:
+            do_update('app')
+            message='Sfotware is updated, please reboot'
+            version = json.loads(subprocess.Popen([str(BASE_DIR / 'scripts/show_version.sh'), '-l', 'local' ], stdout=subprocess.PIPE).communicate()[0])
+            print("2")
+        elif form.is_submitted() and 'update_core' in request.form:
+            do_update('core')
+            message='Sfotware is updated, please reboot'
+            version = json.loads(subprocess.Popen([str(BASE_DIR / 'scripts/show_version.sh'), '-l', 'local' ], stdout=subprocess.PIPE).communicate()[0])
+            print("3")
+        else:
+            version = json.loads(subprocess.Popen([str(BASE_DIR / 'scripts/show_version.sh'), '-l', 'local' ], stdout=subprocess.PIPE).communicate()[0])
+            print ("4")
+
+    except:
+        print("5")
+        version = {}
+
+    print(version)
+    return {
+        'version': version,
+        'message': message,
+        'form': form,
+    }
+
+
+
+@app.route("/reboot", methods=["GET", "POST"])
+@do_response_from_context
+def reboot():
+    form = RebootForm(request.form, meta={"csrf": True})
+    return {
+        'message': message,
+        'form': form,
+    }
 
 
 @app.route("/diagnostics", methods=["GET", "POST"])

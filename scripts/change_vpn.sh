@@ -186,7 +186,7 @@ if [ "$TYPE" == "server" ]; then
 	re_subnet="^(128|192|224|240|248|252|254|255)\.(0|128|192|224|240|248|252|254|255)\.(0|128|192|224|240|248|252|254|255)\.(0|128|192|224|240|248|252|254|255)$"
 
 	# GET -h, -p, -n, -s and -c  ARGUMENTS
-	while getopts ":t:b:h:p:n:s:c:d:" options; do
+	while getopts ":t:b:h:p:n:s:c:f:" options; do
 		case "${options}" in
 		b)
 			BRIDGE=${OPTARG}
@@ -256,7 +256,7 @@ if [ "$TYPE" == "server" ]; then
 
 			CLIENTS+=("${OPTARG}")
 		;;
-		d)
+		f)
 			FEATURES+=("${OPTARG}")
 			for FEATURE in "${FEATURES[@]}"; do
 				if ! [ $FEATURE == "mdns" -o $FEATURE == "pimd" -o $FEATURE == "stp" -o $FEATURE == ":" ]; then
@@ -433,7 +433,7 @@ ${KEY_CONTENT}
 elif [ "$TYPE" == "client" ]; then
 
 	if [ "$BRIDGE" ] || [ "$HOST" ] || [ "$PROTOCOL" ] || [ "$PORT_NUMBER" ] || [ "$SUBNETS" ] || [ "$CLIENTS" ] || [ "$FEATURES" ]; then
-		echo "ERROR: When setting -t to client, all other options like -b, -h, -p, -n, -s and -c are not allowed! The config is created at the server and save to a config file. Clients will only parse that config file."
+		echo "ERROR: When setting -t to client, all other options like -b, -h, -p, -n, -s, -c and -f  are not allowed! The config is created at the server and save to a config file. Clients will only parse that config file."
 		exit_abnormal
 	fi
 
@@ -462,6 +462,9 @@ elif [ "$TYPE" == "client" ]; then
 		echo "ERROR: No config file for this client found with <machine_id>.conf (we also checked the client_config.zip file)!"
 		exit_abnormal
 	else	
+		#ALWAYS CREATE THE CLIENT DIRECTORY
+                mkdir -p ${OPEN_VPN_DIR}client
+
 		# COPY THE FILE TO TO THE OPENVPN CLIENT CONFIG
 		cp "${MACHINE_ID}.conf" "${OPEN_VPN_DIR}client/client.conf"
 		CONFIG_FILE="${MACHINE_ID}.conf"
