@@ -12,6 +12,10 @@
 	</style>
 	<h3 class="mb-5">Update</h3>
 	<h4>Currently Installed</h4>
+
+	<form method="POST" id="UpdateForm">
+        {{ form.csrf_token }}
+
 	<div class="version-info">
 		<div class="row">
 			<p class="col-4">{{ version.core_os }} version</p>
@@ -41,43 +45,41 @@
 	</div>
 	{% endif %}
 
-
 	{% if not message %}
 
-	<form method="POST" id="UpdateForm">
-	{{ form.csrf_token }}
-
-	{% if not version.future_app_version %}
-	<div class="row">
-		<div class="col-4">{{ form.check_online }}</div>
-	</div>
-	{% else %}
-	<h4>Latest online available</h4>
-	<div class="version-info">
-		{% if version.future_core_version %}
-		<div class="row">
-			<p class="col-4">{{ version.core_os }} version</p>
-			<p class="info col-4">{{ version.future_core_version }}</p>
-		</div>
-		<div class="col-4">{{ form.update_core }}</div>
-		<br /><br />
+		{% if not version.future_app_version %}
+			<div class="row">
+				<div class="col-4">{{ form.check_online }}</div>
+			</div>
+		{% else %}
+			<h4>Latest online available</h4>
+			<div class="version-info">
+			{% if version.future_core_version %}
+				<div class="row">
+					<p class="col-4">{{ version.core_os }} version</p>
+					<p class="info col-4">{{ version.future_core_version }}</p>
+				</div>
+				<div class="col-4">{{ form.update_core }}</div>
+				<br /><br />
+			{% endif %}
+			<div class="row">
+				<p class="col-4">T1 version</p>
+				<p class="info col-4">{{ version.future_app_version }}</p>
+			</div>
+			<div class="row">
+				<div class="col-4">{{ form.update_app }}</div>
+			</div>
 		{% endif %}
-		<div class="row">
-			<p class="col-4">T1 version</p>
-			<p class="info col-4">{{ version.future_app_version }}</p>
-		</div>
-
-		<div class="col-4">{{ form.update_app }}</div>
-	</div>
 	{% endif %}
 
 	</form>
-	{% endif %}
 
+	{% if message %}
 		<div class="row">
-			<p class="col-4">Tunnel info: </p>
 			{% with height='50vh' %}
-				{% include 'logs_block.html' %}
+				{% include 'update_block.html' %}
 			{% endwith %}
 		</div>
+	{% endif %}
+
 {% endblock %}

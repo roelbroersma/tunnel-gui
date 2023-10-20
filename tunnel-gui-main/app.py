@@ -22,6 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_EXECUTABLE = '/bin/bash'
 load_dotenv(BASE_DIR / ".env")
 
+UPDATE_LOG = BASE_DIR / "logs/update.log"
+
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
@@ -279,7 +281,7 @@ def update():
 
     message=''
     try:
-        if form.is_submitted()
+        if form.is_submitted():
             if 'check_online' in request.form:
                 version = get_version("all")
             elif 'update_auto_enable' in request.form:
@@ -290,11 +292,11 @@ def update():
                 version = get_version("local")
             elif 'update_app' in request.form:
                 upgrade_app()
-                message='Software is updated, please reboot'
+                message="Software will be updated in background, do not close this screen!"
                 version = get_version("local")
             elif 'update_core' in request.form:
                 do_upgrade('now')
-                message='Software will now be updated in the background, please do not leave this page.'
+                message="Software will be updated in the background, do not close this screen!"
                 version = get_version("local")
             else:
                 version = get_version("local")
@@ -340,11 +342,25 @@ def diagnostics():
     }
 
 
-@app.route("/log-file", methods=["GET", ])
-def get_log_file():
-    with open(os.getenv('OPENVPN_LOG_PATH', '/'), 'r+') as f:
-        return f.readlines()
+@app.route("/openvpn-status", methods=["GET", ])
+def get_openvpn_status():
+    try:
+        with open(os.getenv('OPENVPN_LOG_PATH', '/'), 'r+') as f:
+            return f.readlines()
+    except:
+        pass
 
+    return ""
+
+@app.route("/update-log", methods=["GET", ])
+def get_update_log():
+    try:
+        with open(UPDATE_LOG, 'r+') as f:
+            return f.readlines()
+    except:
+        pass
+
+    return ""
 
 if __name__ == "__main__":
     is_debug = os.getenv('DEBUG', 'False').lower() == 'true'

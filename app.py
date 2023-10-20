@@ -13,7 +13,7 @@ from flask import send_file
 from pydantic import BaseModel
 
 from forms import IpAddressChangeForm, PasswordForm, SignInForm, UpdateForm, RebootForm, TunnelMasterForm, TunnelNonMasterForm
-from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration, handle_uploaded_file, do_upgrade, get_version, upgrade_app 
+from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration, handle_uploaded_file, core_upgrade, get_version, app_upgrade
 
 
 from flask_wtf.csrf import CSRFProtect
@@ -285,17 +285,17 @@ def update():
             if 'check_online' in request.form:
                 version = get_version("all")
             elif 'update_auto_enable' in request.form:
-                do_upgrade("auto")
+                core_upgrade("auto")
                 version = get_version("local")
             elif 'update_auto_disable' in request.form:
-                do_upgrade("manual")
+                core_upgrade("manual")
                 version = get_version("local")
             elif 'update_app' in request.form:
-                upgrade_app()
+                app_upgrade("now")
                 message="Software will be updated in background, do not close this screen!"
                 version = get_version("local")
             elif 'update_core' in request.form:
-                do_upgrade('now')
+                core_upgrade('now')
                 message="Software will be updated in the background, do not close this screen!"
                 version = get_version("local")
             else:

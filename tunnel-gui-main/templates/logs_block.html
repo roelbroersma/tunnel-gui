@@ -117,7 +117,7 @@ console.log(clientListTable);
         function loadLogData() {
             let logElement = document.getElementById("log");
 
-            fetchAsync('/log-file')
+            fetchAsync('/openvpn-status')
                 .then(
                     function (result) {
                         let newContent = result.join('');

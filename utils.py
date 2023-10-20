@@ -295,23 +295,19 @@ def handle_uploaded_file(file):
 
 
 
-def do_upgrade(action):
+def core_upgrade(action):
     if action in ["now", "auto", "manual"]:
-        command = [str(SCRIPT_DIR / "do_upgrade.sh")]
+        command = [str(SCRIPT_DIR / "core_upgrade.sh")]
         command.extend(["-u", action])
         command_str = " ".join(command)
         subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
 
-def upgrade_app():
-    #DOWNLOAD ZIPFILE
-    response = requests.get(UPDATE_FILE)
-    response.raise_for_status()
-
-    with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-        #print("Dry run: Listing files...")
-        #z.printdir()
-        z.extractall(path=BASE_DIR)
-
+def app_upgrade(action):
+    if action in ["now"]:
+        command = [str(SCRIPT_DIR / "app_upgrade.sh")]
+        command.extend(["-u", action])
+        command_str = " ".join(command)
+        subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
 
 def do_reboot():
     subprocess.run([str(SCRIPT_DIR / "do_reboot.sh")], shell=True, executable=DEFAULT_EXECUTABLE)
