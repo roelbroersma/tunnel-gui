@@ -63,7 +63,7 @@ if [ "$UPDATE" == "now" ]; then
     rm -rf ${SCRIPT_DIR}../temp
 
     echo "Downloading latest vesion..." > ${LOG_DIR}update.log
-    curl -L -o ${SCRIPT_DIR}../temp/${FILENAME} ${URL} >> ${LOG_DIR}update.log
+    curl -L -o ${SCRIPT_DIR}../temp/${FILENAME} ${UPDATE_URL} >> ${LOG_DIR}update.log
 
     echo "Unzipping files to temporary folder..." >> ${LOG_DIR}update.log
     unzip ${SCRIPT_DIR}../temp/${FILENAME} -d ${SCRIPT_DIR}../temp >> ${LOG_DIR}update.log
