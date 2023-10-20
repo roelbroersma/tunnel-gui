@@ -44,7 +44,7 @@ fi
 # INITIALIZE VARIABLES AND MAKE SURE THEY ARE EMTPY
 SCRIPT_PATH="$(realpath "$0")"
 SCRIPT_DIR="$(dirname "$SCRIPT_PATH")/"
-
+LOG_DIR="${SCRIPT_DIR}../logs/"
 
 #SET UPDATE TO MANUAL
 if [ "$UPDATE" == "manual" ]; then
@@ -68,20 +68,20 @@ elif [ "$UPDATE" == "auto" ]; then
 
 #UPDATE NOW
 elif [ "$UPDATE" == "now" ]; then
-
+    mkdir -p ${LOG_DIR}
     if [ -f /boot/dietpi/.version ]; then
 	echo "Update DietPi Now (non-interactive)"
-	/boot/dietpi/dietpi-update 1 > $(SCRIPT_DIR)logs/update.log
+	/boot/dietpi/dietpi-update 1 > ${LOG_DIR}update.log
     elif command -v apt-get > /dev/null; then
 	echo "Update OS with APT (non-interactive)"
-	apt-get update -y && apt-get upgrade -y > $(SCRIPT_DIR)logs/update.log
+	apt-get update -y && apt-get upgrade -y > ${LOG_DIR}update.log
     elif command -v yum > /dev/null; then
 	echo "Update OS with YUM (non-interactive)"
-        yum -y update > $(SCRIPT_DIR)logs/update.log
+        yum -y update > ${LOG_DIR}update.log
     elif command -v dnf > /dev/null; then
 	echo "Update OS with DNF (non-interactive)"
-	dnf -y update > $(SCRIPT_DIR)logs/update.log
+	dnf -y update > ${LOG_DIR}update.log
     fi
-    #DELETE LOGFILE AT THE END OF THE UPGRADE
-    rm -f $(SCRIPT_DIR)logs/update.log
+    #CLEAR LOG AND WRITE TO FILE
+    echo "<h4><b>UPDATE FINISHED, PLEASE REBOOT DEVICE!</b></h4>" > ${LOG_DIR}update.log
 fi

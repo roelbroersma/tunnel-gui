@@ -8,7 +8,8 @@ import io
 import zipfile
 
 BASE_DIR = Path(__file__).parent
-SCRIPT_DIR = BASE_DIR / "scripts/"
+SCRIPT_DIR = BASE_DIR / 'scripts/'
+CONFIG_DIR = BASE_DIR / "configs\/" 
 DEFAULT_EXECUTABLE = '/bin/bash'
 IP_CONFIG_FILE = 'ip_config.json'
 UPDATE_FILE = "https://github.com/roelbroersma/tunnel-gui/archive/refs/heads/main.zip"
@@ -68,38 +69,30 @@ class IpAddressChangeInfo:
 
 
 def change_ip(ip_address_info):
-    # network_interface = open("netconfig", "w")
-    # content = ["IP Address \n", "Subnet Mask \n", "Gateway"]
-    # network_interface.writeLines(content)
-    # network_interface.close()
-    with open(BASE_DIR / IP_CONFIG_FILE, 'w+') as f:
-        f.write(ip_address_info.to_json())
-
-    subprocess.run(
-        str(SCRIPT_DIR "change_ip.sh") +\
-        " -t {} -a {} -n {} -g {} -d {}".format(
-            ip_address_info.ip_type,
-            ip_address_info.ip_address,
-            ip_address_info.subnet,
-            ip_address_info.gateway,
-            ip_address_info.dns_servers
-        ),
-        shell=True,
-        executable=DEFAULT_EXECUTABLE,
-    )
-    # subprocess.run(["mv", network_interface, "/etc/"])
-    # subprocess.run(["systemctl", "restart", "netctl"])
+    try:
+        subprocess.run(
+            str(SCRIPT_DIR / "change_ip.sh") +\
+            " -t {} -a {} -n {} -g {} -d {}".format(
+                ip_address_info.ip_type,
+                ip_address_info.ip_address,
+                ip_address_info.subnet,
+                ip_address_info.gateway,
+                ip_address_info.dns_servers
+            ),
+            shell=True,
+            executable=DEFAULT_EXECUTABLE,
+        )
+    except:
+        pass
 
 
 def show_ip():
-    result = subprocess.run(
-        str(SCRIPT_DIR "show_ip.sh"),
-        shell=True,
-        executable=DEFAULT_EXECUTABLE,
-        capture_output=True,
-    )
-    output = result.stdout.decode('utf-8')
-    return IpAddressChangeInfo.from_script_output(output)
+    try:
+        result = subprocess.run(str(SCRIPT_DIR / "show_ip.sh"), shell=True, executable=DEFAULT_EXECUTABLE, capture_output=True)
+        output = result.stdout.decode('utf-8')
+        return IpAddressChangeInfo.from_script_output(output)
+    except:
+        pass
 
 
 class PublicIpInfo:
@@ -127,34 +120,21 @@ class PublicIpInfo:
 
 
 def show_public_ip():
-    result = subprocess.run(
-        str(SCRIPT_DIR "show_public_ip.sh"),
-        shell=True,
-        executable=DEFAULT_EXECUTABLE,
-        capture_output=True,
-    )
-    output = result.stdout.decode('utf-8')
-    return PublicIpInfo.from_script_output(output)
+    try:
+        result = subprocess.run(str(SCRIPT_DIR / "show_public_ip.sh"), shell=True, executable=DEFAULT_EXECUTABLE, capture_output=True )
+        output = result.stdout.decode('utf-8')
+        return PublicIpInfo.from_script_output(output)
+    except:
+        pass
 
 
 def do_change_password(new_password):
-    subprocess.run(
-        str(SCRIPT_DIR "do_change_password.sh") +\
-        f" {new_password} root",
-        shell=True,
-        executable=DEFAULT_EXECUTABLE,
-    )
-    subprocess.run(
-        str((SCRIPT_DIR "do_change_password.sh") +\
-        f" {new_password} dietpi",
-        shell=True,
-        executable=DEFAULT_EXECUTABLE,
-    )
-    subprocess.run(
-        str(SCRIPT_DIR f"save_password.sh") + f" {new_password}",
-        shell=True,
-        executable=DEFAULT_EXECUTABLE,
-    )
+    try:
+        subprocess.run(str(SCRIPT_DIR / "do_change_password.sh") + f" {new_password} root", shell=True, executable=DEFAULT_EXECUTABLE )
+        subprocess.run(str(SCRIPT_DIR / "do_change_password.sh") + f" {new_password} dietpi", shell=True, executable=DEFAULT_EXECUTABLE )
+        subprocess.run(str(SCRIPT_DIR / "save_password.sh") + f" {new_password}", shell=True, executable=DEFAULT_EXECUTABLE )
+    except:
+        pass
 
 
 def get_token(password):
@@ -173,7 +153,7 @@ def get_passwords():
 
 
 def generate_keys(server, clients, regenerate=False):
-    command = [str(SCRIPT_DIR "change_keys.sh")]
+    command = [str(SCRIPT_DIR / "change_keys.sh")]
 
     if server:
         command.extend(["-s", str(server)])
@@ -189,7 +169,7 @@ def generate_keys(server, clients, regenerate=False):
 
 def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_networks, clients, features):
     try:
-        command = [str(SCRIPT_DIR "change_vpn.sh")]
+        command = [str(SCRIPT_DIR / "change_vpn.sh")]
 
         command.extend(["-t", "server"])
         command.extend(["-b", str(bridge)])
@@ -222,7 +202,7 @@ def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_net
 
 def generate_client_config():
     try:
-        command = [str(SCRIPT_DIR "change_vpn.sh")]
+        command = [str(SCRIPT_DIR / "change_vpn.sh")]
         command.extend(["-t", "client"])
         command_str = " ".join(command)
         subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
@@ -232,17 +212,12 @@ def generate_client_config():
 
 
 def save_tunnel_configuration(data):
-    config_dir = 'configs'
-    server_conf_file = os.path.join(config_dir, 't1config.json')
-
-    with open(server_conf_file, "w") as server_config_file:
+    with open(CONFIG_DIR / "t1config.json", "w") as server_config_file:
         json.dump(data, server_config_file, indent=2)
 
-def load_device_type():
-    config_dir = 'configs'
-    server_conf_file = os.path.join(config_dir, 't1config.json')
 
-    if os.path.exists(server_conf_file):
+def load_device_type():
+    if os.path.exists(CONFIG_DIR / "t1config.json"):
         try:
             with open(server_conf_file, 'r') as file:
                 return "master"
@@ -254,10 +229,7 @@ def load_device_type():
 
 
 def load_tunnel_configuration(form):
-    config_dir = 'configs'
-    server_conf_file = os.path.join(config_dir, 't1config.json')
-
-    if os.path.exists(server_conf_file):
+    if os.path.exists(CONFIG_DIR / "t1config.json"):
         try:
             with open(server_conf_file, 'r') as file:
                 config_data = json.load(file)
@@ -302,7 +274,7 @@ def load_tunnel_configuration(form):
     else:
         #THIS IS THE DEFAULT IF NO FILE CAN BE LOADED
         print(f"Config file '{server_conf_file}' does not exist.")
-        form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(SCRIPT_DIR "show_public_ip.sh", stdout=subprocess.PIPE).communicate()[0])["public_ipv4"]
+        form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(SCRIPT_DIR / "show_public_ip.sh", stdout=subprocess.PIPE).communicate()[0])["public_ipv4"]
         form.mdns.data = True
 
     return form
@@ -312,12 +284,9 @@ def load_tunnel_configuration(form):
 
 
 def handle_uploaded_file(file):
-    config_dir = 'configs'
-    client_conf_file = os.path.join(config_dir, 'client_config.zip')
-
     if file:
         filename=file.filename
-        file.save(client_conf_file)
+        file.save(CONFIG_DIR / "client_config.zip")
         print("File succesfully saved!")
         return True
     else:
@@ -327,35 +296,25 @@ def handle_uploaded_file(file):
 
 
 def do_upgrade(action):
-    if action in ["now", "auto", "manual"]
-        command = [str(SCRIPT_DIR "do_upgrade.sh")]
+    if action in ["now", "auto", "manual"]:
+        command = [str(SCRIPT_DIR / "do_upgrade.sh")]
         command.extend(["-u", action])
         command_str = " ".join(command)
-        try:
-            subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
-        except:
-            pass
+        subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
 
-def upgrade_app()
-    #TRY TO DOWNLOAD ZIPFILE
-    try:
-        response = requests.get(UPDATE_FILE)
-        response.raise_for_status()
+def upgrade_app():
+    #DOWNLOAD ZIPFILE
+    response = requests.get(UPDATE_FILE)
+    response.raise_for_status()
 
-        with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-            #print("Dry run: Listing files...")
-            #z.printdir()
-            z.extractall(path=BASE_DIR)
-    except:
-        pass
+    with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+        #print("Dry run: Listing files...")
+        #z.printdir()
+        z.extractall(path=BASE_DIR)
 
 
 def do_reboot():
-    try:
-        subprocess.run([str(SCRIPT_DIR "do_reboot.sh")], shell=True, executable=DEFAULT_EXECUTABLE)
-    except:
-        pass
-
+    subprocess.run([str(SCRIPT_DIR / "do_reboot.sh")], shell=True, executable=DEFAULT_EXECUTABLE)
     
 
 def get_version(type="local"):
@@ -366,7 +325,7 @@ def get_version(type="local"):
 
     result = "{}"
     try:
-        result = json.loads(subprocess.Popen([str(SCRIPT_DIR "show_version.sh"), '-l', type ], stdout=subprocess.PIPE).communicate()[0])
+        result = json.loads(subprocess.Popen([str(SCRIPT_DIR / "show_version.sh"), '-l', type ], stdout=subprocess.PIPE).communicate()[0])
     except:
         result = "{}"
 

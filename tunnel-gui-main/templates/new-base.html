@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>T1 | {% block title %} Tunnel {% endblock %}</title>
+
+	<link href="{{ url_for('static', filename='bootstrap5/bootstrap.min.css') }}"
+	      rel="stylesheet"
+	      crossorigin="anonymous">
+	<link href="{{ url_for('static', filename='bootstrap5/bootstrap-icons.css') }}"
+	      rel="stylesheet"
+	      crossorigin="anonymous">
+	<link href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}"
+	      rel="stylesheet"
+	      crossorigin="anonymous">
+
+	<link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.5/css/boxicons.min.css" rel="stylesheet">
+
+	<script src="{{ url_for('static', filename='jquery-3.6.3.min.js') }}"></script>
+
+	<meta name="theme-color" content="#712cf9">
+
+
+	<style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+
+        .b-example-divider {
+            height: 3rem;
+            background-color: rgba(0, 0, 0, .1);
+            border: solid rgba(0, 0, 0, .15);
+            border-width: 1px 0;
+            box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+        }
+
+        .b-example-vr {
+            flex-shrink: 0;
+            width: 1.5rem;
+            height: auto;
+        }
+
+        .bi {
+            vertical-align: -.125em;
+            fill: currentColor;
+        }
+
+        .nav-scroller {
+            position: relative;
+            z-index: 3;
+            height: 2.75rem;
+            overflow-y: hidden;
+        }
+
+        .nav-scroller .nav {
+            display: flex;
+            flex-wrap: nowrap;
+            padding-bottom: 1rem;
+            margin-top: -1px;
+            overflow-x: auto;
+            text-align: center;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+	</style>
+
+	<style>
+        .side-navbar {
+            width: 280px;
+            height: 100%;
+            position: fixed;
+            margin-left: -300px;
+            transition: 0.5s;
+        }
+
+        .nav-link:active,
+        .nav-link:focus,
+        .nav-link:hover {
+            background-color: #ffffff26;
+        }
+
+        .my-container {
+            transition: 0.4s;
+        }
+
+        .active-nav {
+            margin-left: 0;
+        }
+
+        /* for main section */
+        .active-cont {
+            margin-left: 280px;
+        }
+
+        #menu-btn {
+            background-color: #100901;
+            color: #fff;
+            margin-left: -96px;
+        }
+
+        .sized-content {
+            width: 700px;
+        }
+
+        @media (min-width: 1050px) {
+            .sized-content {
+                width: calc(60vw - 3rem);
+            }
+        }
+
+        .sized-content > * {
+            z-index: 1;
+        }
+
+        .form-control::placeholder {
+            opacity: 0.3;
+        }
+	</style>
+
+	<!-- Custom styles for this template -->
+	<link href="{{ url_for('static', filename='bootstrap5/sidebars.css') }}" rel="stylesheet">
+</head>
+<body>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+	<symbol id="map_pin" viewBox="0 0 20 20">
+		<path d="M19.367 18.102L18 14h-1.5l.833 4H2.667l.833-4H2L.632 18.102C.285 19.146.9 20 2 20h16c1.1 0 1.715-.854 1.367-1.898zM15 5A5 5 0 1 0 5 5c0 4.775 5 10 5 10s5-5.225 5-10zm-7.7.06c0-1.491 1.208-2.699 2.7-2.699a2.699 2.699 0 1 1 0 5.399 2.7 2.7 0 0 1-2.7-2.7z"></path>
+	</symbol>
+	<symbol id="key" viewBox="0 0 20 20">
+		<path d="M10,13 L10,16 L13,16 L13,19 L16,19 L16,21 L18,23 L23,23 L23,19 L12.74,8.74 C12.91,8.19 13,7.6 13,7 C13,3.69 10.31,1 7,1 C3.69,1 1,3.69 1,7 C1,10.31 3.69,13 7,13 C7.88,13 8.72,12.81 9.47,12.47 L10,13 Z M6,7 C5.4475,7 5,6.5525 5,6 C5,5.4475 5.4475,5 6,5 C6.5525,5 7,5.4475 7,6 C7,6.5525 6.5525,7 6,7 Z"></path>
+	</symbol>
+	<symbol id="route" viewBox="0 0 502 502">
+		<path d="M120.995,255.996h248.853c54.933,0,99.52-43.093,99.52-96s-44.693-96-99.52-96H127.075
+				c-6.08-35.84-40.853-59.627-76.693-51.84C18.275,19.089-3.485,49.809,0.462,82.343c4.48,36.48,38.4,61.44,74.24,55.467
+				c26.88-4.587,47.893-25.6,52.48-52.48h242.773c43.093,0,78.187,33.493,78.187,74.667c0,41.173-35.093,74.667-78.187,74.667
+				h-248.96c-54.933,0-99.627,43.093-99.627,96s44.693,96,99.52,96h173.333l-45.653,45.76c-4.267,4.053-4.373,10.88-0.213,15.04
+				c4.16,4.16,10.88,4.373,15.04,0.213c0.107-0.107,0.213-0.213,0.213-0.213l63.893-63.893c4.16-4.16,4.16-10.88,0-15.04l-63.893-64
+				c-4.267-4.053-10.987-3.947-15.04,0.213c-3.947,4.16-3.947,10.667,0,14.827l45.76,45.76H120.995
+				c-43.2,0-78.293-33.493-78.293-74.667S77.795,255.996,120.995,255.996z M64.035,117.223c-23.573,0-42.667-19.093-42.667-42.667
+				c0-23.573,19.093-42.667,42.667-42.667c23.573,0,42.667,19.093,42.667,42.667C106.702,98.129,87.608,117.223,64.035,117.223z"></path>
+		<path d="M437.368,351.889c-35.307,0-64,28.693-64,64s28.693,64,64,64s64-28.693,64-64S472.782,351.996,437.368,351.889z
+				 M437.368,458.556c-23.573,0-42.667-19.093-42.667-42.667s19.093-42.667,42.667-42.667s42.667,19.093,42.667,42.667
+				S460.942,458.556,437.368,458.556z"></path>
+	</symbol>
+
+	<!-- SVG-icon for Update -->
+	<symbol id="update" viewBox="0 0 482.568 482.568">
+	    <!-- SVG-path data for update icon -->
+		<path d="M116.993,203.218c13.4-1.8,26.8,2.8,36.3,12.3l24,24l22.7-22.6l-32.8-32.7c-5.1-5.1-5.1-13.4,0-18.5s13.4-5.1,18.5,0
+			l32.8,32.8l22.7-22.6l-24.1-24.1c-9.5-9.5-14.1-23-12.3-36.3c4-30.4-5.7-62.2-29-85.6c-23.8-23.8-56.4-33.4-87.3-28.8
+			c-4.9,0.7-6.9,6.8-3.4,10.3l30.9,30.9c14.7,14.7,14.7,38.5,0,53.1l-19,19c-14.7,14.7-38.5,14.7-53.1,0l-31-30.9
+			c-3.5-3.5-9.5-1.5-10.3,3.4c-4.6,30.9,5,63.5,28.8,87.3C54.793,197.518,86.593,207.218,116.993,203.218z"/>
+		<path d="M309.193,243.918l-22.7,22.6l134.8,134.8c5.1,5.1,5.1,13.4,0,18.5s-13.4,5.1-18.5,0l-134.8-134.8l-22.7,22.6l138.9,138.9
+			c17.6,17.6,46.1,17.5,63.7-0.1s17.6-46.1,0.1-63.7L309.193,243.918z"/>
+		<path d="M361.293,153.918h59.9l59.9-119.7l-29.9-29.9l-119.8,59.8v59.9l-162.8,162.3l-29.3-29.2l-118,118
+			c-24.6,24.6-24.6,64.4,0,89s64.4,24.6,89,0l118-118l-29.9-29.9L361.293,153.918z"/>
+	</symbol>
+
+	<!-- SVG-icon for Reboot -->
+	<symbol id="reboot" viewBox="0 0 24 24">
+	    <!-- SVG-parh data for reboot icon -->
+	    <path d="M12,5V1L7,6l5,5V7c3.31,0,6,2.69,6,6s-2.69,6-6,6s-6-2.69-6-6H4c0,4.42,3.58,8,8,8s8-3.58,8-8S16.42,5,12,5z"></path>
+	</symbol>
+
+	<symbol id="checklist" viewBox="0 0 288 288">
+		<path d="M197.095,253.646H30V33.757h167.095v12.214l29.767-29.767c-1.214-7.066-7.355-12.447-14.767-12.447H15
+		  c-8.284,0-15,6.716-15,15v249.89c0,8.284,6.716,15,15,15h197.095c8.284,0,15-6.716,15-15V159.041l-30,7.533V253.646z"></path>
+		<path d="M140.161,73.802c-5.169-6.474-14.605-7.533-21.081-2.366L84.964,98.667L74.647,88.352c-5.857-5.857-15.355-5.857-21.213,0
+		  c-5.858,5.857-5.858,15.355,0,21.213l19.799,19.799c2.912,2.912,6.753,4.394,10.61,4.394c3.296,0,6.604-1.081,9.354-3.276
+		  l44.598-35.598C144.27,89.715,145.329,80.276,140.161,73.802z"></path>
+		<path d="M119.08,168.366l-34.116,27.232l-10.316-10.316c-5.857-5.859-15.355-5.857-21.213,0s-5.858,15.354,0,21.213l19.799,19.8
+		  c2.912,2.912,6.752,4.394,10.61,4.394c3.296,0,6.604-1.082,9.354-3.276l44.598-35.599c6.475-5.169,7.534-14.606,2.366-21.081
+		  C134.992,164.259,125.556,163.199,119.08,168.366z"></path>
+		<path d="M276.798,12.959c-2.587,0-5.224,0.96-7.37,3.105l-71.389,71.39c-3.502,3.501-5.988,7.887-7.194,12.69l-7.66,30.506
+		  c-0.358,1.424-0.235,2.96,0.497,4.232c1.021,1.774,2.857,2.765,4.756,2.765c0.444,0,0.891-0.054,1.332-0.165l30.704-7.71
+		  c4.803-1.206,9.189-3.692,12.69-7.194l43.493-43.493c6.881-6.881,10.747-16.214,10.747-25.946V23.51
+		  C287.403,17.163,282.21,12.959,276.798,12.959z"></path>
+	</symbol>
+	<symbol id="exit" viewBox="0 0 513 513">
+		<path d="M508.184,249.202c0.203-0.247,0.379-0.507,0.568-0.76c0.227-0.304,0.463-0.601,0.674-0.917
+				c0.203-0.303,0.379-0.618,0.565-0.93c0.171-0.286,0.35-0.565,0.508-0.86c0.17-0.318,0.314-0.645,0.467-0.969
+				c0.145-0.307,0.298-0.609,0.428-0.923c0.13-0.315,0.235-0.636,0.35-0.956c0.121-0.337,0.25-0.67,0.355-1.015
+				c0.097-0.32,0.168-0.645,0.249-0.968c0.089-0.351,0.187-0.698,0.258-1.056c0.074-0.375,0.118-0.753,0.172-1.13
+				c0.044-0.311,0.104-0.618,0.135-0.933c0.138-1.4,0.138-2.811,0-4.211c-0.031-0.315-0.09-0.621-0.135-0.932
+				c-0.054-0.378-0.098-0.756-0.173-1.13c-0.071-0.358-0.169-0.704-0.258-1.055c-0.081-0.324-0.152-0.649-0.249-0.969
+				c-0.104-0.344-0.233-0.677-0.354-1.013c-0.115-0.32-0.22-0.642-0.35-0.957c-0.13-0.314-0.283-0.616-0.428-0.922
+				c-0.153-0.325-0.297-0.652-0.467-0.97c-0.157-0.294-0.337-0.573-0.507-0.859c-0.186-0.312-0.362-0.627-0.565-0.931
+				c-0.211-0.315-0.446-0.612-0.673-0.915c-0.19-0.254-0.367-0.515-0.57-0.762c-0.443-0.539-0.909-1.058-1.402-1.551
+				c-0.004-0.004-0.007-0.008-0.011-0.012l-64-64c-8.331-8.331-21.839-8.331-30.17,0c-8.331,8.331-8.331,21.839,0,30.17
+				l27.582,27.582H321.019c-11.782,0-21.333,9.551-21.333,21.333c0,11.782,9.551,21.333,21.333,21.333h119.163l-27.582,27.582
+				c-8.331,8.331-8.331,21.839,0,30.17c8.331,8.331,21.839,8.331,30.17,0l64-64c0.004-0.004,0.007-0.008,0.011-0.012
+				C507.275,250.26,507.741,249.742,508.184,249.202z"></path>
+		<path d="M363.686,299.672c-11.782,0-21.333,9.551-21.333,21.333v106.667h-85.333V86.347v-0.008
+				c0-9.421-6.18-17.727-15.203-20.434l-74.11-22.233h174.647v106.667c0,11.782,9.551,21.333,21.333,21.333
+				s21.333-9.551,21.333-21.333v-128c0-11.782-9.551-21.333-21.333-21.333H22.353c-0.002,0-0.004,0-0.006,0
+				c-0.631-0.001-1.256,0.029-1.876,0.083C10.685,1.827,4.306,8.264,1.988,15.949c-0.149,0.478-0.279,0.966-0.395,1.46
+				c-0.012,0.053-0.022,0.107-0.034,0.161c-0.115,0.508-0.211,1.024-0.29,1.547c-0.011,0.074-0.023,0.147-0.034,0.221
+				c-0.067,0.477-0.12,0.96-0.155,1.449c-0.062,0.788-0.081,1.578-0.061,2.368v425.859c0,10.169,7.178,18.925,17.15,20.919
+				L231.502,512.6c13.201,2.64,25.517-7.457,25.517-20.919v-21.342h106.667c11.782,0,21.333-9.551,21.333-21.333v-128
+				C385.019,309.223,375.468,299.672,363.686,299.672z M214.353,465.658L43.686,431.525V51.02l170.667,51.2v346.785V465.658z"></path>
+	</symbol>
+	<symbol id="gear-fill" viewBox="0 0 16 16">
+		<path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"></path>
+	</symbol>
+</svg>
+
+<main class="d-flex" style="overflow-y:auto">
+
+	<div class="side-navbar bg-light active-nav d-flex justify-content-between flex-wrap flex-column flex-shrink-0 p-3"
+	     style="width: 280px; z-index: 2" id="sidebar">
+		<a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+			<svg class="bi pe-none me-2" width="40" height="32">
+				<use xlink:href="#gear-fill"></use>
+			</svg>
+			<span class="fs-4">T1 Tunnel</span>
+		</a>
+		<hr>
+		<ul class="nav nav-pills flex-column mb-auto">
+
+			{% for item in menu_items %}
+				<li class="nav-item">
+					<a href="{{ url_for (item.linked_route_method_name) }}"
+					   class="nav-link {% if active_route_method_name == item.linked_route_method_name %}active{% else %}link-dark{% endif %}"
+					   aria-current="page">
+						<svg class="bi pe-none me-2" width="16" height="16">
+							<use xlink:href="#{{ item.svg_icon_id }}"></use>
+						</svg>
+						{{ item.title }}
+					</a>
+				</li>
+			{% endfor %}
+		</ul>
+		<hr>
+		<small>Connecting the unconnectable &copy 2022</small>
+	</div>
+
+	<div class="b-example-divider b-example-vr my-container active-cont"></div>
+
+	<div class="d-flex flex-column flex-shrink-0 p-3 bg-light sized-content">
+		<nav class="navbar top-navbar navbar-light bg-light px-5" style="z-index: 0; margin-bottom: -52px;">
+			<a class="btn border-0" id="menu-btn" style="background-color: darkslategray;">
+				<i class="bx bx-menu"></i>
+			</a>
+		</nav>
+
+		{% block content %}{% endblock %}
+	</div>
+
+	<div class="b-example-divider b-example-vr"></div>
+</main>
+
+
+<script src="{{ url_for('static', filename='bootstrap5/bootstrap.bundle.min.js') }}" crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='bootstrap5/sidebars.js') }}"></script>
+<script>
+    let menu_btn = document.querySelector("#menu-btn");
+    let sidebar = document.querySelector("#sidebar");
+    let myContainer = document.querySelector(".my-container");
+    menu_btn.addEventListener("click", () => {
+        sidebar.classList.toggle("active-nav");
+        myContainer.classList.toggle("active-cont");
+    });
+</script>
+</body>
+</html>

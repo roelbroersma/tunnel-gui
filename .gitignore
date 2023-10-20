@@ -2,6 +2,8 @@
 /web_password.txt
 /configs/*
 !/configs/
+/logs/*
+!/logs/
 #
 # https://github.com/github/gitignore/blob/main/Python.gitignore
 #
