@@ -4,11 +4,14 @@ from pathlib import Path
 import json
 import subprocess
 import requests
+import io
+import zipfile
 
 BASE_DIR = Path(__file__).parent
+SCRIPT_DIR = BASE_DIR / "scripts/"
 DEFAULT_EXECUTABLE = '/bin/bash'
 IP_CONFIG_FILE = 'ip_config.json'
-
+UPDATE_FILE = "https://github.com/roelbroersma/tunnel-gui/archive/refs/heads/main.zip"
 
 class IpAddressChangeInfo:
     def __init__(self, ip_type, ip_address, dns_servers, subnet, gateway):
@@ -73,7 +76,7 @@ def change_ip(ip_address_info):
         f.write(ip_address_info.to_json())
 
     subprocess.run(
-        str(BASE_DIR / "scripts/change_ip.sh") +\
+        str(SCRIPT_DIR "change_ip.sh") +\
         " -t {} -a {} -n {} -g {} -d {}".format(
             ip_address_info.ip_type,
             ip_address_info.ip_address,
@@ -90,7 +93,7 @@ def change_ip(ip_address_info):
 
 def show_ip():
     result = subprocess.run(
-        str(BASE_DIR / "scripts/show_ip.sh"),
+        str(SCRIPT_DIR "show_ip.sh"),
         shell=True,
         executable=DEFAULT_EXECUTABLE,
         capture_output=True,
@@ -125,7 +128,7 @@ class PublicIpInfo:
 
 def show_public_ip():
     result = subprocess.run(
-        str(BASE_DIR / "scripts/show_public_ip.sh"),
+        str(SCRIPT_DIR "show_public_ip.sh"),
         shell=True,
         executable=DEFAULT_EXECUTABLE,
         capture_output=True,
@@ -135,21 +138,20 @@ def show_public_ip():
 
 
 def do_change_password(new_password):
-    # subprocess.run("scripts/do_change_password.sh {} {}".format(new_password, "tunnel_demo"), shell=True)
     subprocess.run(
-        str(BASE_DIR / "scripts/do_change_password.sh") +\
+        str(SCRIPT_DIR "do_change_password.sh") +\
         f" {new_password} root",
         shell=True,
         executable=DEFAULT_EXECUTABLE,
     )
     subprocess.run(
-        str(BASE_DIR / "scripts/do_change_password.sh") +\
+        str((SCRIPT_DIR "do_change_password.sh") +\
         f" {new_password} dietpi",
         shell=True,
         executable=DEFAULT_EXECUTABLE,
     )
     subprocess.run(
-        str(BASE_DIR / f"scripts/save_password.sh") + f" {new_password}",
+        str(SCRIPT_DIR f"save_password.sh") + f" {new_password}",
         shell=True,
         executable=DEFAULT_EXECUTABLE,
     )
@@ -165,15 +167,13 @@ def get_token(password):
 def get_passwords():
     super_password = os.getenv('SUPER_PASSWORD', None)
 
-    BASE_DIR = Path(__file__).resolve().parent
     with open(BASE_DIR / "web_password.txt", "r+") as f:
         web_password = f.read().strip()
     return [web_password, super_password]
 
 
-
 def generate_keys(server, clients, regenerate=False):
-    command = [str(BASE_DIR / "scripts/change_keys.sh")]
+    command = [str(SCRIPT_DIR "change_keys.sh")]
 
     if server:
         command.extend(["-s", str(server)])
@@ -189,7 +189,7 @@ def generate_keys(server, clients, regenerate=False):
 
 def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_networks, clients, features):
     try:
-        command = [str(BASE_DIR / "scripts/change_vpn.sh")]
+        command = [str(SCRIPT_DIR "change_vpn.sh")]
 
         command.extend(["-t", "server"])
         command.extend(["-b", str(bridge)])
@@ -222,7 +222,7 @@ def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_net
 
 def generate_client_config():
     try:
-        command = [str(BASE_DIR / "scripts/change_vpn.sh")]
+        command = [str(SCRIPT_DIR "change_vpn.sh")]
         command.extend(["-t", "client"])
         command_str = " ".join(command)
         subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
@@ -302,9 +302,7 @@ def load_tunnel_configuration(form):
     else:
         #THIS IS THE DEFAULT IF NO FILE CAN BE LOADED
         print(f"Config file '{server_conf_file}' does not exist.")
-        form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(
-            'scripts/show_public_ip.sh', stdout=subprocess.PIPE
-        ).communicate()[0])["public_ipv4"]
+        form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(SCRIPT_DIR "show_public_ip.sh", stdout=subprocess.PIPE).communicate()[0])["public_ipv4"]
         form.mdns.data = True
 
     return form
@@ -327,39 +325,50 @@ def handle_uploaded_file(file):
         return False
 
 
-def get_version(repo_url):
-    #GET CURRENT APP VERSION
+
+def do_upgrade(action):
+    if action in ["now", "auto", "manual"]
+        command = [str(SCRIPT_DIR "do_upgrade.sh")]
+        command.extend(["-u", action])
+        command_str = " ".join(command)
+        try:
+            subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+        except:
+            pass
+
+def upgrade_app()
+    #TRY TO DOWNLOAD ZIPFILE
     try:
-        with open('VERSION', 'r') as file:
-            local_app_version = file.read().strip()
-    except:
-        local_app_version = None
+        response = requests.get(UPDATE_FILE)
+        response.raise_for_status()
 
-    #GET LATEST APP VERSION (ONLINE)
+        with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+            #print("Dry run: Listing files...")
+            #z.printdir()
+            z.extractall(path=BASE_DIR)
+    except:
+        pass
+
+
+def do_reboot():
     try:
-        response = requests.get(f"{repo_url}/blob/main/VERSION", timeout=10)
-        if response.status_code == 200:
-            latest_app_version = response.text.strip()
-        else:
-            latest_app_version = None
+        subprocess.run([str(SCRIPT_DIR "do_reboot.sh")], shell=True, executable=DEFAULT_EXECUTABLE)
     except:
-        latest_app_version = None
+        pass
 
+    
+
+def get_version(type="local"):
+    if type in ["local", "remote", "all"]:
+        pass
+    else:
+        type = "local"
+
+    result = "{}"
     try:
-        result = subprocess.Popen(['scripts/get_core_version.sh'], stdout=subprocess.PIPE).communicate()[0]
-        data = json.loads(result)
-        core_local = data.get("core_local", None)
-        core_latest = data.get("core_version", None)
+        result = json.loads(subprocess.Popen([str(SCRIPT_DIR "show_version.sh"), '-l', type ], stdout=subprocess.PIPE).communicate()[0])
     except:
-        core_local = None
-        core_latest = None
+        result = "{}"
 
-    #RETURN ARRAY WITH SOFTWARE VERSIONS
-    return {
-        'app_local': local_app_version,
-        'app_latest': latest_app_version,
-        'core_local': core_local,
-        'core_latest': core_latest,
-    }
-
+    return result
 

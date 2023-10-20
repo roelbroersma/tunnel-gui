@@ -112,9 +112,11 @@ class PasswordForm(FlaskForm):
 
 class UpdateForm(FlaskForm):
     check_online = SubmitField("Check for Software Updates")
+    update_auto_enable = SubmitField("Enable automatic updates")
+    update_auto_disable = SubmitField("Disable automatic updates")
     update_app = SubmitField("Update T1 Sofware")
     update_app_force = BooleanField("Force/Overwrite update?")
-    update_core = SubmitField("Update Core Operating System")
+    update_core = SubmitField("Update Operating System")
 
 class RebootForm(FlaskForm):
     reboot = SubmitField("Reboot system")

@@ -13,7 +13,7 @@ from flask import send_file
 from pydantic import BaseModel
 
 from forms import IpAddressChangeForm, PasswordForm, SignInForm, UpdateForm, RebootForm, TunnelMasterForm, TunnelNonMasterForm
-from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration, handle_uploaded_file
+from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration, handle_uploaded_file, do_upgrade, get_version, upgrade_app 
 
 
 from flask_wtf.csrf import CSRFProtect
@@ -278,34 +278,31 @@ def update():
     form = UpdateForm(request.form, meta={"csrf": True})
 
     message=''
-    if form.is_submitted():
-        print("ja")
-
-    if 'check_online' in request.form:
-        print("erin")
     try:
-        if form.is_submitted() and 'check_online' in request.form:
-            version = json.loads(subprocess.Popen([str(BASE_DIR / 'scripts/show_version.sh'), '-l', 'all' ], stdout=subprocess.PIPE).communicate()[0])
-            print("1")
-        elif form.is_submitted() and 'update_app' in request.form:
-            do_update('app')
-            message='Sfotware is updated, please reboot'
-            version = json.loads(subprocess.Popen([str(BASE_DIR / 'scripts/show_version.sh'), '-l', 'local' ], stdout=subprocess.PIPE).communicate()[0])
-            print("2")
-        elif form.is_submitted() and 'update_core' in request.form:
-            do_update('core')
-            message='Sfotware is updated, please reboot'
-            version = json.loads(subprocess.Popen([str(BASE_DIR / 'scripts/show_version.sh'), '-l', 'local' ], stdout=subprocess.PIPE).communicate()[0])
-            print("3")
+        if form.is_submitted()
+            if 'check_online' in request.form:
+                version = get_version("all")
+            elif 'update_auto_enable' in request.form:
+                do_upgrade("auto")
+                version = get_version("local")
+            elif 'update_auto_disable' in request.form:
+                do_upgrade("manual")
+                version = get_version("local")
+            elif 'update_app' in request.form:
+                upgrade_app()
+                message='Software is updated, please reboot'
+                version = get_version("local")
+            elif 'update_core' in request.form:
+                do_upgrade('now')
+                message='Software will now be updated in the background, please do not leave this page.'
+                version = get_version("local")
+            else:
+                version = get_version("local")
         else:
-            version = json.loads(subprocess.Popen([str(BASE_DIR / 'scripts/show_version.sh'), '-l', 'local' ], stdout=subprocess.PIPE).communicate()[0])
-            print ("4")
-
+            version = get_version("local")
     except:
-        print("5")
         version = {}
 
-    print(version)
     return {
         'version': version,
         'message': message,

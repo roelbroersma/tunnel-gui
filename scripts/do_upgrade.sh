@@ -42,7 +42,8 @@ fi
 
 
 # INITIALIZE VARIABLES AND MAKE SURE THEY ARE EMTPY
-SCRIPT_DIR=$(dirname -- "$0")
+SCRIPT_PATH="$(realpath "$0")"
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")/"
 
 
 #SET UPDATE TO MANUAL
@@ -68,9 +69,19 @@ elif [ "$UPDATE" == "auto" ]; then
 #UPDATE NOW
 elif [ "$UPDATE" == "now" ]; then
 
-    echo "Update DietPi Now (non-interactive)"
-    /boot/dietpi/dietpi-update 2
-
-    echo "Update Tunnel GUI"
-    #TODO: UPDATE FILES FROM GITHUB MAIN BRANCH
+    if [ -f /boot/dietpi/.version ]; then
+	echo "Update DietPi Now (non-interactive)"
+	/boot/dietpi/dietpi-update 1 > $(SCRIPT_DIR)logs/update.log
+    elif command -v apt-get > /dev/null; then
+	echo "Update OS with APT (non-interactive)"
+	apt-get update -y && apt-get upgrade -y > $(SCRIPT_DIR)logs/update.log
+    elif command -v yum > /dev/null; then
+	echo "Update OS with YUM (non-interactive)"
+        yum -y update > $(SCRIPT_DIR)logs/update.log
+    elif command -v dnf > /dev/null; then
+	echo "Update OS with DNF (non-interactive)"
+	dnf -y update > $(SCRIPT_DIR)logs/update.log
+    fi
+    #DELETE LOGFILE AT THE END OF THE UPGRADE
+    rm -f $(SCRIPT_DIR)logs/update.log
 fi

@@ -2,53 +2,77 @@
 {% block title %}Update{% endblock %}
 {% block content %}
 	<style>
-        .diagnostic-info p {
+        .version-info p {
             font-weight: 700;
         }
 
-        .diagnostic-info p.info {
+        .version-info p.info {
             font-weight: 400;
         }
 	</style>
 	<h3 class="mb-5">Update</h3>
 	<h4>Currently Installed</h4>
-	<div class="diagnostic-info">
+	<div class="version-info">
 		<div class="row">
 			<p class="col-4">{{ version.core_os }} version</p>
-			<p class="info col-6">{{ version.core_version_full }}</p>
+			<p class="info col-4">{{ version.core_version_full }}</p>
 		</div>
 		{% if version.core_auto_update %}
                 <div class="row">
                         <p class="col-4">OS updates</p>
-			<p class="info col-6">{{ version.core_auto_update }}</p>
+			<p class="info col-4">{{ version.core_auto_update }}</p>
+			<p class="col-4">{% if version.core_auto_update=="manual" %}{{ form.update_auto_enable }}{% endif %}{% if version.core_auto_update=="auto" %}{{ form.update_auto_disable }}{% endif %}</p>
                 </div>
 		{% endif %}
 		<div class="row">
 			<p class="col-4">T1 version</p>
-			<p class="info col-6">{{ version.app_version }}</p>
+			<p class="info col-4">{{ version.app_version }}</p>
 		</div>
 		<div class="row">
 			<p class="col-4">OpenVPN version</p>
-			<p class="info col-6">{{ version.openvpn_version }}</p>
+			<p class="info col-4">{{ version.openvpn_version }}</p>
 		</div>
-		<br/>
-		<form method="POST" id="UpdateForm">
-                {{ form.csrf_token }}
+	</div>
+	<br/>
 
-		{% if not version.future_app_version %}
+	{% if message %}
+	<div class="row">
+		<p class="danger">{{ message }}</p>
+	</div>
+	{% endif %}
+
+
+	{% if not message %}
+
+	<form method="POST" id="UpdateForm">
+	{{ form.csrf_token }}
+
+	{% if not version.future_app_version %}
+	<div class="row">
+		<div class="col-4">{{ form.check_online }}</div>
+	</div>
+	{% else %}
+	<h4>Latest online available</h4>
+	<div class="version-info">
+		{% if version.future_core_version %}
 		<div class="row">
-                        <div class="col-4">{{ form.check_online }}</div>
-                </div>
-		{% else %}
-		<div class="row">
-			<p class="col-4">Latest T1 version</p>
-			<p class="info col-6">{{ version.future_app_version }}</p>
+			<p class="col-4">{{ version.core_os }} version</p>
+			<p class="info col-4">{{ version.future_core_version }}</p>
 		</div>
-		<div class="row">
-			<p class="col-4">Latest OS version</p>
-			<p class="info col-6">{{ version.future_core_version }}</p>
-		</div>
+		<div class="col-4">{{ form.update_core }}</div>
+		<br /><br />
 		{% endif %}
+		<div class="row">
+			<p class="col-4">T1 version</p>
+			<p class="info col-4">{{ version.future_app_version }}</p>
+		</div>
+
+		<div class="col-4">{{ form.update_app }}</div>
+	</div>
+	{% endif %}
+
+	</form>
+	{% endif %}
 
 		<div class="row">
 			<p class="col-4">Tunnel info: </p>
@@ -56,5 +80,4 @@
 				{% include 'logs_block.html' %}
 			{% endwith %}
 		</div>
-	</div>
 {% endblock %}

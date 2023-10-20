@@ -51,6 +51,9 @@ CORE_AUTO_UPDATE=""
 APP_VERSION=""
 OPENVPN_VERSION=""
 
+SCRIPT_PATH="$(realpath "$0")"
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")/"
+
 #START JSON OUTPUT
 json_output="{";
 
@@ -59,7 +62,7 @@ json_output="{";
 get_app_version() {
 	if [[ -f $SCRIPT_DIR/../.version ]]; then
 		source $SCRIPT_DIR/../.version
-		echo $APP_VERSION
+		echo "$APP_VERSION"
 	else
 		echo ""
 	fi
