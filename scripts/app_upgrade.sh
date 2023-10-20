@@ -60,7 +60,7 @@ if [ "$UPDATE" == "now" ]; then
     mkdir -p ${SCRIPT_DIR}../temp
 
     #DELETE ANY FILES IN THE TEMP FOLDER
-    rm -rf ${SCRIPT_DIR}../temp
+    rm -rf ${SCRIPT_DIR}../temp/*
 
     echo "Downloading latest vesion..." > ${LOG_DIR}update.log
     curl -L -o ${SCRIPT_DIR}../temp/${FILENAME} ${UPDATE_URL} >> ${LOG_DIR}update.log
