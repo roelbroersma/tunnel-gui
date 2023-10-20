@@ -70,8 +70,7 @@ if [ "$UPDATE" == "now" ]; then
     unzip ${BASE_DIR}temp/${FILENAME} -d ${BASE_DIR}temp >> ${LOG_DIR}update.log
 
     echo "Moving files from temporary folder to application path..." >> ${LOG_DIR}update.log
-    cd ${BASE_DIR}temp/${DIRECTORY}
-    find . -mindepth 1 -exec mv -t ${SCRIPT_DIR}../ {} + >> ${LOG_DIR}update.log
+    cp -R -f ${BASE_DIR}temp/${DIRECTORY} ${BASE_DIR} >> ${LOG_DIR}update.log
 
     echo "Cleaning up files..." >> ${LOG_DIR}update.log
     #rm -rf ${SCRIPT_DIR}../temp >> ${LOG_DIR}update.log

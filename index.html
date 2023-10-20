@@ -1,0 +1,193 @@
+{% extends 'new-base.html' %}
+{% block title %}IP Address{% endblock %}
+{% block content %}
+	<h3 class="mb-5">IP Address</h3>
+	<div class="row g-5">
+		<div>
+			<style>
+                .was-validated > .invalid-feedback {
+                    display: block;
+                }
+
+                ul {
+                    list-style-type: none;
+                }
+			</style>
+			<form method="POST" action="{{ url_for('index') }}" id="ipForm">
+			{{ form.csrf_token }} 
+
+				<div class="row g-3">
+					<div class="col-12 {% if form.ip_type.errors %}was-validated{% endif %}">
+						{{ form.ip_type() }}
+						{{ form.ip_type.label }}
+						<br>
+						{% for err in form.ip_type.errors %}
+							<div class="invalid-feedback">
+								{{ err }}
+							</div>
+						{% endfor %}
+					</div>
+				</div>
+
+				<div class="row g-3 mt-0 p-5 jumping-container"
+				     style="display: none; margin-left: 30px; padding-top: 0!important; border: 1px solid gray; border-radius: 10px;">
+
+					{% for input_name, input_label in fields if form[input_name].type == 'StringField' %}
+						<div class="col-12">
+							<label for="{{ input_name }}-part0">{{ input_label }}</label>
+							<div class="row">
+								{% for x in range(4) %}
+									<div class="col-2">
+										<input class="form-control" id="{{ input_name }}-part{{ x }}" type="text"
+										       maxlength="3">
+									</div>
+									{% if x != 3 %}.{% endif %}
+								{% endfor %}
+							</div>
+							{{ form[input_name]() }}
+							<div class=" {% if form[input_name].errors %}was-validated{% endif %}">
+								{% for err in form[input_name].errors %}
+									<div class="invalid-feedback">
+										{{ err }}
+									</div>
+								{% endfor %}
+							</div>
+						</div>
+					{% endfor %}
+				</div>
+
+				<hr class="my-4">
+
+				<button class="w-100 btn btn-primary btn-lg" type="submit">Save</button>
+			</form>
+		</div>
+	</div>
+
+	<script>
+        let dhcpIpRadiobutton = document.getElementById("ip_type-0");
+        let staticIpRadiobutton = document.getElementById("ip_type-1");
+        dhcpIpRadiobutton.onclick = function () {
+            let additionalInputsContainer = document.getElementsByClassName("jumping-container")[0];
+            additionalInputsContainer.style.display = "none";
+        }
+        staticIpRadiobutton.onclick = function () {
+            let additionalInputsContainer = document.getElementsByClassName("jumping-container")[0];
+            additionalInputsContainer.style.display = "block";
+        }
+
+        if (staticIpRadiobutton.checked === true) {
+            let additionalInputsContainer = document.getElementsByClassName("jumping-container")[0];
+            additionalInputsContainer.style.display = "block";
+        }
+
+        let hiddenInputs = document.getElementsByClassName('visually-hidden');
+        for (let i = 0; i < hiddenInputs.length; i++) {
+            let hiddenId = hiddenInputs[i].id;
+            let placeholderParts = hiddenInputs[i].placeholder.split('.');
+            let valueParts = (hiddenInputs[i].value || '').split('.');
+            console.log(hiddenInputs[i].id);
+            for (let partI = 0; partI < 4; partI++) {
+                let partInput = document.getElementById(`${hiddenId}-part${partI}`);
+                partInput.placeholder = placeholderParts[partI];
+                if (valueParts[partI] !== undefined) {
+                    partInput.value = valueParts[partI];
+                }
+            }
+        }
+
+        function beforeSubmit(event) {
+            let hiddenInputs = document.getElementsByClassName('visually-hidden');
+            for (let i = 0; i < hiddenInputs.length; i++) {
+                let hiddenId = hiddenInputs[i].id;
+                let newValue = '';
+                for (let partI = 0; partI < 4; partI++) {
+                    let partInput = document.getElementById(`${hiddenId}-part${partI}`);
+                    let partValue = partInput.value;
+                    if (partValue !== undefined) {
+                        newValue += '.' + partValue
+                    }
+                }
+                newValue = newValue.slice(1);
+                console.log(`${hiddenId} - "${newValue}"`)
+                if (newValue) {
+                    hiddenInputs[i].value = newValue;
+                }
+            }
+        }
+
+        const form = document.getElementById('ipForm');
+        form.addEventListener('submit', beforeSubmit);
+
+        let container = document.getElementsByClassName("jumping-container")[0];
+        let visiblePartsId = [];
+        for (let i = 0; i < hiddenInputs.length; i++) {
+            let hiddenId = hiddenInputs[i].id;
+            for (let partI = 0; partI < 4; partI++) {
+                visiblePartsId.push(`${hiddenId}-part${partI}`);
+            }
+        }
+        console.log(`visible parts: ${visiblePartsId}`)
+
+        container.onkeyup = function (e) {
+            let target = e.srcElement || e.target;
+            let targetId = target.id;
+            let targetValue = target.value;
+
+            let isDotKey = '.' === e.key;
+            let shouldJumpToNext = (targetValue.length === 3 || isDotKey);
+
+            if (("0" <= e.key && e.key <= "9") || isDotKey) {
+                if (isDotKey) {
+                    if (targetValue && targetValue[targetValue.length - 1] === '.') {
+                        target.value = targetValue.slice(0, -1);
+                    }
+                }
+                if (shouldJumpToNext) {
+                    let nextPartIndex = visiblePartsId.indexOf(targetId) + 1;
+                    if (nextPartIndex < visiblePartsId.length) {
+                        let nextId = visiblePartsId[nextPartIndex];
+                        setTimeout(function () {
+                            document.getElementById(nextId).focus();
+                        }, 0);
+
+                    }
+                }
+            }
+
+        }
+	</script>
+
+
+	{% if not form.errors and request.method == 'POST' %}
+		<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+			<symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+				<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+			</symbol>
+		</svg>
+		<div class="g-5 alert alert-success d-flex align-items-center" role="alert" id="hideMeAfter2Seconds"
+		     style="margin-top: 40px">
+			<svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:">
+				<use xlink:href="#check-circle-fill"/>
+			</svg>
+			<div>
+				Settings SAVED
+			</div>
+		</div>
+
+		<style>
+            #hideMeAfter2Seconds {
+                animation: hideAnimation 0s ease 2s;
+                animation-fill-mode: forwards;
+            }
+
+            @keyframes hideAnimation {
+                to {
+                    visibility: hidden;
+                    width: 0;
+                    height: 0;
+                }
+            }
+		</style>
+	{% endif %}
+
+{% endblock %}
