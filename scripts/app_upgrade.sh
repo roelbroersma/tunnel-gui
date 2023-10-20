@@ -48,7 +48,8 @@ fi
 # INITIALIZE VARIABLES AND MAKE SURE THEY ARE EMTPY
 SCRIPT_PATH="$(realpath "$0")"
 SCRIPT_DIR="$(dirname "$SCRIPT_PATH")/"
-LOG_DIR="${SCRIPT_DIR}../logs/"
+BASE_DIR="${SCRIPT_DIR}../"
+LOG_DIR="${BASE_DIR}logs/"
 
 #UPDATE NOW
 if [ "$UPDATE" == "now" ]; then
@@ -57,22 +58,23 @@ if [ "$UPDATE" == "now" ]; then
     mkdir -p ${LOG_DIR}
 
     #CREATE TEMP DIR IF IT DOESNT EXIST
-    mkdir -p ${SCRIPT_DIR}../temp
+    mkdir -p ${BASE_DIR}temp
 
     #DELETE ANY FILES IN THE TEMP FOLDER
-    rm -rf ${SCRIPT_DIR}../temp/*
+    rm -rf ${BASE_DIR}temp/*
 
     echo "Downloading latest vesion..." > ${LOG_DIR}update.log
-    curl -L -o ${SCRIPT_DIR}../temp/${FILENAME} ${UPDATE_URL} >> ${LOG_DIR}update.log
+    curl -L -o ${BASE_DIR}temp/${FILENAME} ${UPDATE_URL} >> ${LOG_DIR}update.log
 
     echo "Unzipping files to temporary folder..." >> ${LOG_DIR}update.log
-    unzip ${SCRIPT_DIR}../temp/${FILENAME} -d ${SCRIPT_DIR}../temp >> ${LOG_DIR}update.log
+    unzip ${BASE_DIR}temp/${FILENAME} -d ${BASE_DIR}temp >> ${LOG_DIR}update.log
 
     echo "Moving files from temporary folder to application path..." >> ${LOG_DIR}update.log
-    mv -f ${SCRIPT_DIR}../temp/${DIRECTORY}/* ${SCRIPT_DIR}../ >> ${LOG_DIR}update.log
+    cd ${BASE_DIR}temp/${DIRECTORY}
+    find . -mindepth 1 -exec mv -t ${SCRIPT_DIR}../ {} + >> ${LOG_DIR}update.log
 
     echo "Cleaning up files..." >> ${LOG_DIR}update.log
-    rm -rf ${SCRIPT_DIR}../temp >> ${LOG_DIR}update.log
+    #rm -rf ${SCRIPT_DIR}../temp >> ${LOG_DIR}update.log
     #CLEAR LOG AND WRITE TO FILE
     echo "<h4><b>UPDATE FINISHED, PLEASE REBOOT DEVICE!</b></h4>" > ${LOG_DIR}update.log
 fi
