@@ -1,14 +1,14 @@
 # Tunnel GUI (T1)
 _A very user-friendly VPN Tunnel for connecting multiple locations as it's ONE_
 
-##Table of Contents
+## Table of Contents
 - [Overview](#overview)
 - [Installing on a Rasperry Pi (method1)](#installing-on-a-raspberry-pi-2345-method-1))
 - [Installing on a Rasperry/Odroid or other device (method2)](#installing-on-a-raspberry-pi-or-other-system-method-2))
 - [Installing on Hyper-V/VMWare/VirtualBox or Proxmox](#installing-on-hyper-v-vmware-virtualbox-or-proxmox)
 - [Installing manually](#installing-manually-on-you-LinuxDebianCentOSRHEL-machine)
 - [Installing on Docker (for development purposes)](#running-on-docker-for-development-purposes)
-- [Eplanation about the files](#explanation_about_the_files)
+- [Eplanation about the files](#explanation-about-the-files)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -23,7 +23,7 @@ When you want to enroll it yourself, you can use a **physical device** like a Ra
 
 
 ## Installing on a Raspberry Pi 2/3/4/5 (method 1)
-1. Download the latest version for Raspberry Pi from the Releases page.
+1. Download the latest version for Raspberry Pi from the [Releases](https://github.com/roelbroersma/tunnel-gui/releases) page.
 2. Unpack the .zip file and use [balenaEtcher](https://www.balena.io/etcher/) to put the .iso on a microSD card.
 3. Put the microSD card in the Pi, connect the Pi to your network using an ethernet cable and start the Pi. It might be convenient to attach a monitor and keyboard but it's not required.
 4. After the whole unattended installation process finished, you can login to http://<ip address>:8080 using password: tunnel1. You can also login using SSH. Username: dietpi, Password: tunnel1
@@ -82,7 +82,7 @@ Run the application with this command:
 You can contribute to this project by buying a T1 device. 100% of the money is used to support this project.
 Want to help coding or have a good idea? Use the [issue tracker](https://github.com/roelbroersma/tunnel-gui/issues) or send me an email at: info@roelbroersma.nl
 
-# License
+## License
 This project is open-source. You may use/distribute/change it for personal use.
 It is not allowed to sell your own device with this software, if you want to do this, please contact me at: info@roelbroersma.nl
 
