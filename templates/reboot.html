@@ -1,0 +1,21 @@
+{% extends 'new-base.html' %}
+{% block title %}Update{% endblock %}
+{% block content %}
+	<h3 class="mb-5">Reboot</h3>
+
+	<form method="POST" id="RebootForm">
+        {{ form.csrf_token }}
+
+	<div class="reboot">
+		<div class="row">
+			<p class="col-8">To reboot the device, press the button below. Depending on the hardware it will take 30sec. till 2 minutes. Webinterface and Tunnel will be unavailable during reboot.</p>
+		</div>
+		<div class="row">
+			<p class="col-4">{{ form.reboot }}</p>
+		</div>
+	</div>
+	</div>
+
+	</form>
+
+{% endblock %}

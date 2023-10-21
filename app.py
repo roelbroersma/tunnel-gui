@@ -13,7 +13,7 @@ from flask import send_file
 from pydantic import BaseModel
 
 from forms import IpAddressChangeForm, PasswordForm, SignInForm, UpdateForm, RebootForm, TunnelMasterForm, TunnelNonMasterForm
-from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration, handle_uploaded_file, core_upgrade, get_version, app_upgrade
+from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration, handle_uploaded_file, core_upgrade, get_version, app_upgrade, do_reboot
 
 
 from flask_wtf.csrf import CSRFProtect
@@ -317,8 +317,11 @@ def update():
 @do_response_from_context
 def reboot():
     form = RebootForm(request.form, meta={"csrf": True})
+
+    if form.is_submitted():
+        do_reboot()
+
     return {
-        'message': message,
         'form': form,
     }
 

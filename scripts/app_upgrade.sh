@@ -64,12 +64,12 @@ if [ "$UPDATE" == "now" ]; then
     rm -rf ${BASE_DIR}temp/*
 
     echo "Downloading latest vesion..." > ${LOG_DIR}update.log
-    curl -L -o ${BASE_DIR}temp/${FILENAME} ${UPDATE_URL} >> ${LOG_DIR}update.log
+    curl -L -o ${BASE_DIR}temp/${FILENAME} ${UPDATE_URL} >> ${LOG_DIR}update.log 2>&1
 
     echo "Unzipping files to temporary folder..." >> ${LOG_DIR}update.log
     unzip ${BASE_DIR}temp/${FILENAME} -d ${BASE_DIR}temp >> ${LOG_DIR}update.log
 
-    echo "Moving files from temporary folder to application path..." >> ${LOG_DIR}update.log
+    echo "Moving files from temporary folder to application path..." >> ${LOG_DIR}update.log 2>&1
     cp -R -f ${BASE_DIR}temp/${DIRECTORY}/* ${BASE_DIR} >> ${LOG_DIR}update.log
 
     echo "Cleaning up files..." >> ${LOG_DIR}update.log
