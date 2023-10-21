@@ -1,0 +1,34 @@
+REFRESH_RATE=5
+USER_COLOUR_INDEX=3
+TEMPERATURE_OUTPUT_TYPE=1
+OUTPUT_DISPLAY_INDEX=0
+
+NETWORK_USAGE_CURRENT_OUTPUT_TYPE=0
+
+BLANK_SCREEN_AT_SPECIFIC_TIME_ENABLED=0
+BLANK_SCREEN_TIME_HOUR_START=0
+BLANK_SCREEN_TIME_HOUR_END=0
+
+aEnabledScenes[0]=1
+aEnabledScenes[1]=0
+aEnabledScenes[2]=0
+aEnabledScenes[3]=0
+aEnabledScenes[4]=0
+aEnabledScenes[5]=1
+aEnabledScenes[6]=1
+aEnabledScenes[7]=0
+aEnabledScenes[8]=0
+aEnabledScenes[9]=0
+STORAGE_PATH[0]='/'
+STORAGE_NAME[0]='Flash/RootFS Storage:    '
+STORAGE_PATH[1]='/mnt/usb_1'
+STORAGE_NAME[1]='Storage 1:               '
+STORAGE_PATH[2]='/mnt/usb_2'
+STORAGE_NAME[2]='Storage 2:               '
+STORAGE_PATH[3]='/mnt/usb_3'
+STORAGE_NAME[3]='Storage 3:               '
+STORAGE_PATH[4]='/mnt/usb_4'
+STORAGE_NAME[4]='Storage 4:               '
+STORAGE_PATH[5]='/mnt/usb_5'
+STORAGE_NAME[5]='Storage 5:               '
+

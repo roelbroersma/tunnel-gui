@@ -32,7 +32,7 @@ When you want to enroll it yourself, you can use a **physical device** like a Ra
 We recommend setting up the Tunnel GUI on a Raspberry Pi 2/3/4. Running it on an Odroid or other devices which can run the DietPi image is possible and even devices with non-DietPi images might be possible but we still recommend the Raspberry Pi because of stability and because our developpers also use it.
 1. Download the [DietPi](https://dietpi.com/) image for your device (eg. for Raspberry Pi 2/3/4 or Odroid)
 2. Install the DietPi image to a MicroSD card using [balenaEtcher](https://www.balena.io/etcher/).
-3. Copy the [modified dietpi.txt](https://github.com/roelbroersma/tunnel-gui/blob/main/dietpi.txt) to /boot/dietpi.txt on the microSD card. It will use it on first boot.
+3. Copy the [modified dietpi.txt](https://github.com/roelbroersma/tunnel-gui/blob/main/dietpi/dietpi.txt) to /boot/dietpi.txt on the microSD card. It will use it on first boot.
 4. Startup your device with the microSD card with the the DietPi image.
 5. When you startup your device, it will automatically obtain an IP address from DHCP and install the tunnel-gui. If it didn't got an address from DHCP, the tunnel-gui couldn't be installed and you have to do it manually by typing the following at the prompt:
 `wget -q -O - https://github.com/roelbroersma/tunnel-gui/raw/main/install.txt | bash`

@@ -61,6 +61,9 @@ touch ${LOG_PATH}
 echo "Setting file permissions on scripts"
 chmod -R +x scripts/
 
+echo "Copying DietPi-CloudShell config for small TFT display"
+cp dietpi/.dietpi-cloudshell /boot/dietpi/.dietpi-cloudshell 
+
 echo "Instaling as a Service so it will run after rebooting or network restarts"
 cp t1tunnel.service /etc/systemd/system/t1tunnel.service
 systemctl daemon-reload
