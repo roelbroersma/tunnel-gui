@@ -71,16 +71,16 @@ elif [ "$UPDATE" == "now" ]; then
     mkdir -p ${LOG_DIR}
     if [ -f /boot/dietpi/.version ]; then
 	echo "Update DietPi Now (non-interactive)"
-	/boot/dietpi/dietpi-update 1 > ${LOG_DIR}update.log
+	/boot/dietpi/dietpi-update 1 > ${LOG_DIR}update.log 2>&1
     elif command -v apt-get > /dev/null; then
 	echo "Update OS with APT (non-interactive)"
-	apt-get update -y && apt-get upgrade -y > ${LOG_DIR}update.log
+	apt-get update -y && apt-get upgrade -y > ${LOG_DIR}update.log 2>&1
     elif command -v yum > /dev/null; then
 	echo "Update OS with YUM (non-interactive)"
-        yum -y update > ${LOG_DIR}update.log
+        yum -y update > ${LOG_DIR}update.log 2>&1
     elif command -v dnf > /dev/null; then
 	echo "Update OS with DNF (non-interactive)"
-	dnf -y update > ${LOG_DIR}update.log
+	dnf -y update > ${LOG_DIR}update.log 2>&1
     fi
     #CLEAR LOG AND WRITE TO FILE
     echo "<h4><b>UPDATE FINISHED, PLEASE REBOOT DEVICE!</b></h4>" > ${LOG_DIR}update.log

@@ -1,0 +1,23 @@
+{% extends 'new-base.html' %}
+{% block title %}Rebooting{% endblock %}
+{% block content %}
+	<script type="text/javascript">
+		// Set Timeout to 60 seconds
+		setTimeout(function() {
+					window.location.href = '/';
+				      }, 60000);
+    </script>
+	<h3 class="mb-5">Rebooting</h3>
+
+	<div class="reboot">
+		<div class="row">
+			<p class="col-8">System is rebooting...</p>
+		</div>
+		<br />
+		<div class="row">
+			<p class="col-8">Please wait, you will be redirected to the homepage in 60 seconds.</p>
+		</div>
+	</div>
+	</div>
+
+{% endblock %}

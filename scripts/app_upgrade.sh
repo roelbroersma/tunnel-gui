@@ -72,6 +72,11 @@ if [ "$UPDATE" == "now" ]; then
     echo "Moving files from temporary folder to application path..." >> ${LOG_DIR}update.log 2>&1
     cp -R -f ${BASE_DIR}temp/${DIRECTORY}/* ${BASE_DIR} >> ${LOG_DIR}update.log
 
+    echo "Running after update scripts..." >> ${LOG_DIR}update.log
+    if [ -f ${BASE_DIR}upgrade.txt ]
+	cat ${BASE_DIR}upgrade.txt | bash  >> ${LOG_DIR}update.log 2>&1
+    fi
+
     echo "Cleaning up files..." >> ${LOG_DIR}update.log
     rm -rf ${SCRIPT_DIR}../temp >> ${LOG_DIR}update.log
     #CLEAR LOG AND WRITE TO FILE

@@ -7,13 +7,13 @@ import subprocess
 import uuid
 
 from dotenv import load_dotenv
-from flask import Flask, redirect, url_for, request, session
+from flask import Flask, redirect, url_for, request, Response, session
 from flask import render_template as flask_render_template
 from flask import send_file
 from pydantic import BaseModel
 
 from forms import IpAddressChangeForm, PasswordForm, SignInForm, UpdateForm, RebootForm, TunnelMasterForm, TunnelNonMasterForm
-from utils import do_change_password, change_ip, get_token, get_passwords, IP_CONFIG_FILE, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration, handle_uploaded_file, core_upgrade, get_version, app_upgrade, do_reboot
+from utils import do_change_password, change_ip, get_token, get_passwords, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration, handle_uploaded_file, core_upgrade, get_version, app_upgrade, do_reboot
 
 
 from flask_wtf.csrf import CSRFProtect
@@ -77,6 +77,10 @@ def render_template(route_name: str, **kwargs):
             svg_icon_id='exit'
         ),
     ]
+
+#    if route_name == "rebooting":
+#        template_name = f"{route_name}.html"
+
     template_name = f"{route_name}.html"
     return flask_render_template(template_name, **kwargs, menu_items=menu_items, active_route_method_name=route_name)
 
@@ -92,6 +96,10 @@ def do_response_from_context(make_context_func):
 
         context = make_context_func(*args, **kwargs)
         route_name = make_context_func.__name__
+
+        if isinstance(context, Response):
+            return context  # Return the response object directly
+
         if context is not None and 'callback' in context:
             return context['callback']()
 
@@ -104,14 +112,12 @@ def do_response_from_context(make_context_func):
 def signin():
     form = SignInForm(request.form, meta={"csrf": True})
 
-    if request.method == "POST":
-        is_ok = form.validate_on_submit()
+    if form.validate_on_submit():
+        raw_password = form.password.data
+        response = redirect(url_for('index'), code=302)
+        response.set_cookie('userToken', get_token(raw_password))
+        return response
 
-        if is_ok:
-            raw_password = form.password.data
-            response = redirect(url_for('index'), code=302)
-            response.set_cookie('userToken', get_token(raw_password))
-            return response
     return flask_render_template("signin.html", form=form)
 
 
@@ -128,13 +134,11 @@ def index():
     """This renders IP Address template"""
     form = IpAddressChangeForm(request.form, meta={"csrf": True})
 
-    if request.method == "POST":
-        is_ok = form.validate_on_submit()
-
-        if is_ok:
-            form_generated_data = form.get_generated_data()
-            change_ip(form_generated_data)
-    elif request.method == "GET":
+    if form.validate_on_submit():
+        form_generated_data = form.get_generated_data()
+        change_ip(form_generated_data)
+    
+    else:
         ip_change_info = show_ip()
 
         form.ip_address.default = ip_change_info.ip_address or None
@@ -155,13 +159,10 @@ def index():
 def change_password():
     form = PasswordForm(request.form, meta={"csrf": True})
 
-    if request.method == "POST":
-        is_ok = form.validate_on_submit()
-
-        if is_ok:
-            # shelve sync
-            do_change_password(form.pass1.data)
-            return {'callback': lambda: redirect(url_for('signin'), code=302)}
+    if form.validate_on_submit():
+        # shelve sync
+        do_change_password(form.pass1.data)
+        return {'callback': lambda: redirect(url_for('signin'), code=302)}
     return {'form': form}
 
 
@@ -225,7 +226,6 @@ def tunnel():
         }
 
 
-    print(tunnel_non_master_form.file_upload)
     if tunnel_non_master_form.validate_on_submit():
         #SAVE UPLOADED FILE
         success1 = handle_uploaded_file(request.files['file_upload'])
@@ -281,7 +281,7 @@ def update():
 
     message=''
     try:
-        if form.is_submitted():
+        if form.validate_on_submit():
             if 'check_online' in request.form:
                 version = get_version("all")
             elif 'update_auto_enable' in request.form:
@@ -318,12 +318,18 @@ def update():
 def reboot():
     form = RebootForm(request.form, meta={"csrf": True})
 
-    if form.is_submitted():
+    if form.validate_on_submit():
         do_reboot()
+        return redirect(url_for('rebooting'))
 
     return {
         'form': form,
     }
+
+
+@app.route("/rebooting")
+def rebooting():
+    return render_template('rebooting')
 
 
 @app.route("/diagnostics", methods=["GET", "POST"])
@@ -348,7 +354,7 @@ def diagnostics():
 @app.route("/openvpn-status", methods=["GET", ])
 def get_openvpn_status():
     try:
-        with open(os.getenv('OPENVPN_LOG_PATH', '/'), 'r+') as f:
+        with open(os.getenv('OPENVPN_STATUS_PATH', '/'), 'r+') as f:
             return f.readlines()
     except:
         pass
@@ -368,13 +374,14 @@ def get_update_log():
 if __name__ == "__main__":
     is_debug = os.getenv('DEBUG', 'False').lower() == 'true'
     port = os.getenv('PORT', 8080)
-    try:
-        with open(BASE_DIR / IP_CONFIG_FILE, 'r') as f:
-            try_read = f.read()
-    except Exception:
-        with open(BASE_DIR / IP_CONFIG_FILE, 'w') as f:
-            default_config = IpAddressChangeInfo('dhcp', None, None, None, None)
-            f.write(default_config.to_json())
+    IP_CONFIG_FILE = BASE_DIR / "ipconfig.json"
+#    try:
+#        with open(BASE_DIR / IP_CONFIG_FILE, 'r') as f:
+#            try_read = f.read()
+#    except Exception:
+#        with open(BASE_DIR / IP_CONFIG_FILE, 'w') as f:
+#            default_config = IpAddressChangeInfo('dhcp', None, None, None, None)
+#            f.write(default_config.to_json())
 
     if is_debug:
         app.run(debug=is_debug, host="0.0.0.0")

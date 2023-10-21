@@ -28,40 +28,44 @@ install_packages() {
   fi
 }
 
-# Install required packages
+echo "Install required Software packages"
 install_packages
 
-
+echo "Installing Python Packages"
 pip install -r https://github.com/roelbroersma/tunnel-gui/raw/main/requirements.txt
 
-wget https://github.com/roelbroersma/tunnel-gui/archive/main.zip -O "/tmp/tunnel-gui_main.zip"
-unzip -o /tmp/tunnel-gui_main.zip -d /usr/bin/
-rm /tmp/tunnel-gui_main.zip
-cd /usr/bin/tunnel-gui-main
+echo "Downloading and Unpacking latest Tunnel GUI Software"
+cd /tmp
+wget https://github.com/roelbroersma/tunnel-gui/archive/main.zip -O "/tmp/tunnel-gui-main.zip"
+unzip -o /tmp/tunnel-gui_main.zip -d /tmp/
+cp -R -f /tmp/tunnel-gui-main /usr/bin/tunnel-gui
+rm -rf /tmp/tunnel-gui-main*
+cd /usr/bin/tunnel-gui
 
 echo "Setting default password to: defaultpassword"
 echo "Please change the default password immediately by changing the .env file and the web_password.txt file!"
+echo 'tunnel1' > web_password.txt;
 
-echo 'defaultpassword' > web_password.txt;
-
-echo;
 echo "Generating .env file with random secret key..."
 (
   (echo 'SECRET_KEY='; head -c 80 /dev/random | base64) | tr -d [:cntrl:];
   echo;
   echo 'DEBUG=False';
-  echo 'SUPER_PASSWORD=defaultpassword';
-  echo LOG_PATH=/var/log/tunnel-gui.log
+  echo 'SUPER_PASSWORD=VerySecretPassword';
+  echo OPENVPN_STATUS_PATH=/var/log/tunnel-gui.log
 ) > .env
 
-touch /var/log/tunnel-gui.log;
+echo "Creating OpenVPN Status File"
+touch ${LOG_PATH}
 
 echo "Setting file permissions on scripts"
 chmod -R +x scripts/
 
-
 echo "Instaling as a Service so it will run after rebooting or network restarts"
 cp t1tunnel.service /etc/systemd/system/t1tunnel.service
+systemctl daemon-reload
+systemctl enable t1tunnel.service
+systemctl start t1tunnel.service
 
 echo "Succesfully installed the Tunneling GUI. Check the next steps in README.md file"
 echo;

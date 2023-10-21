@@ -9,9 +9,10 @@ import zipfile
 
 BASE_DIR = Path(__file__).parent
 SCRIPT_DIR = BASE_DIR / 'scripts/'
-CONFIG_DIR = BASE_DIR / "configs\/" 
+CONFIG_DIR = BASE_DIR / "configs/" 
+SERVER_CONFIG_FILE = CONFIG_DIR / "t1config.json"
 DEFAULT_EXECUTABLE = '/bin/bash'
-IP_CONFIG_FILE = 'ip_config.json'
+
 UPDATE_FILE = "https://github.com/roelbroersma/tunnel-gui/archive/refs/heads/main.zip"
 
 class IpAddressChangeInfo:
@@ -212,14 +213,14 @@ def generate_client_config():
 
 
 def save_tunnel_configuration(data):
-    with open(CONFIG_DIR / "t1config.json", "w") as server_config_file:
+    with open(SERVER_CONFIG_FILE, "w") as server_config_file:
         json.dump(data, server_config_file, indent=2)
 
 
 def load_device_type():
-    if os.path.exists(CONFIG_DIR / "t1config.json"):
+    if os.path.exists(SERVER_CONFIG_FILE):
         try:
-            with open(server_conf_file, 'r') as file:
+            with open(SERVER_CONFIG_FILE, 'r') as file:
                 return "master"
         except:
             return "notMaster"
@@ -229,9 +230,10 @@ def load_device_type():
 
 
 def load_tunnel_configuration(form):
-    if os.path.exists(CONFIG_DIR / "t1config.json"):
+
+    if os.path.exists(SERVER_CONFIG_FILE):
         try:
-            with open(server_conf_file, 'r') as file:
+            with open(SERVER_CONFIG_FILE, 'r') as file:
                 config_data = json.load(file)
                 #print(config_data)
 
@@ -268,12 +270,12 @@ def load_tunnel_configuration(form):
                         form.clients[i].client_networks[j].client_subnet.data = client_network["client_subnet"]
 
         except FileNotFoundError:
-            print(f"Config file '{server_conf_file}' not found.")
+            print(f"Config file '{SERVER_CONFIG_FILE}' not found.")
         except json.JSONDecodeError as e:
             print(f"Fout bij het decoderen van JSON: {e}")
     else:
         #THIS IS THE DEFAULT IF NO FILE CAN BE LOADED
-        print(f"Config file '{server_conf_file}' does not exist.")
+        print(f"Config file '{SERVER_CONFIG_FILE}' does not exist.")
         form.public_ip_or_ddns_hostname.data = json.loads(subprocess.Popen(SCRIPT_DIR / "show_public_ip.sh", stdout=subprocess.PIPE).communicate()[0])["public_ipv4"]
         form.mdns.data = True
 
@@ -310,7 +312,9 @@ def app_upgrade(action):
         subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
 
 def do_reboot():
-    subprocess.run([str(SCRIPT_DIR / "do_reboot.sh")], shell=True, executable=DEFAULT_EXECUTABLE)
+    command = [str(SCRIPT_DIR / "do_upgrade.sh")]
+    command_str = " ".join(command)
+    subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
     
 
 def get_version(type="local"):
