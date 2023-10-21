@@ -3,8 +3,8 @@ _A very user-friendly VPN Tunnel for connecting multiple locations as it's ONE_
 
 ## Table of Contents
 - [Overview](#overview)
-- [Installing on a Rasperry Pi (method1)](#installing-on-a-raspberry-pi-2345-method-1))
-- [Installing on a Rasperry/Odroid or other device (method2)](#installing-on-a-raspberry-pi-or-other-system-method-2))
+- [Installing on a Rasperry Pi (method1)](#installing-on-a-raspberry-pi-2345-method-1)
+- [Installing on a Rasperry/Odroid or other device (method2)](#installing-on-a-raspberry-pi-or-other-system-method-2)
 - [Installing on Hyper-V/VMWare/VirtualBox or Proxmox](#installing-on-hyper-v-vmware-virtualbox-or-proxmox)
 - [Installing manually](#installing-manually-on-you-LinuxDebianCentOSRHEL-machine)
 - [Installing on Docker (for development purposes)](#running-on-docker-for-development-purposes)
@@ -41,7 +41,7 @@ We recommend setting up the Tunnel GUI on a Raspberry Pi 2/3/4. Running it on an
 
 
 ## Installing on Hyper-V, VMWare, VirtualBox or Proxmox
-1. Download the DietPi image for Hyper-V/VMWare/Virtualbox or Proxmox (yes, they supply separate images for this at www.dietpi.com
+1. Download the DietPi image for Hyper-V/VMWare/Virtualbox or Proxmox (yes, they supply separate images for this at [dietpi.com](https://www.dietpi.com)
 2. Create a new VM and supply the downloaded file.
 3. Start the VM and login to the command prompt, then run the following: `wget -q -O - https://github.com/roelbroersma/tunnel-gui/raw/main/install.txt | bash`
 This will download the latest repository and install all Python and Flask requiments. It will also create a default .env file, logfile and default password: tunnel1
