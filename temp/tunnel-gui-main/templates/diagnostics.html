@@ -1,0 +1,48 @@
+{% extends 'new-base.html' %}
+{% block title %}Diagnostics{% endblock %}
+{% block content %}
+	<style>
+        .diagnostic-info p {
+            font-weight: 700;
+        }
+
+        .diagnostic-info p.info {
+            font-weight: 400;
+        }
+	</style>
+	<h3 class="mb-5">Diagnostics</h3>
+	<h4>IP Info</h4>
+	<div class="diagnostic-info">
+		<div class="row">
+			<p class="col-4">Mode:</p>
+			<p class="info col-6">{{ ip_type }}</p>
+		</div>
+		<div class="row">
+			<p class="col-4">IP Address:</p>
+			<p class="info col-6">{{ ip_address }}</p>
+		</div>
+		<div class="row">
+			<p class="col-4">Subnet Mask: </p>
+			<p class="info col-6">{{ subnet }}</p>
+		</div>
+		<div class="row">
+			<p class="col-4">Gateway: </p>
+			<p class="info col-6">{{ gateway }}</p>
+		</div>
+		<div class="row">
+			<p class="col-4">DNS Servers: </p>
+			<p class="info col-6">{{ dns_servers }}</p>
+		</div>
+		<div class="row">
+			<p class="col-4">Public IP Address: </p>
+			<p class="info col-6">{{ public_ip_address }}</p>
+		</div>
+		<br/>
+		<div class="row">
+			<p class="col-4">Tunnel info: </p>
+			{% with height='50vh' %}
+				{% include 'logs_block.html' %}
+			{% endwith %}
+		</div>
+	</div>
+{% endblock %}

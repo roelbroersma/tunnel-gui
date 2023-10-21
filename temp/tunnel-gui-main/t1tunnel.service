@@ -1,0 +1,14 @@
+[Unit]
+Description=T1 Tunnel
+After=network.target
+
+[Service]
+#BECAUSE OUR APP.PY WILL TRIGGER A CHANGE_BRIDGE.SH SCRIPT WHICH WILL DO A SERVICE RESTART NETWORK AND AFTER THAT IT WILL CHANGE SOME VPN CONFIG. LET IT WAIT 5 SECONDS AFTER RESTARTING THE NETWORK CONFIG BEFORE RESTARTING THIS APP.PY
+ExecStartPre=/bin/sleep 5
+ExecStart=/usr/bin/python3 /usr/bin/tunnel-gui-main/app.py
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

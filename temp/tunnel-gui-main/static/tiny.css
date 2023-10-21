@@ -1,0 +1,31 @@
+.vertical-line {
+  display: inline-block;
+  border-right: 5px solid #ccc;
+  height: 70vh;
+  /* padding-left: 300px; */
+  /* margin-left: 3000px; */
+}
+
+ul.vertical-line li {
+  padding-right: 50px;
+  padding-top: 20px;
+  overflow: hidden;
+}
+
+.submit:hover {
+  color: white !important;
+  background-color: blue !important;
+  border-color: #5b288e !important;
+}
+
+.arrow {
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+}
+
+.right {
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+}
