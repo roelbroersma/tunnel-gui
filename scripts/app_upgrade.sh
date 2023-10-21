@@ -73,7 +73,7 @@ if [ "$UPDATE" == "now" ]; then
     cp -R -f ${BASE_DIR}temp/${DIRECTORY}/* ${BASE_DIR} >> ${LOG_DIR}update.log
 
     echo "Cleaning up files..." >> ${LOG_DIR}update.log
-    #rm -rf ${SCRIPT_DIR}../temp >> ${LOG_DIR}update.log
+    rm -rf ${SCRIPT_DIR}../temp >> ${LOG_DIR}update.log
     #CLEAR LOG AND WRITE TO FILE
     echo "<h4><b>UPDATE FINISHED, PLEASE REBOOT DEVICE!</b></h4>" > ${LOG_DIR}update.log
 fi
