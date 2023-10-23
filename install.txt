@@ -16,15 +16,15 @@ install_packages() {
   elif command -v apt-get > /dev/null 2>&1; then
     echo "Using apt-get to install Packages..."
     sudo apt-get update
-    sudo apt-get install -y zip unzip wget sed openssl openvpn easy-rsa
+    sudo apt-get install -y zip unzip wget sed mawk openssl openvpn easy-rsa python3
   elif command -v yum > /dev/null 2>&1; then
     echo "Using yum to install Packages..."
     sudo yum update -y
-    sudo yum install -y zip unzip wget sed openssl openvpn easy-rsa
+    sudo yum install -y zip unzip wget sed mawk openssl openvpn easy-rsa python3
   elif command -v dnf > /dev/null 2>&1; then
     echo "Using dnf to install Packages..."
-    sudo dnf update -y
-    sudo dnf install -y zip unzip wget sed openssl openvpn easy-rsa
+    sudo dnf makecache --refresh
+    sudo dnf install -y zip unzip wget sed mawk openssl openvpn easy-rsa python3
   else
     echo "No known package manager found, exiting."
     exit 1
@@ -43,7 +43,7 @@ pip install -r https://raw.githubusercontent.com/roelbroersma/tunnel-gui/main/re
 echo "Downloading and Unpacking latest Tunnel GUI Software"
 cd /tmp
 wget https://github.com/roelbroersma/tunnel-gui/archive/main.zip -O "/tmp/tunnel-gui-main.zip"
-unzip -o /tmp/tunnel-gui_main.zip -d /tmp/
+unzip -o /tmp/tunnel-gui-main.zip -d /tmp/
 cp -R -f /tmp/tunnel-gui-main /usr/bin/tunnel-gui
 rm -rf /tmp/tunnel-gui-main*
 cd /usr/bin/tunnel-gui
