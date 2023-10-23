@@ -38,23 +38,24 @@ install_packages() {
   fi
 }
 
-echo "Install required Software packages"
+echo "Install required Software packages."
 install_packages
 echo;
 
-echo "Stopping OpenVPN service since it will probably be started after installation"
+echo "Stopping OpenVPN service since it will probably be started after installation."
 systemctl disable openvpn@server.service
 echo;
 
-echo "Installing Python Packages"
+echo "Installing Python Packages."
 pip install -r https://raw.githubusercontent.com/roelbroersma/tunnel-gui/main/requirements.txt 
 echo;
 
-echo "Downloading and Unpacking latest Tunnel GUI Software"
+echo "Downloading and Unpacking latest Tunnel GUI Software."
 cd /tmp
 wget https://github.com/roelbroersma/tunnel-gui/archive/main.zip -O "/tmp/tunnel-gui-main.zip"
 unzip -o /tmp/tunnel-gui-main.zip -d /tmp/
-cp -R -f /tmp/tunnel-gui-main /usr/bin/tunnel-gui
+mkdir -p /usr/bin/tunnel-gui
+cp -R -f /tmp/tunnel-gui-main/* /usr/bin/tunnel-gui
 rm -rf /tmp/tunnel-gui-main*
 cd /usr/bin/tunnel-gui
 echo;
@@ -82,16 +83,16 @@ else
 fi
 echo;
 
-echo "Creating OpenVPN Status File"
+echo "Creating OpenVPN Status File."
 touch /var/log/tunnel-gui.log 
 echo;
 
-echo "Setting file permissions on scripts"
+echo "Setting file permissions on scripts."
 chmod -R +x scripts/
 echo;
 
 if [[ ${DIETPI_DETECTED} == True ]]; then
-    echo "Copying DietPi-CloudShell config for small TFT display"
+    echo "Copying DietPi-CloudShell config for small TFT display."
     cp dietpi/.dietpi-cloudshell /boot/dietpi/.dietpi-cloudshell
     echo;
     if ! grep -q "dtoverlay=rpi-display" /boot/config.txt; then
@@ -101,7 +102,7 @@ if [[ ${DIETPI_DETECTED} == True ]]; then
     fi
 fi
 
-echo "Installing as a Service so it will run after rebooting or network restarts"
+echo "Installing as a Service so it will run after rebooting or network restarts."
 cp t1tunnel.service /etc/systemd/system/t1tunnel.service
 systemctl daemon-reload
 systemctl enable t1tunnel.service
