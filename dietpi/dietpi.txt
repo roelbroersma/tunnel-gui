@@ -35,7 +35,7 @@ AUTO_SETUP_NET_USESTATIC=0
 AUTO_SETUP_NET_STATIC_IP=192.168.0.100
 AUTO_SETUP_NET_STATIC_MASK=255.255.255.0
 AUTO_SETUP_NET_STATIC_GATEWAY=192.168.0.1
-AUTO_SETUP_NET_STATIC_DNS=1.1.1.1 1.0.0.1
+AUTO_SETUP_NET_STATIC_DNS=9.9.9.9 1.0.0.1
 
 # Set to "1" to convert DHCP leased network settings into static settings automatically on first boot.
 AUTO_SETUP_DHCP_TO_STATIC=0
@@ -68,7 +68,7 @@ AUTO_UNMASK_LOGIND=0
 # - Option 0 = Copy your script to /boot/Automation_Custom_Script.sh and it will be executed automatically.
 # - Option 1 = Host your script online, then use e.g. AUTO_SETUP_CUSTOM_SCRIPT_EXEC=https://myweb.com/myscript.sh and it will be downloaded and executed automatically.
 # - Executed script log: /var/tmp/dietpi/logs/dietpi-automation_custom_script.log
-AUTO_SETUP_CUSTOM_SCRIPT_EXEC=https://github.com/roelbroersma/tunnel-gui/blob/main/install.txt
+AUTO_SETUP_CUSTOM_SCRIPT_EXEC=https://raw.githubusercontent.com/roelbroersma/tunnel-gui/main/install.txt
 
 # Restore a DietPi-Backup on first boot: 0 => disable | 1 => interactive restore (show list of found backups) | 2 => non-interactive restore (restore first found backup)
 # - Simply attach the drive/disk/stick with contains the backup. All attached drives will be mounted temporarily and searched automatically.
@@ -214,7 +214,7 @@ CONFIG_SOUNDCARD=none
 CONFIG_LCDPANEL=none
 
 # IPv6
-CONFIG_ENABLE_IPV6=1
+CONFIG_ENABLE_IPV6=0
 
 # APT mirrors which are applied to /etc/apt/sources.list | Values here will also be applied during 1st run setup
 # - Raspbian: https://www.raspbian.org/RaspbianMirrors

@@ -1,3 +1,5 @@
+#!/usr/bin/bash
+
 if [ "$EUID" -gt 0 ]
   then echo "Please run this script as Root, it will create a folder and install required Python libraries."
   exit
@@ -5,12 +7,13 @@ fi
 
 # MULTI-PLATFORM REQUIREMENTS INSTALLER
 install_packages() {
-  if grep -q "DietPi" /etc/os-release; then
+  if igrep -q "DietPi" /etc/os-release; then
     echo "Detected DietPi, using dietpi-software to install Packages..."
+    dietpi-software install 130 #PYTHON3 AND PIP
     dietpi-software install 16 # openVPN
     dietpi-software install 152 # Avahi-Daemon
     apt-get install -y zip unzip sed easy-rsa
-  elseif command -v apt-get > /dev/null 2>&1; then
+  elif command -v apt-get > /dev/null 2>&1; then
     echo "Using apt-get to install Packages..."
     sudo apt-get update
     sudo apt-get install -y zip unzip wget sed openssl openvpn easy-rsa
@@ -31,8 +34,11 @@ install_packages() {
 echo "Install required Software packages"
 install_packages
 
+echo "Stopping OpenVPN service since it will probably be started after installation"
+systemctl disable openvpn@server.service
+
 echo "Installing Python Packages"
-pip install -r https://github.com/roelbroersma/tunnel-gui/raw/main/requirements.txt
+pip install -r https://raw.githubusercontent.com/roelbroersma/tunnel-gui/main/requirements.txt 
 
 echo "Downloading and Unpacking latest Tunnel GUI Software"
 cd /tmp
@@ -56,7 +62,7 @@ echo "Generating .env file with random secret key..."
 ) > .env
 
 echo "Creating OpenVPN Status File"
-touch ${LOG_PATH}
+touch /var/log/tunnel-gui.log 
 
 echo "Setting file permissions on scripts"
 chmod -R +x scripts/
