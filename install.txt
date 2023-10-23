@@ -7,7 +7,7 @@ fi
 
 # MULTI-PLATFORM REQUIREMENTS INSTALLER
 install_packages() {
-  if igrep -q "DietPi" /etc/os-release; then
+  if grep -q "DietPi" /etc/os-release; then
     echo "Detected DietPi, using dietpi-software to install Packages..."
     dietpi-software install 130 #PYTHON3 AND PIP
     dietpi-software install 16 # openVPN
