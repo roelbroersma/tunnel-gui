@@ -15,20 +15,22 @@ install_packages() {
   if [[ ${DIETPI_DETECTED} == True ]]; then
     echo "Detected DietPi, using dietpi-software to install Packages..."
     /boot/dietpi/dietpi-software install 130 #PYTHON3 AND PIP
-    /boot/dietpi/dietpi-software install 16 # openVPN
+    /boot/dietpi/dietpi-software install 97 # openVPN
     /boot/dietpi/dietpi-software install 152 # Avahi-Daemon
+    echo;
+    echo "Install additional small packages using apt-get if not already installed..."
     apt-get install -y zip unzip sed mawk grep easy-rsa
   elif command -v apt-get > /dev/null 2>&1; then
-    echo "Using apt-get to install updates and Packages..."
+    echo "Using apt-get to install Packages..."
     apt-get update
     apt-get install -y zip unzip wget sed mawk grep openssl openvpn easy-rsa python3
   elif command -v yum > /dev/null 2>&1; then
-    echo "Using yum to install updates and Packages..."
-    yum -y update
+    echo "Using yum to install Packages..."
+    yum makecache -y
     yum -y install zip unzip wget sed mawk openssl grep openvpn easy-rsa python3
   elif command -v dnf > /dev/null 2>&1; then
-    echo "Using dnf to install updates and Packages..."
-    dnf -y update
+    echo "Using dnf to install Packages..."
+    dnf makecache -y
     dnf -y install zip unzip wget sed mawk openssl grep openvpn easy-rsa python3
   else
     echo "No known package manager found, exiting."
@@ -38,12 +40,15 @@ install_packages() {
 
 echo "Install required Software packages"
 install_packages
+echo;
 
 echo "Stopping OpenVPN service since it will probably be started after installation"
 systemctl disable openvpn@server.service
+echo;
 
 echo "Installing Python Packages"
 pip install -r https://raw.githubusercontent.com/roelbroersma/tunnel-gui/main/requirements.txt 
+echo;
 
 echo "Downloading and Unpacking latest Tunnel GUI Software"
 cd /tmp
@@ -52,14 +57,16 @@ unzip -o /tmp/tunnel-gui-main.zip -d /tmp/
 cp -R -f /tmp/tunnel-gui-main /usr/bin/tunnel-gui
 rm -rf /tmp/tunnel-gui-main*
 cd /usr/bin/tunnel-gui
+echo;
 
 if [[ ! -e web_password.txt ]]; then
-    echo "Setting web password to: defaultpassword"
+    echo "Setting web password to: tunnel1"
     echo "Please change the default passwords immediately by changing the .env file and the web_password.txt file!"
     echo 'tunnel1' > web_password.txt;
 else
     echo "We will not overwrite the password because a web_password.txt file already exists!"
 fi
+echo;
 
 if [[ ! -e .env ]]; then
     echo "Generating .env file with random secret key..."
@@ -73,27 +80,33 @@ if [[ ! -e .env ]]; then
 else
 	echo "We will not create a .env file because one already exists!"
 fi
+echo;
 
 echo "Creating OpenVPN Status File"
 touch /var/log/tunnel-gui.log 
+echo;
 
 echo "Setting file permissions on scripts"
 chmod -R +x scripts/
+echo;
 
 if [[ ${DIETPI_DETECTED} == True ]]; then
     echo "Copying DietPi-CloudShell config for small TFT display"
     cp dietpi/.dietpi-cloudshell /boot/dietpi/.dietpi-cloudshell
+    echo;
     if ! grep -q "dtoverlay=rpi-display" /boot/config.txt; then
 	echo "Enable small TFT display"
 	echo -e "\n#------- Enable TFT SPI Display -------\ndtoverlay=rpi-display" >> /boot/config.txt
+	echo;
     fi
 fi
 
-echo "Instaling as a Service so it will run after rebooting or network restarts"
+echo "Installing as a Service so it will run after rebooting or network restarts"
 cp t1tunnel.service /etc/systemd/system/t1tunnel.service
 systemctl daemon-reload
 systemctl enable t1tunnel.service
 systemctl start t1tunnel.service
+echo;
 
 echo "Succesfully installed the Tunneling GUI."
 echo ;
