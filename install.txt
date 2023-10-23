@@ -6,7 +6,7 @@ if [ "$EUID" -gt 0 ]
 fi
 
 #Check for DIETPI
-if [[ $(uname -a) == *DietPi* ]] || [[ -f /DietPi/dietpi/.version ]]; then
+if [[ $(uname -a) == *DietPi* ]] || [[ -f /boot/dietpi/.version ]]; then
     DIETPI_DETECTED=True
 fi
 
