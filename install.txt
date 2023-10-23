@@ -6,7 +6,7 @@ if [ "$EUID" -gt 0 ]
 fi
 
 #Check for DIETPI
-if [[ $(uname -a) == *DietPi* -o ]] || [[ -f /DietPi/dietpi/.version ]]; then
+if [[ $(uname -a) == *DietPi* ]] || [[ -f /DietPi/dietpi/.version ]]; then
     DIETPI_DETECTED=True
 fi
 
@@ -14,22 +14,22 @@ fi
 install_packages() {
   if [[ ${DIETPI_DETECTED} == True ]]; then
     echo "Detected DietPi, using dietpi-software to install Packages..."
-    dietpi-software install 130 #PYTHON3 AND PIP
-    dietpi-software install 16 # openVPN
-    dietpi-software install 152 # Avahi-Daemon
+    /boot/dietpi/dietpi-software install 130 #PYTHON3 AND PIP
+    /boot/dietpi/dietpi-software install 16 # openVPN
+    /boot/dietpi/dietpi-software install 152 # Avahi-Daemon
     apt-get install -y zip unzip sed mawk grep easy-rsa
   elif command -v apt-get > /dev/null 2>&1; then
-    echo "Using apt-get to install Packages..."
-    sudo apt-get update
-    sudo apt-get install -y zip unzip wget sed mawk grep openssl openvpn easy-rsa python3
+    echo "Using apt-get to install updates and Packages..."
+    apt-get update
+    apt-get install -y zip unzip wget sed mawk grep openssl openvpn easy-rsa python3
   elif command -v yum > /dev/null 2>&1; then
-    echo "Using yum to install Packages..."
-    sudo yum update -y
-    sudo yum install -y zip unzip wget sed mawk openssl grep openvpn easy-rsa python3
+    echo "Using yum to install updates and Packages..."
+    yum -y update
+    yum -y install zip unzip wget sed mawk openssl grep openvpn easy-rsa python3
   elif command -v dnf > /dev/null 2>&1; then
-    echo "Using dnf to install Packages..."
-    sudo dnf makecache --refresh
-    sudo dnf install -y zip unzip wget sed mawk openssl grep openvpn easy-rsa python3
+    echo "Using dnf to install updates and Packages..."
+    dnf -y update
+    dnf -y install zip unzip wget sed mawk openssl grep openvpn easy-rsa python3
   else
     echo "No known package manager found, exiting."
     exit 1
