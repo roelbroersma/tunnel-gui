@@ -67,7 +67,7 @@ if [ "$UPDATE" == "now" ]; then
     curl -L -o ${BASE_DIR}temp/${FILENAME} ${UPDATE_URL} >> ${LOG_DIR}update.log 2>&1
 
     echo "Unzipping files to temporary folder..." >> ${LOG_DIR}update.log
-    unzip ${BASE_DIR}temp/${FILENAME} -d ${BASE_DIR}temp >> ${LOG_DIR}update.log
+    unzip -q -o ${BASE_DIR}temp/${FILENAME} -d ${BASE_DIR}temp >> ${LOG_DIR}update.log
 
     echo "Coying files from temporary folder to application path..." >> ${LOG_DIR}update.log 2>&1
     shopt -s dotglob #ADD OPTION TO ALLOW WILDCARD MATCHING OF HIDDEN FILES
