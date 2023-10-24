@@ -330,6 +330,6 @@ def get_version(type="local"):
         except:
             result = "{}"
         return result
-    else
+    else:
         return "{}"
 
