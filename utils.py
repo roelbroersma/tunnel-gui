@@ -8,10 +8,10 @@ import io
 import zipfile
 
 BASE_DIR = Path(__file__).parent
-SCRIPT_DIR = BASE_DIR / 'scripts/'
+SCRIPT_DIR = BASE_DIR / "scripts/"
 CONFIG_DIR = BASE_DIR / "configs/" 
 SERVER_CONFIG_FILE = CONFIG_DIR / "t1config.json"
-DEFAULT_EXECUTABLE = '/bin/bash'
+DEFAULT_EXECUTABLE = "/bin/bash"
 
 UPDATE_FILE = "https://github.com/roelbroersma/tunnel-gui/archive/refs/heads/main.zip"
 
@@ -299,7 +299,7 @@ def handle_uploaded_file(file):
 
 def core_upgrade(action):
     command = [str(SCRIPT_DIR / "core_upgrade.sh")]
-    command.extend(["-u", action])
+    command.extend(["-u", str(action)])
     command_str = " ".join(command)
     subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
     if action in ["now"]:
@@ -312,7 +312,7 @@ def core_upgrade(action):
 def app_upgrade(action):
     if action in ["now"]:
         command = [str(SCRIPT_DIR / "app_upgrade.sh")]
-        command.extend(["-u", action])
+        command.extend(["-u", str(action)])
         command_str = " ".join(command)
         subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
 
@@ -324,15 +324,12 @@ def do_reboot():
 
 def get_version(type="local"):
     if type in ["local", "remote", "all"]:
-        pass
-    else:
-        type = "local"
-
-    result = "{}"
-    try:
-        result = json.loads(subprocess.Popen([str(SCRIPT_DIR / "show_version.sh"), '-l', type ], stdout=subprocess.PIPE).communicate()[0])
-    except:
         result = "{}"
-
-    return result
+        try:
+            result = json.loads(subprocess.Popen([str(SCRIPT_DIR / "show_version.sh"), '-l', str(type) ], stdout=subprocess.PIPE).communicate()[0])
+        except:
+            result = "{}"
+        return result
+    else
+        return "{}"
 
