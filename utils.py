@@ -279,6 +279,7 @@ def load_tunnel_configuration(form):
 def handle_uploaded_file(file):
     if file:
         filename=file.filename
+        os.makedirs(CONFIG_DIR, exist_ok=True) 
         file.save(CONFIG_DIR / "client_config.zip")
         print("File succesfully saved!")
         return True
