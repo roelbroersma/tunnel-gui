@@ -91,7 +91,7 @@ if [ -n "$server_id" ]; then
       echo "set_var EASYRSA_CURVE		prime256v1" >> vars
 
       #INITIALIZE PKI
-      ./easyrsa --batch --vars=${EASY_RSA_DIR}openvpn-ca/vars init-pki
+      ./easyrsa --batch init-pki
 
       #CREATE NEW CA CERTIFICATE
       EASYRSA_REQ_CN="TunnelT1" ./easyrsa --batch --vars=${EASY_RSA_DIR}openvpn-ca/vars build-ca nopass
