@@ -53,7 +53,7 @@ echo;
 echo "Downloading and Unpacking latest Tunnel GUI Software."
 cd /tmp
 wget https://github.com/roelbroersma/tunnel-gui/archive/main.zip -O "/tmp/tunnel-gui-main.zip"
-unzip -o /tmp/tunnel-gui-main.zip -d /tmp/
+unzip -qq -o /tmp/tunnel-gui-main.zip -d /tmp/
 mkdir -p /usr/bin/tunnel-gui
 cp -R -f /tmp/tunnel-gui-main/* /usr/bin/tunnel-gui
 rm -rf /tmp/tunnel-gui-main*
