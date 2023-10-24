@@ -45,7 +45,7 @@ fi
 SCRIPT_PATH="$(realpath "$0")"
 SCRIPT_DIR="$(dirname "$SCRIPT_PATH")/"
 LOG_DIR="${SCRIPT_DIR}../logs/"
-
+echo "$LOG_DIR"
 #SET UPDATE TO MANUAL
 if [ "$UPDATE" == "manual" ]; then
 

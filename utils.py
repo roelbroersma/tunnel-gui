@@ -298,11 +298,16 @@ def handle_uploaded_file(file):
 
 
 def core_upgrade(action):
-    if action in ["now", "auto", "manual"]:
-        command = [str(SCRIPT_DIR / "core_upgrade.sh")]
-        command.extend(["-u", action])
-        command_str = " ".join(command)
+    command = [str(SCRIPT_DIR / "core_upgrade.sh")]
+    command.extend(["-u", action])
+    command_str = " ".join(command)
+    subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+    if action in ["now"]:
+        #ASYNC
         subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+    elif action in ["manual", "auto"]:
+        #SYNC
+        subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
 
 def app_upgrade(action):
     if action in ["now"]:
