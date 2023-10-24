@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 #THIS SCRIPT WILL SET/UPDATE AND RENEW VPN KEYS
-echo "INPUT: $@" > /tmp/temp1.txt
+
 # USAGE FUNCTION
 usage() {
         echo "Usage: change_keys -s [server machine ID]
@@ -13,8 +13,12 @@ usage() {
 server_id=""
 client_ids=()
 regen_all=false
-easyrsa_dir="/etc/openvpn/easy-rsa/"
 
+OPEN_VPN_DIR="/etc/openvpn/"
+EASY_RSA_DIR=${OPEN_VPN_DIR}"easy-rsa/"
+SCRIPT_PATH="$(realpath "$0")"
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")/"
+BASE_DIR="${SCRIPT_DIR}../"
 
 # EXIT ERROR FUNCTION
 exit_abnormal() {
@@ -68,15 +72,15 @@ if [ -n "$server_id" ]; then
     if [ "$regen_all" = true ]; then
         echo "Regenerating all keys for server"
 	#DELETE OPEN-CA DIRECTORY
-        [ -d "${easyrsa_dir}openvpn-ca" ] && rm -r ${easyrsa_dir}openvpn-ca
+        [ -d "${EASY_RSA_DIR}openvpn-ca" ] && rm -rf ${EASY_RSA_DIR}openvpn-ca
     fi
 
     #CHECK IF OPENVPN-CA FOLDER EXSITS, IF NOT, CREATE IT
-    if [ ! -d "${easyrsa_dir}openvpn-ca" ]; then
+    if [ ! -d "${EASY_RSA_DIR}openvpn-ca" ]; then
       echo "Creating CA"
-      make-cadir ${easyrsa_dir}openvpn-ca
+      make-cadir ${EASY_RSA_DIR}openvpn-ca
 
-      cd ${easyrsa_dir}openvpn-ca
+      cd ${EASY_RSA_DIR}openvpn-ca
  
       #SET THESE DEFAULTS (30 YEARS=10958 DAYS)
       echo "set_var EASYRSA_KEY_SIZE		2048" > vars
@@ -87,26 +91,26 @@ if [ -n "$server_id" ]; then
       echo "set_var EASYRSA_CURVE		prime256v1" >> vars
 
       #INITIALIZE PKI
-      ./easyrsa --batch --vars=${easyrsa_dir}openvpn-ca/vars init-pki
+      ./easyrsa --batch --vars=${EASY_RSA_DIR}openvpn-ca/vars init-pki
 
       #CREATE NEW CA CERTIFICATE
-      EASYRSA_REQ_CN="TunnelT1" ./easyrsa --batch --vars=${easyrsa_dir}openvpn-ca/vars build-ca nopass
+      EASYRSA_REQ_CN="TunnelT1" ./easyrsa --batch --vars=${EASY_RSA_DIR}openvpn-ca/vars build-ca nopass
     fi
 
-    cd ${easyrsa_dir}openvpn-ca
+    cd ${EASY_RSA_DIR}openvpn-ca
 
     #CHECK IF SERVER FOLDER EXISTS AND IF NOT, CREATE IT
-    [ ! -d "server" ] && mkdir server
+    [ ! -d "server" ] && mkdir -p server
  
     #CHECK IF CERT EXISTS, IF NOT CREATE IT
     if [ ! -f "server/server.crt" ]; then
 	#DELETE CONTENTS OF THE SERVER FOLDER SO ANY PREVIOUS SERVER CERTS ARE DELETED
-	rm -r server/*
+	rm -rf server/*
 
 	# GENERATE SERVER CERT AND KEY	
 	echo "Creating Server Certificate and Key for: ${server_id}"
-	./easyrsa --batch --req-cn=$server_id --vars=${easyrsa_dir}openvpn-ca/vars gen-req server nopass
-    	./easyrsa --batch --vars=${easyrsa_dir}openvpn-ca/vars sign-req server server
+	./easyrsa --batch --req-cn=$server_id --vars=${EASY_RSA_DIR}openvpn-ca/vars gen-req server nopass
+    	./easyrsa --batch --vars=${EASY_RSA_DIR}openvpn-ca/vars sign-req server server
 
 	# MOVE CREATED CERT AND KEY TO SERVER FOLDER
 	mv pki/issued/server.crt server/
@@ -121,15 +125,15 @@ fi
 
 if [ "${#client_ids[@]}" -gt 0 ]; then
   #CHECK IF A SERVER CERTIFICATE EXISTS, IF NOT, ERROR
-  if [ ! -d "${easyrsa_dir}openvpn-ca/" ] || [ $(find "${easyrsa_dir}openvpn-ca/" -maxdepth 1 -type f 2>/dev/null | wc -l) -lt 2 ]; then
+  if [ ! -d "${EASY_RSA_DIR}openvpn-ca/" ] || [ $(find "${EASY_RSA_DIR}openvpn-ca/" -maxdepth 1 -type f 2>/dev/null | wc -l) -lt 2 ]; then
     echo "ERROR: This is the FIRST TIME this command is running, please specify a server machine ID so we can build a CA."
     exit_abnormal
   fi
 
-  cd ${easyrsa_dir}openvpn-ca
+  cd ${EASY_RSA_DIR}openvpn-ca
 
   #CHECK IF CLIENT FOLDER EXISTS AND IF NOT, CREATE IT
-  [ ! -d "client" ] && mkdir client
+  [ ! -d "client" ] && mkdir -p client
 
   #LOOP THROUGH CLIENT MACHINE IDs
   for client_id in "${client_ids[@]}"; do
@@ -137,8 +141,8 @@ if [ "${#client_ids[@]}" -gt 0 ]; then
     if [ ! -f "client/${client_id}.crt" ]; then
 	# GENERATE CLIENT CERT AND KEY
         echo "Creating Client Certificate and Key for: ${client_id}"
-        ./easyrsa --batch --req-cn=$client_id --vars=${easyrsa_dir}openvpn-ca/vars gen-req $client_id nopass
-	./easyrsa --batch --vars=${easyrsa_dir}openvpn-ca/vars sign-req client $client_id
+        ./easyrsa --batch --req-cn=$client_id --vars=${EASY_RSA_DIR}openvpn-ca/vars gen-req $client_id nopass
+	./easyrsa --batch --vars=${EASY_RSA_DIR}openvpn-ca/vars sign-req client $client_id
 
         # MOVE CREATED CERT AND KEY TO SERVER FOLDER
         mv pki/issued/$client_id.crt client/
