@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).parent
 SCRIPT_DIR = BASE_DIR / "scripts/"
 CONFIG_DIR = BASE_DIR / "configs/" 
 SERVER_CONFIG_FILE = CONFIG_DIR / "t1config.json"
-DEFAULT_EXECUTABLE = "/bin/bash"
+#DEFAULT_EXECUTABLE = "/bin/bash"
 
 UPDATE_FILE = "https://github.com/roelbroersma/tunnel-gui/archive/refs/heads/main.zip"
 
@@ -71,25 +71,20 @@ class IpAddressChangeInfo:
 
 def change_ip(ip_address_info):
     try:
-        subprocess.run(
-            str(SCRIPT_DIR / "change_ip.sh") +\
-            " -t {} -a {} -n {} -g {} -d {}".format(
-                ip_address_info.ip_type,
-                ip_address_info.ip_address,
-                ip_address_info.subnet,
-                ip_address_info.gateway,
-                ip_address_info.dns_servers
-            ),
-            shell=True,
-            executable=DEFAULT_EXECUTABLE,
-        )
+        command = [str(SCRIPT_DIR / "change_ip.sh")]
+        command.extend(["-t", str(ip_address_info.ip_type)])
+        command.extend(["-a", str(ip_address_info.ip_address)])
+        command.extend(["-n", str(ip_address_info.subnet)])
+        command.extend(["-g", str(ip_address_info.gateway)])
+        command.extend(["-d", str(ip_address_info.dns_servers)])
+        subprocess.run(command)
     except:
         pass
 
 
 def show_ip():
     try:
-        result = subprocess.run(str(SCRIPT_DIR / "show_ip.sh"), shell=True, executable=DEFAULT_EXECUTABLE, capture_output=True)
+        result = subprocess.run(str(SCRIPT_DIR / "show_ip.sh"), capture_output=True)
         output = result.stdout.decode('utf-8')
         return IpAddressChangeInfo.from_script_output(output)
     except:
@@ -122,7 +117,7 @@ class PublicIpInfo:
 
 def show_public_ip():
     try:
-        result = subprocess.run(str(SCRIPT_DIR / "show_public_ip.sh"), shell=True, executable=DEFAULT_EXECUTABLE, capture_output=True )
+        result = subprocess.run(str(SCRIPT_DIR / "show_public_ip.sh"), capture_output=True )
         output = result.stdout.decode('utf-8')
         return PublicIpInfo.from_script_output(output)
     except:
@@ -131,9 +126,9 @@ def show_public_ip():
 
 def do_change_password(new_password):
     try:
-        subprocess.run(str(SCRIPT_DIR / "do_change_password.sh") + f" {new_password} root", shell=True, executable=DEFAULT_EXECUTABLE )
-        subprocess.run(str(SCRIPT_DIR / "do_change_password.sh") + f" {new_password} dietpi", shell=True, executable=DEFAULT_EXECUTABLE )
-        subprocess.run(str(SCRIPT_DIR / "save_password.sh") + f" {new_password}", shell=True, executable=DEFAULT_EXECUTABLE )
+        subprocess.run([str(SCRIPT_DIR / "do_change_password.sh"), str(new_password), "root"])
+        subprocess.run([str(SCRIPT_DIR / "do_change_password.sh"), str(new_password), "dietpi"])
+        subprocess.run([str(SCRIPT_DIR / "save_password.sh"), str(new_password)])
     except:
         pass
 
@@ -164,8 +159,7 @@ def generate_keys(server, clients, regenerate=False):
 
     if regenerate:
         command.extend(["-r"])
-    command_str = " ".join(command)
-    subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+    subprocess.run(command)
 
 
 def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_networks, clients, features):
@@ -192,9 +186,7 @@ def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_net
         for feature in features:
             command.extend(["-f", str(feature)])
 
-        command_str = " ".join(command)
-
-        subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+        subprocess.run(command)
         return True
 
     except:
@@ -205,8 +197,7 @@ def generate_client_config():
     try:
         command = [str(SCRIPT_DIR / "change_vpn.sh")]
         command.extend(["-t", "client"])
-        command_str = " ".join(command)
-        subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+        subprocess.run(command)
         return True
     except:
         return False
@@ -300,34 +291,33 @@ def handle_uploaded_file(file):
 def core_upgrade(action):
     command = [str(SCRIPT_DIR / "core_upgrade.sh")]
     command.extend(["-u", str(action)])
-    command_str = " ".join(command)
-    subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
     if action in ["now"]:
         #ASYNC
-        subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+        subprocess.Popen(command)
     elif action in ["manual", "auto"]:
         #SYNC
-        subprocess.run(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+        subprocess.run(command)
 
 def app_upgrade(action):
     if action in ["now"]:
         command = [str(SCRIPT_DIR / "app_upgrade.sh")]
         command.extend(["-u", str(action)])
-        command_str = " ".join(command)
-        subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+        subprocess.Popen(command)
 
 def do_reboot():
     command = [str(SCRIPT_DIR / "do_reboot.sh")]
-    command_str = " ".join(command)
-    subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
+    subprocess.Popen(command)
     
 
 def get_version(type="local"):
     if type in ["local", "remote", "all"]:
         result = "{}"
         try:
-            result = json.loads(subprocess.Popen([str(SCRIPT_DIR / "show_version.sh"), '-l', str(type) ], stdout=subprocess.PIPE).communicate()[0])
-        except:
+            command = [str(SCRIPT_DIR / "show_version.sh")]
+            command.extend(["-l", str(type)])
+            result = json.loads(subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0])
+        except Exception as e:
+            print(f"Error: {e}")
             result = "{}"
         return result
     else:

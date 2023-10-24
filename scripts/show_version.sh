@@ -103,7 +103,7 @@ get_diepi_version() {
 
 # GET LATEST AVAILABLE DIETPI VERSION (WHEN DOING DIETPI-UDATE)
 get_dietpi_latest_version() {
-	local dietpi_latest=$(/boot/dietpi/dietpi-update 2>&1 | awk -F': ' '/Latest version/ {print $2}' | tr -d 'v')
+	local dietpi_latest=$(/boot/dietpi/dietpi-update 2 2>&1 | awk -F': ' '/Latest version/ {print $2}' | tr -d 'v')
 	if [[ $? -eq 0 ]]; then # CHECK EXIT STATUS
 		echo "$dietpi_latest"
 	else
