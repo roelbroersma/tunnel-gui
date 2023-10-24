@@ -62,22 +62,28 @@ echo;
 
 if [[ ! -e web_password.txt ]]; then
     echo "Setting web password to: tunnel1"
-    echo "Please change the default passwords immediately by changing the .env file and the web_password.txt file!"
+    echo "Please change the default passwords immediately by changing the .env file and the web_password.txt file!";
     echo 'tunnel1' > web_password.txt;
 else
-    echo "We will not overwrite the password because a web_password.txt file already exists!"
+    echo "We will not overwrite the password because a web_password.txt file already exists!";
 fi
-echo;
 
 if [[ ! -e .env ]]; then
     echo "Generating .env file with random secret key..."
     (
 	(echo 'SECRET_KEY='; head -c 80 /dev/random | base64) | tr -d [:cntrl:];
-	echo;
-	echo 'DEBUG=False';
+	echo ' #FLASK APP SECRET KEY WHICH IS USED FOR CROSS-SITE PROTECTION. YOU CAN CHANGE THIS AS YOU WISH.';
+	echo 'DEBUG=False #FOR DEBUGGING PURPOSES (IF DEBUG=TRUE, IT WILL ONLY LISTEN TO 127.0.0.1)';
+	echo 'PORT=8080 #PORT THE WEB GUI RUNS AT';
 	echo 'SUPER_PASSWORD=VerySecretPassword';
-	echo OPENVPN_STATUS_PATH=/var/log/tunnel-gui.log
+	echo 'OPENVPN_STATUS_PATH=/var/openvpn/openvpn-status.log #SET THIS TO THE LOG PATH AS DEFINED IN THE OPENVPN CONFIG FILE.'
     ) > .env
+    SECRET_KEY=really-long-string
+DEBUG=False #FOR DEBUGGING PURPOSES (IF DEBUG=TRUE, IT WILL ONLY LISTEN TO 127.0.0.1)
+PORT=8080 #PORT THE WEB GUI RUN AT
+SUPER_PASSWORD=yourUsefulWebPassword
+OPENVPN_STATUS_PATH=/var/log/openvpn/openvpn-status.log #SET THIS TO THE LOG PATH AS DEFINED IN openvpn's config file.
+
 else
 	echo "We will not create a .env file because one already exists!"
 fi

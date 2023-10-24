@@ -67,7 +67,7 @@ You can download this repo to your own computer and run web-server locally in Do
 The following files need to be modified when checking out the project but they are automatically set for newly installed devices using the install script.
  1. A new file web_password.txt in project's directory with admin's password of RaspberryPI.
  2. An .env file with the following important values (See or renamce the example in .env.template file)
-    * SECRET_KEY - Flask App Secret Key. It is used in the web gui for cross-site protection. You can change it freely.
+    * SECRET_KEY - Flask App Secret Key. It is used in the web gui for cross-site protection. You can change it as you wish.
     * DEBUG - True or False.
     * SUPER_PASSWORD - A super secret (backup) password so you can always login to the web gui. You can only change this password in this file.
     * OPENVPN_LOG_PATH - Set this to the log path as defined in openvpn config, default is: /var/log/openvpn/openvpn-status.log

@@ -382,7 +382,7 @@ if __name__ == "__main__":
 #            f.write(default_config.to_json())
 
     if is_debug:
-        app.run(debug=is_debug, host="0.0.0.0")
+        app.run(debug=is_debug, host="0.0.0.0", port=int(port))
     else:
         from waitress import serve
         serve(app, host="0.0.0.0", port=int(port))
