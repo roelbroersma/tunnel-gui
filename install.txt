@@ -5,6 +5,10 @@ if [ "$EUID" -gt 0 ]
   exit
 fi
 
+
+BASE_DIR="/usr/bin/tunnel-gui/"
+DOWNLOAD_URL="https://github.com/roelbroersma/tunnel-gui/archive/main.zip"
+
 #Check for DIETPI
 if [[ $(uname -a) == *DietPi* ]] || [[ -f /boot/dietpi/.version ]]; then
     DIETPI_DETECTED=True
@@ -52,12 +56,15 @@ echo;
 
 echo "Downloading and Unpacking latest Tunnel GUI Software."
 cd /tmp
-wget https://github.com/roelbroersma/tunnel-gui/archive/main.zip -O "/tmp/tunnel-gui-main.zip"
-unzip -q -o /tmp/tunnel-gui-main.zip -d /tmp/
-mkdir -p /usr/bin/tunnel-gui
-cp -R -f /tmp/tunnel-gui-main/* /usr/bin/tunnel-gui
-rm -rf /tmp/tunnel-gui-main*
-cd /usr/bin/tunnel-gui
+mkdir -p ${BASE_DIR}temp
+wget ${DOWNLOAD_URL} -O "${BASE_DIR}temp/tunnel-gui-main.zip"
+unzip -q -o ${BASE_DIR}/temp/tunnel-gui-main.zip -d ${BASE_DIR}/temp/
+cd ${BASE_DIR}/temp/tunnel-gui-main
+shopt -s dotglob
+cp -R -f ./* ${BASE_DIR}
+shopt -u dotglob
+cd ${BASE_DIR}
+rm -rf ${BASE_DIR}/temp/tunnel-gui-main*
 echo;
 
 if [[ ! -e web_password.txt ]]; then
