@@ -45,7 +45,11 @@ fi
 SCRIPT_PATH="$(realpath "$0")"
 SCRIPT_DIR="$(dirname "$SCRIPT_PATH")/"
 LOG_DIR="${SCRIPT_DIR}../logs/"
-echo "$LOG_DIR"
+#JUST IN CASE THE UPDATE DID HANG IN A PREVIOUS SESSION AND G_INTERACTIVE WAS NOT SET TO 1 AGAIN
+export G_INTERACTIVE=1
+
+
+
 #SET UPDATE TO MANUAL
 if [ "$UPDATE" == "manual" ]; then
 
@@ -71,7 +75,9 @@ elif [ "$UPDATE" == "now" ]; then
     mkdir -p ${LOG_DIR}
     if [ -f /boot/dietpi/.version ]; then
 	echo "Update DietPi Now (non-interactive)"
+	export G_INTERACTIVE=0
 	/boot/dietpi/dietpi-update 1 > ${LOG_DIR}update.log 2>&1
+	export G_INTERACTIVE=1
     elif command -v apt-get > /dev/null; then
 	echo "Update OS with APT (non-interactive)"
 	apt-get update -y && apt-get upgrade -y > ${LOG_DIR}update.log 2>&1
