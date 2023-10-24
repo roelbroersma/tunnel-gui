@@ -69,8 +69,11 @@ if [ "$UPDATE" == "now" ]; then
     echo "Unzipping files to temporary folder..." >> ${LOG_DIR}update.log
     unzip ${BASE_DIR}temp/${FILENAME} -d ${BASE_DIR}temp >> ${LOG_DIR}update.log
 
-    echo "Moving files from temporary folder to application path..." >> ${LOG_DIR}update.log 2>&1
-    cp -R -f ${BASE_DIR}temp/${DIRECTORY}/* ${BASE_DIR} >> ${LOG_DIR}update.log
+    echo "Coying files from temporary folder to application path..." >> ${LOG_DIR}update.log 2>&1
+    shopt -s dotglob #ADD OPTION TO ALLOW WILDCARD MATCHING OF HIDDEN FILES
+    cd ${BASE_DIR}temp/${DIRECTORY}
+    cp -R -f ./* ${BASE_DIR} >> ${LOG_DIR}update.log
+    shopt -u dotglob #REMOVE OPTION TO ALLOW WILDCARD MATCHING OF HIDDEN FILES
 
     echo "Running after update scripts..." >> ${LOG_DIR}update.log
     if [ -f ${BASE_DIR}upgrade.txt ]; then
