@@ -309,21 +309,35 @@ if [ "$TYPE" == "server" ]; then
 	#DISABLE TLS-AUTH VIA SHARED-KEY (TODO FOR EXTRA SECURITY)
 	sed -i "s/^\(tls-auth.*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
 
+	#SET SERVER SUBNET TO A VERY UNIQUE RANGE
+	if ! grep -q '^#\?server ' ${OPEN_VPN_DIR}server/server.conf; then
+		echo 'server 172.31.199.0 255.255.255.0' >> ${OPEN_VPN_DIR}server/server.conf
+	else
+		sed -i "s/^#\?server .*/server 172.16.199.0 255.255.0.0/" ${OPEN_VPN_DIR}server/server.conf
+	fi
+
 	#DISABLE CIPHER IN GENERAL, DEPRECATED SINCE OPENVPN 2.6
 	sed -i "s/^\(cipher.*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
 
-	#DISABLE DATA-CIPHERS IN GENERAL, THIS IS OPTIONAL AND A CIPHER WILL BE NEGOTIATED
-	sed -i "s/^\(data-ciphers.*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
+	#DISABLE (old) CIPHERS IN GENERAL
+	sed -i "s/^#\?\(ciphers .*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
 
 	#CHANGE DATA-CIPHERS
-	#if ! grep -q '^#\?data-ciphers' ${OPEN_VPN_DIR}server/server.conf; then
-	#	echo 'data-ciphers AES-256-GCM:AES-128-GCM' >> ${OPEN_VPN_DIR}server/server.conf
-	#else
-	#	sed -i "s/^#\?data-ciphers.*/data-ciphers AES-256-GCM:AES-128-GCM/" ${OPEN_VPN_DIR}server/server.conf
-	#fi
+	if ! grep -q '^#\?data-ciphers ' ${OPEN_VPN_DIR}server/server.conf; then
+		echo 'data-ciphers AES-256-GCM:AES-128-GCM' >> ${OPEN_VPN_DIR}server/server.conf
+	else
+		sed -i "s/^#\?data-ciphers .*/data-ciphers AES-256-GCM:AES-128-GCM/" ${OPEN_VPN_DIR}server/server.conf
+	fi
+
+	#CHANGE FALLBACK-CIPHERS
+	if ! grep -q '^#\?data-ciphers-fallback' ${OPEN_VPN_DIR}server/server.conf; then
+		echo 'data-ciphers-fallback AES-256-CBC:AES-128-CBC' >> ${OPEN_VPN_DIR}server/server.conf
+	else
+		sed -i "s/^#\?data-ciphers-fallback.*/data-ciphers-fallback AES-256-CBC:AES-128-CBC/" ${OPEN_VPN_DIR}server/server.conf
+	fi
 
 	#DISABLE DIFFIE HELLMAN BECAUSE WE USE ELIPTIC CURVE KEYS
-	sed -i "s/^\(dh .*\)/#dh none/" ${OPEN_VPN_DIR}server/server.conf
+	sed -i "s/^\(dh .*\)/dh none/" ${OPEN_VPN_DIR}server/server.conf
 
 	#SET explicit-exit-notify ONLY FOR UDP MODE
 	if [ "$PROTOCOL" == "udp" ]; then
