@@ -78,9 +78,10 @@ elif [ "$UPDATE" == "now" ]; then
 	export G_INTERACTIVE=0
 	/boot/dietpi/dietpi-update 1 > ${LOG_DIR}update.log 2>&1
 	export G_INTERACTIVE=1
+	apt-get update -y && apt-get full-upgrade -y > ${LOG_DIR}update.log 2>&1
     elif command -v apt-get > /dev/null; then
 	echo "Update OS with APT (non-interactive)"
-	apt-get update -y && apt-get upgrade -y > ${LOG_DIR}update.log 2>&1
+	apt-get update -y && apt-get full-upgrade -y > ${LOG_DIR}update.log 2>&1
     elif command -v yum > /dev/null; then
 	echo "Update OS with YUM (non-interactive)"
         yum -y update > ${LOG_DIR}update.log 2>&1
