@@ -276,13 +276,10 @@ def tunnel_upload():
 def update():
 
     form = UpdateForm(request.form, meta={"csrf": True})
-    print ("1")
     message=''
     try:
         if form.validate_on_submit():
-            print ("2")
             if 'check_online' in request.form:
-                print ("3")
                 version = get_version("all")
             elif 'update_auto_enable' in request.form:
                 core_upgrade("auto")
