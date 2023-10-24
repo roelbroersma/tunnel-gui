@@ -309,6 +309,22 @@ if [ "$TYPE" == "server" ]; then
 	#DISABLE TLS-AUTH VIA SHARED-KEY (TODO FOR EXTRA SECURITY)
 	sed -i "s/^\(tls-auth.*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
 
+	#DISABLE CIPHER IN GENERAL, DEPRECATED SINCE OPENVPN 2.6
+	sed -i "s/^\(cipher.*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
+
+	#DISABLE DATA-CIPHERS IN GENERAL, THIS IS OPTIONAL AND A CIPHER WILL BE NEGOTIATED
+	sed -i "s/^\(data-ciphers.*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
+
+	#CHANGE DATA-CIPHERS
+	#if ! grep -q '^#\?data-ciphers' ${OPEN_VPN_DIR}server/server.conf; then
+	#	echo 'data-ciphers AES-256-GCM:AES-128-GCM' >> ${OPEN_VPN_DIR}server/server.conf
+	#else
+	#	sed -i "s/^#\?data-ciphers.*/data-ciphers AES-256-GCM:AES-128-GCM/" ${OPEN_VPN_DIR}server/server.conf
+	#fi
+
+	#DISABLE DIFFIE HELLMAN BECAUSE WE USE ELIPTIC CURVE KEYS
+	sed -i "s/^\(dh .*\)/#dh none/" ${OPEN_VPN_DIR}server/server.conf
+
 	#SET explicit-exit-notify ONLY FOR UDP MODE
 	if [ "$PROTOCOL" == "udp" ]; then
 		sed -i "s/^explicit-exit-notify .*/explicit-exit-notify 1/" ${OPEN_VPN_DIR}server/server.conf

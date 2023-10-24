@@ -119,7 +119,7 @@ echo "Succesfully installed the Tunneling GUI."
 echo ;
 
 if [[ ${DIETPI_DETECTED} == True ]]; then
-	echo "System will be rebooted in 30 seconds, press CTRL-C if you want to abort."
+	echo "System will reboot in 30 seconds, press CTRL-C to abort."
 	sleep 30
 	reboot
 fi
