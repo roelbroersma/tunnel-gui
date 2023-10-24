@@ -25,6 +25,7 @@ OPEN_VPN_DIR="/etc/openvpn/"
 EASY_RSA_DIR=${OPEN_VPN_DIR}"easy-rsa/"
 SCRIPT_PATH="$(realpath "$0")"
 SCRIPT_DIR="$(dirname "$SCRIPT_PATH")/"
+CONFIG_DIR="${SCRIPT_DIR}../configs/"
 
 #INITIALIZE VARIABLES
 unset TYPE
@@ -370,8 +371,8 @@ if [ "$TYPE" == "server" ]; then
 	# SAVE THE CLIENT CONFIG FILES IN THE CONFIG DIRECTORY
 	if [ ! -z "$CLIENTS" ]; then
 		#FIRST, ALWAYS EMPTY THE configs DIRECTORY EXCEPT OUR t1config.json FILE
-		#rm -f ${SCRIPT_DIR}../configs/*
-		find "${SCRIPT_DIR}../configs/" -type f ! -name "configt1.json" -exec rm -f {} +
+		#rm -f ${CONFIG_DIR}*
+		find "${CONFIG_DIR}" -type f ! -name "configt1.json" -exec rm -f {} +
 		#ADD A FILE FOR EACH CLIENT WITH ITS CONFIG AND SAVE IT WITH THE MACHINE_ID AS FILENAME
 		for CLIENT in "${CLIENTS[@]}"; do
 			IFS='-' read -ra CLIENT_NETWORK <<< "${CLIENT}"
@@ -389,7 +390,13 @@ resolv-retry infinite
 nobind
 persist-key
 persist-tun
-remote-cert-tls server
+remote-cert-tls server"
+			#SET explicit-exit-notify ONLY FOR UDP MODE
+			if [ "$PROTOCOL" == "udp" ]; then
+				CONFIG="${CONFIG}
+explicit-exit-notify 1"
+			fi
+			CONFIG="${CONFIG}
 <ca>
 $CA_CONTENT
 </ca>
@@ -411,12 +418,12 @@ ${KEY_CONTENT}
 ########################
 "
 			#WRITE THE CONFIG
-			echo "${CONFIG}" > ${SCRIPT_DIR}../configs/${CLIENT_ID}.conf
+			echo "${CONFIG}" > ${CONFIG_DIR}${CLIENT_ID}.conf
 		done
 	fi
 
 	# ZIP ALL THE CONFIG FILES FOR DISTRIBUTION TO THE CLIENTS
-	cd ${SCRIPT_DIR}../configs/
+	cd ${CONFIG_DIR}
 	zip -r client_config.zip *
 
 	#FIRST, DEACTIVATE ALL FEATURES
@@ -443,11 +450,11 @@ elif [ "$TYPE" == "client" ]; then
 	MACHINE_ID=$("${SCRIPT_DIR}show_machine_id.sh" | grep -oP '(?<=machine_id" : ")[^"]+')
 
 	#GO TO THE CONFIG FOLDER
-	cd ${SCRIPT_DIR}../configs/
+	cd ${CONFIG_DIR}
 
 	#FIRST, ALWAYS EMPTY THE configs DIRECTORY EXCEPT OUR t1config.json FILE
-        #rm -f ${SCRIPT_DIR}../configs/*
-	find "${SCRIPT_DIR}../configs/" -type f ! \( -name "configt1.json" -o -name "client_config.zip" -o -name "${MACHINE_ID}.conf" \) -exec rm -f {} +
+        #rm -f ${CONFIG_DIR}*
+	find "${CONFIG_DIR}" -type f ! \( -name "configt1.json" -o -name "client_config.zip" -o -name "${MACHINE_ID}.conf" \) -exec rm -f {} +
 
 
 	#CHECK IF CLIENT_CONFIG.ZIP EXISTS
@@ -500,7 +507,7 @@ elif [ "$TYPE" == "client" ]; then
 	enable_features
 
 	#DELETE ALL FILES FROM CONFIG DIRECTORY
-	rm -f ${SCRIPT_DIR}../configs/*
+	rm -f ${CONFIG_DIR}*
 
 	#STOP AND START THE OPENVPN CLIENT AND MAKE SURE IT AUTOMATICALLY STARTS AT SYSTEM REBOOT
 	start_stop_openvpn "stop"
