@@ -73,7 +73,7 @@ if [ "$UPDATE" == "now" ]; then
     cp -R -f ${BASE_DIR}temp/${DIRECTORY}/* ${BASE_DIR} >> ${LOG_DIR}update.log
 
     echo "Running after update scripts..." >> ${LOG_DIR}update.log
-    if [ -f ${BASE_DIR}upgrade.txt ]
+    if [ -f ${BASE_DIR}upgrade.txt ]; then
 	cat ${BASE_DIR}upgrade.txt | bash  >> ${LOG_DIR}update.log 2>&1
     fi
 
