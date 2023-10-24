@@ -312,7 +312,7 @@ def app_upgrade(action):
         subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
 
 def do_reboot():
-    command = [str(SCRIPT_DIR / "do_upgrade.sh")]
+    command = [str(SCRIPT_DIR / "do_reboot.sh")]
     command_str = " ".join(command)
     subprocess.Popen(command_str, shell=True, executable=DEFAULT_EXECUTABLE)
     
