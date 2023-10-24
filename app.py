@@ -177,9 +177,7 @@ def tunnel():
     if deviceType is None:
         deviceType = load_device_type()
 
-    device_id = json.loads(subprocess.Popen(
-        'scripts/show_machine_id.sh', stdout=subprocess.PIPE
-    ).communicate()[0])["machine_id"]
+    device_id = json.loads(subprocess.Popen(BASE_DIR / 'scripts/show_machine_id.sh', stdout=subprocess.PIPE).communicate()[0])["machine_id"]
 
 
     if (not tunnel_master_form.is_submitted() and not tunnel_non_master_form.is_submitted()):

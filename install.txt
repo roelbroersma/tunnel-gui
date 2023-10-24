@@ -19,19 +19,19 @@ install_packages() {
     /boot/dietpi/dietpi-software install 152 # Avahi-Daemon
     echo;
     echo "Install additional small packages using apt-get if not already installed..."
-    apt-get install -y zip unzip sed mawk grep easy-rsa
+    apt-get install -y zip unzip sed mawk grep easy-rsa python3-pip
   elif command -v apt-get > /dev/null 2>&1; then
     echo "Using apt-get to install Packages..."
     apt-get update
-    apt-get install -y zip unzip wget sed mawk grep openssl openvpn easy-rsa python3
+    apt-get install -y zip unzip wget sed mawk grep openssl openvpn easy-rsa python3 python3-pip
   elif command -v yum > /dev/null 2>&1; then
     echo "Using yum to install Packages..."
     yum makecache -y
-    yum -y install zip unzip wget sed mawk openssl grep openvpn easy-rsa python3
+    yum -y install zip unzip wget sed mawk openssl grep openvpn easy-rsa python3 python3-pip
   elif command -v dnf > /dev/null 2>&1; then
     echo "Using dnf to install Packages..."
     dnf makecache -y
-    dnf -y install zip unzip wget sed mawk openssl grep openvpn easy-rsa python3
+    dnf -y install zip unzip wget sed mawk openssl grep openvpn easy-rsa python3 python3-pip
   else
     echo "No known package manager found, exiting."
     exit 1
