@@ -46,7 +46,7 @@ echo "Installing required Software packages."
 install_packages
 echo;
 
-echo "Stopping OpenVPN service since it will probably be started after installation."
+echo "Stopping (old) OpenVPN service since it will probably be started after installation."
 systemctl disable openvpn@server.service
 echo;
 
@@ -126,7 +126,7 @@ echo "Installing as a Service so it will run after rebooting or network restarts
 cp install/t1tunnel.service /etc/systemd/system/t1tunnel.service
 systemctl daemon-reload
 systemctl enable t1tunnel.service
-systemctl start t1tunnel.service
+systemctl restart t1tunnel.service
 echo;
 
 echo "Succesfully installed the Tunneling GUI."
