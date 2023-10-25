@@ -39,7 +39,7 @@
 		const joinedLines = lines.join('\n');
 		let formattedResult = "";
 
-		if (joinedLines.startsWith('OpenVPN STATISTICS')) {
+		if (/^[\s["]{0,10}OpenVPN STATISTICS/.test(joinedLines)) {
 			const relevantLines = lines.slice(1, -1);  // Exclude the first and last line
 			const dataArray = relevantLines.map(line => line.split(','));
 			formattedResult = generateNonMasterTable('OpenVPN STATISTICS', dataArray);
@@ -137,6 +137,7 @@
 	    html += '</tr></thead><tbody>';
 	    // LOOP THROUGH THE TABLE ROWS AND THROUGH THE CELLS
 	    dataLines.forEach(dataLine => {
+	        if ( dataLine === undefined || !Array.isArray(dataLine)) { return; }
 	        html += '<tr>';
 	        dataLine.forEach(dataItem => {
 		    // REPLACE IF EPOCH IS FOUND
