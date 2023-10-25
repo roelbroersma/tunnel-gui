@@ -39,10 +39,11 @@
 		const joinedLines = lines.join('\n');
 		let formattedResult = "";
 
-		if (/^[\s["]{0,10}OpenVPN STATISTICS/.test(joinedLines)) {
+		if (joinedLines.trim().startsWith('OpenVPN STATISTICS')) {
 			const relevantLines = lines.slice(1, -1);  // Exclude the first and last line
 			const dataArray = relevantLines.map(line => line.split(','));
 			formattedResult = generateNonMasterTable('OpenVPN STATISTICS', dataArray);
+			return formattedResult;
 		} else {
 
 			//Split but keep the WORDS itself
