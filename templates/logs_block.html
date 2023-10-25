@@ -2,7 +2,6 @@
 
 	<div id="log" class="col" style="height: {{ height }}; overflow-y: scroll;">
 	</div>
-
 	<style>
 	table {
         	width: 100%;
@@ -37,113 +36,135 @@
 
 
 	function processLogData(lines) {
-		//Split but keep the WORDS itself
-//		const sections = lines.join('\n').split(/(?<=TITLE|TIME|HEADER|GLOBAL_STATS|END)|(?=TITLE|TIME|HEADER|GLOBAL_STATS|END)/);
-		const sections = lines.join('\n').match(/(TITLE.*?(?=TIME|HEADER|GLOBAL_STATS|END|$))|(TIME.*?(?=TITLE|HEADER|GLOBAL_STATS|END|$))|(HEADER.*?(?=HEADER|TITLE|TIME|GLOBAL_STATS|END|$))|(GLOBAL_STATS.*?(?=GLOBAL_STATS|TITLE|TIME|HEADER|END|$))|(END.*?(?=TITLE|TIME|HEADER|GLOBAL_STATS|$))/gs);
+		if (joinedLines.startsWith('OpenVPN STATISTICS')) {
+			const relevantLines = lines.slice(1, -1);  // Exclude the first and last line
+			const dataArray = relevantLines.map(line => line.split(','));
+			result = generateNonMasterTable('OpenVPN STATISTICS', dataArray);
+		} else {
 
-		const parsedSections = {};
+			//Split but keep the WORDS itself
+			//const sections = lines.join('\n').split(/(?<=TITLE|TIME|HEADER|GLOBAL_STATS|END)|(?=TITLE|TIME|HEADER|GLOBAL_STATS|END)/);
+			const sections = lines.join('\n').match(/(TITLE.*?(?=TIME|HEADER|GLOBAL_STATS|END|$))|(TIME.*?(?=TITLE|HEADER|GLOBAL_STATS|END|$))|(HEADER.*?(?=HEADER|TITLE|TIME|GLOBAL_STATS|END|$))|(GLOBAL_STATS.*?(?=GLOBAL_STATS|TITLE|TIME|HEADER|END|$))|(END.*?(?=TITLE|TIME|HEADER|GLOBAL_STATS|$))/gs);
 
-		sections.forEach(section => {
-			const [headerLine, ...dataLines] = section.trim().split('\n');
-			if (section.startsWith('HEADER,CLIENT_LIST')) {
-				parsedSections.CLIENT_LIST = {
-					header : headerLine.split(',').slice(2),
-					data: dataLines.map(line => line.split(',').slice(1))
-				};
-			} else if (section.startsWith('HEADER,ROUTING_TABLE')) {
-				parsedSections.ROUTING_TABLE = {
-					header: headerLine.split(',').slice(2),
-					data: dataLines.map(line => line.split(',').slice[1])
-				};
-    			} else if (section.startsWith('GLOBAL_STATS,Max')) {
-				parsedSections.GLOBAL_STATS = {
-					header: headerLine.split(',').slice(1),
-					data: dataLines.map(line => line.split(','))
-				};
-    			} else if (section.startsWith('TITLE')) {
-				let version = '';
-				let features = '';
-				const splitOnComma = headerLine.split(',');
-				if (splitOnComma.length > 1) {
-					const splitOnBracket = splitOnComma[1].split('[');
-					if (splitOnBracket.length > 0) {
-						version = splitOnBracket[0].trim();
-						if (splitOnBracket.length > 1) {
-							features = '[' + splitOnBracket.slice(1).join('[');
+			const parsedSections = {};
+
+			sections.forEach(section => {
+				const [headerLine, ...dataLines] = section.trim().split('\n');
+				if (section.startsWith('HEADER,CLIENT_LIST')) {
+					parsedSections.CLIENT_LIST = {
+						header : headerLine.split(',').slice(2),
+						data: dataLines.map(line => line.split(',').slice(1))
+					};
+				} else if (section.startsWith('HEADER,ROUTING_TABLE')) {
+					parsedSections.ROUTING_TABLE = {
+						header: headerLine.split(',').slice(2),
+						data: dataLines.map(line => line.split(',').slice[1])
+					};
+    				} else if (section.startsWith('GLOBAL_STATS,Max')) {
+					parsedSections.GLOBAL_STATS = {
+						header: headerLine.split(',').slice(1),
+						data: dataLines.map(line => line.split(','))
+					};
+    				} else if (section.startsWith('TITLE')) {
+					let version = '';
+					let features = '';
+					const splitOnComma = headerLine.split(',');
+					if (splitOnComma.length > 1) {
+						const splitOnBracket = splitOnComma[1].split('[');
+						if (splitOnBracket.length > 0) {
+							version = splitOnBracket[0].trim();
+							if (splitOnBracket.length > 1) {
+								features = '[' + splitOnBracket.slice(1).join('[');
+							}
 						}
 					}
+					parsedSections.TITLE = {
+						header: ['Version', 'Features'],
+						data: [[version, features]]
+        	    			};
+    				} else if (section.startsWith('TIME')) {
+					parsedSections.TIME = {
+               	                		header: ['Time'],
+               	                		data: [[headerLine.split(',')[1]]]
+            				};
 				}
-				parsedSections.TITLE = {
-					header: ['Version', 'Features'],
-					data: [[version, features]]
-            			};
-    			} else if (section.startsWith('TIME')) {
-				parsedSections.TIME = {
-                                        header: ['Time'],
-                                        data: [[headerLine.split(',')[1]]]
-            			};
-			}
-    		});
-
-		let result = "";
-		Object.keys(parsedSections).forEach(key => {
-			const sectionData = parsedSections[key];
-			result += generateTable(key, sectionData.header, sectionData.data);
-		});
-		return result;
+    			});
+	
+			let result = "";
+			Object.keys(parsedSections).forEach(key => {
+				const sectionData = parsedSections[key];
+				result += generateMasterTable(key, sectionData.header, sectionData.data);
+			});
+			return result;
+		}
 	}
 
 
-function epochToUTCString(epoch) {
-    const date = new Date(epoch * 1000);  // The Date constructor assumest milliseconds, so multiply by 1000
-    const isoString = date.toISOString();
-    return isoString.replace("T", " ").split(".")[0];
-}
+	function epochToUTCString(epoch) {
+	    const date = new Date(epoch * 1000);  // The Date constructor assumest milliseconds, so multiply by 1000
+	    const isoString = date.toISOString();
+	    return isoString.replace("T", " ").split(".")[0];
+	}
 
-// Check if a value is within the Epoch Range, If yes, convert to UTC:
-function checkAndConvert(dataItem) {
-    const epoch = Number(dataItem)
-    if (isNaN(epoch)) {
-	return dataItem;
-    } 
-    const minEpoch = Date.UTC(2023, 0);  // 1st of january 2023
-    const maxEpoch = Date.UTC(2050, 0);  // 1st of january 2050
-    if (epoch >= minEpoch / 1000 && epoch <= maxEpoch / 1000) {  // Divide by 1000 to convert to seconds
-        return epochToUTCString(epoch);
-    }
-    return epoch;  // Return the original value if not in range
-}
+	// Check if a value is within the Epoch Range, If yes, convert to UTC:
+	function checkAndConvert(dataItem) {
+	    const epoch = Number(dataItem)
+	    if (isNaN(epoch)) {
+		return dataItem;
+	    } 
+	    const minEpoch = Date.UTC(2023, 0);  // 1st of january 2023
+	    const maxEpoch = Date.UTC(2050, 0);  // 1st of january 2050
+	    if (epoch >= minEpoch / 1000 && epoch <= maxEpoch / 1000) {  // Divide by 1000 to convert to seconds
+	        return epochToUTCString(epoch);
+	    }
+	    return epoch;  // Return the original value if not in range
+	}
 
 
-function generateTable(title, headerLine, dataLines) {
-    let html = ''
-    // DISPLAY TITLE IF IT IS NOT TIME, TITLE OR GLOBAL_STATS AND REPLACE THE _ WITH A SPACE
-    if (!/^(time|title|global_stats)$/i.test(title)) {
-	html = '<h3>' + title.replace(/_/g, ' ') + '</h3>';
-    }
-    html += '<table><thead><tr>';
-    // LOOP THROUGH THE TABLE HEADERS
-    headerLine.forEach(headerItem => {
-        html += '<th>' + headerItem.replace('time_t','UTC time') + '</th>';
-    });
-    html += '</tr></thead><tbody>';
-    // LOOP THROUGH THE TABLE ROWS AND THROUGH THE CELLS
-    dataLines.forEach(dataLine => {
-        html += '<tr>';
-        dataLine.forEach(dataItem => {
-	    // REPLACE IF EPOCH IS FOUND
-            html += '<td>' + checkAndConvert(dataItem) + '</td>';
-        });
-        html += '</tr>';
-    });
-    html += '</tbody></table><br/>';
-    return html;
-}
+	function generateMasterTable(title, headerLine, dataLines) {
+	    let html = ''
+	    // DISPLAY TITLE IF IT IS NOT TIME, TITLE OR GLOBAL_STATS AND REPLACE THE _ WITH A SPACE
+	    if (!/^(time|title|global_stats)$/i.test(title)) {
+		html = '<h3>' + title.replace(/_/g, ' ') + '</h3>';
+	    }
+	    html += '<table><thead><tr>';
+	    // LOOP THROUGH THE TABLE HEADERS
+	    headerLine.forEach(headerItem => {
+	        html += '<th>' + headerItem.replace('time_t','UTC time') + '</th>';
+	    });
+	    html += '</tr></thead><tbody>';
+	    // LOOP THROUGH THE TABLE ROWS AND THROUGH THE CELLS
+	    dataLines.forEach(dataLine => {
+	        html += '<tr>';
+	        dataLine.forEach(dataItem => {
+		    // REPLACE IF EPOCH IS FOUND
+	            html += '<td>' + checkAndConvert(dataItem) + '</td>';
+	        });
+	        html += '</tr>';
+	    });
+	    html += '</tbody></table><br/>';
+	    return html;
+	}
+
+
+	function generateNonMasterTable(title, data) {
+	    let tableHtml = '<table>';
+	    // Add data rows
+	    data.forEach(row => {
+	        tableHtml += '<tr>';
+	        tableHtml += '<td class="stats-header">' + row[0] + '</td>';  // Key
+	        tableHtml += '<td>' + row[1] + '</td>';  // Value
+	        tableHtml += '</tr>';
+	    });
+	    tableHtml += '</table>';
+	    return tableHtml;
+	}
+
 
 
 	let previousContent = '';  // DECLARE VARIABLE OUTSIDE FUNCTION
-        function loadLogData() {
-            let logElement = document.getElementById("log");
+	function loadLogData() {
+	    let logElement = document.getElementById("log");
 
             fetchAsync('/openvpn-status')
                 .then(
@@ -159,7 +180,7 @@ function generateTable(title, headerLine, dataLines) {
                 )
         }
 
-        setInterval(loadLogData, 1000);
+        setInterval(loadLogData, 5000);
 
 	</script>
 {% endblock %}

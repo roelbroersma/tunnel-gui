@@ -351,6 +351,7 @@ def diagnostics():
         return val or 'no info could be retrieved'
 
     return {
+	'device_type': load_device_type(),
         'ip_type': ip_change_info.ip_type,
         'ip_address': or_info(ip_change_info.ip_address),
         'subnet': or_info(ip_change_info.subnet),
