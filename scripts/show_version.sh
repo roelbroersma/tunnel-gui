@@ -42,12 +42,11 @@ fi
 
 #INITIALISE AND EMPTY VARIABLES
 json_output=""
+DIETPI_VERSION=""
 CORE_OS=""
 CORE_VERSION_FULL=""
-CORE_VERSION=""
-CORE_SUB_VERSION=""
-CORE_RC_VERSION=""
 CORE_AUTO_UPDATE=""
+DIETPI_AUTO_UPDATE=""
 APP_VERSION=""
 OPENVPN_VERSION=""
 
@@ -112,35 +111,79 @@ get_dietpi_latest_version() {
 }
 
 
-# GET KERNEL VERSION FOR NON-DIETPI SYSTEMS
-get_kernel_version() {
-	if command -v lsb_release >/dev/null 2>&1; then
-        	os_type=$(lsb_release -is)
-		os_version_full=$(lsb_release -rs)
-	elif [[ -f /etc/os-release ]]; then
+# GET OS VERSION
+get_os_version() {
+	if [[ -f /etc/os-release ]]; then
+		# Prefer /etc/os-release as it's a standard file across many distros
 		os_type=$(grep ^ID= /etc/os-release | cut -d'=' -f2 | tr -d '"')
-		os_version_full=$(grep ^VERSION_ID= /etc/os-release | cut -d'=' -f2 | tr -d '"')
+		os_version_full=$(grep ^VERSION= /etc/os-release | cut -d'=' -f2 | tr -d '"')
+	elif [[ -f /etc/lsb-release ]]; then
+		 # Fallback to /etc/lsb-release if available
+        	os_type=$(grep ^DISTRIB_ID= /etc/lsb-release | cut -d'=' -f2)
+		os_version_full=$(grep ^DISTRIB_DESCRIPTION= /etc/lsb-release | cut -d'=' -f2)
+	elif command -v lsb_release >/dev/null 2>&1; then
+		# Fallback to lsb_release command if available
+		os_type=$(lsb_release -is)
+		os_version_full=$(lsb_release -ds)
 	elif [[ -f /etc/*release ]]; then
+		# As a last resort, use /etc/*release
 		os_info=$(head -n1 /etc/*release)
 		os_type=$(echo $os_info | awk '{print $1}')
 		os_version_full=$(echo $os_info | awk '{print $3}')
-	else
+	elif command -v uname >/dev/null 2>&1; then
 		os_type=$(uname -o)
 		os_version_full=$(uname -r)
-	fi
-}
-
-# GET LATEST AVAILABLE KERNEL VERSION NUMBER FOR NON-DIETPI SYSTEMS
-get_kernel_latest_version() {
-	if command -v apt >/dev/null 2>&1; then
-		apt update > /dev/null 2>&1
-		local latest_kernel=$(apt list --upgradable 2>/dev/null | grep -E 'linux-image|linux-headers' | head -n 1 | awk -F/ '{print $2}')
-		echo "$latest_kernel"
 	else
-		echo ""
+		os_type="Unknown"
+		os_version_full="Unknown"
 	fi
 }
 
+# GET LATEST AVAILABLE OS VERSION NUMBER
+get_os_latest_version() {
+	# Enable case-insensitive pattern matching
+	shopt -s nocasematch
+
+	local codename=""
+	local version=""
+
+	case $os_type in
+          Debian)
+		codename=$(wget -qO- http://ftp.debian.org/debian/dists/stable/Release | awk '/Codename:/ {print $2}')
+		version=$(wget -qO- http://ftp.debian.org/debian/dists/stable/Release | awk '/Version:/ {print $2}')
+            ;;
+          Ubuntu)
+		codename=$(wget -qO- http://changelogs.ubuntu.com/meta-release | grep -oP 'Name: \K[^\n]*' | tail -1)
+		version=$(wget -qO- http://changelogs.ubuntu.com/meta-release | grep -oP 'Version: \K[^\n]*' | tail -1)
+            ;;
+          CentOS|RedHat)
+            	codename="Plow"
+		version="9"
+            ;;
+          Raspbian)
+		codename=$(wget -qO- http://raspbian.raspberrypi.org/raspbian/dists/stable/InRelease | awk '/Codename:/ {print $2}')
+		version=$(wget -qO- http://raspbian.raspberrypi.org/raspbian/dists/stable/InRelease | awk '/Suite:/ {print $2}')
+            ;;
+          *)
+            echo "Unsupported distribution."
+            ;;
+	esac
+
+	# Check if version is empty, if so set to "Unknown"
+	if [[ -z $version ]]; then
+        	version="Unknown"
+	fi
+
+	# Format the output
+	if [[ -z $codename ]]; then
+		echo "$version"
+	else
+        	echo "${version} (${codename})"
+	fi
+
+	# Disable case-insensitive pattern matching
+	shopt -u nocasematch
+}
 
 
 
@@ -149,11 +192,7 @@ if [ "$LOCATION" == "local" ] || [ "$LOCATION" == "all" ]; then
 	#IF DIETPI:
 	if [[ -f /boot/dietpi/.version ]]; then
 		source /boot/dietpi/.version
-		CORE_OS="DietPi"
-		CORE_VERSION_FULL="$G_DIETPI_VERSION_CORE.$G_DIETPI_VERSION_SUB.$G_DIETPI_VERSION_RC"
-		CORE_VERSION=$G_DIETPI_VERSION_CORE
-		CORE_SUB_VERSION=$G_DIETPI_VERSION_SUB
-		CORE_RC_VERSION=$G_DIETPI_VERSION_RC
+		DIETPI_VERSION="$G_DIETPI_VERSION_CORE.$G_DIETPI_VERSION_SUB.$G_DIETPI_VERSION_RC"
 
 		#GET INFO ABOUT THE AUTO UPDATE FEATURE
 		if [[ -f /boot/dietpi.txt ]]; then
@@ -163,13 +202,20 @@ if [ "$LOCATION" == "local" ] || [ "$LOCATION" == "all" ]; then
 			else
 				CORE_AUTO_UPDATE="manual"
 			fi
+			DIETPI_AUTO_UPDATE=$(/usr/bin/awk -F "=" '/CONFIG_CHECK_DIETPI_UPDATES/ {print $2;exit}' /boot/dietpi.txt)
+                        if [ "$DIETPI_AUTO_UPDATE" == "1" ]; then
+                                DIETPI_AUTO_UPDATE="auto"
+                        else
+                                DIETPI_AUTO_UPDATE="manual"
+                        fi
+
 		fi
-	else
-	#FOR ALL OTHER SYSTEMS
-		get_kernel_version
-		CORE_OS="$(os_type)"
-		CORE_VERSION_FULL="$(os_version_full)"
 	fi
+
+	#GET OS VERSION
+	get_os_version
+	CORE_OS="${os_type}"
+	CORE_VERSION_FULL="${os_version_full}"
 
 	#GET CURRENT APP VERSION
 	APP_VERSION=$(get_app_version)
@@ -178,11 +224,10 @@ if [ "$LOCATION" == "local" ] || [ "$LOCATION" == "all" ]; then
 	OPENVPN_VERSION=$(get_openvpn_version)
 
 	json_output="$json_output \"core_auto_update\" : \"$CORE_AUTO_UPDATE\"";
+	json_output="$json_output, \"dietpi_auto_update\" : \"$DIETPI_AUTO_UPDATE\"";
+	json_output="$json_output, \"dietpi_version\" : \"$DIETPI_VERSION\"";
 	json_output="$json_output, \"core_os\" : \"$CORE_OS\"";
 	json_output="$json_output, \"core_version_full\" : \"$CORE_VERSION_FULL\"";
-	json_output="$json_output, \"core_version\" : \"$CORE_VERSION\"";
-	json_output="$json_output, \"core_sub_version\" : \"$CORE_SUB_VERSION\"";
-	json_output="$json_output, \"core_rc_version\" : \"$CORE_RC_VERSION\"";
 	json_output="$json_output, \"app_version\" : \"$APP_VERSION\"";
 	json_output="$json_output, \"openvpn_version\" : \"$OPENVPN_VERSION\"";
 
@@ -193,19 +238,21 @@ if [ "$LOCATION" == "remote" ] || [ "$LOCATION" == "all" ]; then
 
 	#IF DIETPI:
 	if [[ -f /boot/dietpi/.version ]]; then
-		FUTURE_CORE_VERSION="$(get_dietpi_latest_version)"
-	else
-		FUTURE_CORE_VERSION="$(get_kernel_latest_version)"
+		FUTURE_DIETPI_VERSION="$(get_dietpi_latest_version)"
 	fi
 
+	#GET LATEST CORE VERSION
+	FUTURE_CORE_VERSION="$(get_os_latest_version)"
+
 	#GET LATEST APP VERSION
-	FUTURE_APP_VERSION=$(get_app_latest_version)
+	FUTURE_APP_VERSION="$(get_app_latest_version)"
 
 	if [ "$LOCATION" == "all" ]; then
 		json_output="$json_output,"
 	fi
 
 	json_output="$json_output \"future_core_version\" : \"$FUTURE_CORE_VERSION\"";
+	json_output="$json_output, \"future_dietpi_version\" : \"$FUTURE_DIETPI_VERSION\"";
 	json_output="$json_output, \"future_app_version\" : \"$FUTURE_APP_VERSION\"";
 fi
 

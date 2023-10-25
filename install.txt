@@ -9,7 +9,7 @@ fi
 BASE_DIR="/usr/bin/tunnel-gui/"
 DOWNLOAD_URL="https://github.com/roelbroersma/tunnel-gui/archive/main.zip"
 
-#Check for DIETPI
+# CHECK FOR DIETPI
 if [[ $(uname -a) == *DietPi* ]] || [[ -f /boot/dietpi/.version ]]; then
     DIETPI_DETECTED=True
 fi
@@ -23,11 +23,11 @@ install_packages() {
     /boot/dietpi/dietpi-software install 152 # Avahi-Daemon
     echo;
     echo "Install additional small packages using apt-get if not already installed..."
-    apt-get install -y zip unzip sed mawk grep easy-rsa python3-pip
+    apt-get install -y zip unzip sed mawk grep systemd easy-rsa python3-pip
   elif command -v apt-get > /dev/null 2>&1; then
     echo "Using apt-get to install Packages..."
     apt-get update
-    apt-get install -y zip unzip wget sed mawk grep openssl openvpn easy-rsa python3 python3-pip
+    apt-get install -y zip unzip wget sed mawk grep systemd openssl openvpn easy-rsa python3 python3-pip
   elif command -v yum > /dev/null 2>&1; then
     echo "Using yum to install Packages..."
     yum makecache -y
@@ -45,6 +45,14 @@ install_packages() {
 echo "Install required Software packages."
 install_packages
 echo;
+
+#UBUNTU FIX
+if [[ $(lsb_release -is 2>/dev/null) == "Ubuntu" ]]; then
+    echo "Move OpenVPN server.conf and create symlinks because Ubuntu stores openvpn config files differently."
+    mkdir -p /etc/openvpn/server
+    sudo mv /etc/openvpn/server.conf /etc/openvpn/server/server.conf
+    sudo ln -s /etc/openvpn/server/server.conf /etc/openvpn/server.conf
+fi
 
 echo "Stopping OpenVPN service since it will probably be started after installation."
 systemctl disable openvpn@server.service
@@ -83,14 +91,7 @@ if [[ ! -e .env ]]; then
 	echo 'DEBUG=False #FOR DEBUGGING PURPOSES (IF DEBUG=TRUE, IT WILL ONLY LISTEN TO 127.0.0.1)';
 	echo 'PORT=8080 #PORT THE WEB GUI RUNS AT';
 	echo 'SUPER_PASSWORD=VerySecretPassword';
-	echo 'OPENVPN_STATUS_PATH=/var/openvpn/openvpn-status.log #SET THIS TO THE LOG PATH AS DEFINED IN THE OPENVPN CONFIG FILE.'
     ) > .env
-    SECRET_KEY=really-long-string
-DEBUG=False #FOR DEBUGGING PURPOSES (IF DEBUG=TRUE, IT WILL ONLY LISTEN TO 127.0.0.1)
-PORT=8080 #PORT THE WEB GUI RUN AT
-SUPER_PASSWORD=yourUsefulWebPassword
-OPENVPN_STATUS_PATH=/var/log/openvpn/openvpn-status.log #SET THIS TO THE LOG PATH AS DEFINED IN openvpn's config file.
-
 else
 	echo "We will not create a .env file because one already exists!"
 fi

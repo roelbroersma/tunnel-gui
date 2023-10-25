@@ -310,23 +310,23 @@ if [ "$TYPE" == "server" ]; then
 	sed -i "s/^\(tls-auth.*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
 
 	#SET SERVER SUBNET TO A VERY UNIQUE RANGE
-	if ! grep -q '^#\?server ' ${OPEN_VPN_DIR}server/server.conf; then
+	if ! grep -q '^#\?;\?server ' ${OPEN_VPN_DIR}server/server.conf; then
 		echo 'server 172.31.199.0 255.255.255.0' >> ${OPEN_VPN_DIR}server/server.conf
 	else
-		sed -i "s/^#\?server .*/server 172.16.199.0 255.255.0.0/" ${OPEN_VPN_DIR}server/server.conf
+		sed -i "s/^#\?;\?server .*/server 172.16.199.0 255.255.0.0/" ${OPEN_VPN_DIR}server/server.conf
 	fi
 
 	#DISABLE CIPHER IN GENERAL, DEPRECATED SINCE OPENVPN 2.6
 	sed -i "s/^\(cipher.*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
 
 	#DISABLE (old) CIPHERS IN GENERAL
-	sed -i "s/^#\?\(ciphers .*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
+	sed -i "s/^#\?;\?\(ciphers .*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
 
 	#CHANGE DATA-CIPHERS
-	if ! grep -q '^#\?data-ciphers ' ${OPEN_VPN_DIR}server/server.conf; then
+	if ! grep -q '^#\?;\?data-ciphers ' ${OPEN_VPN_DIR}server/server.conf; then
 		echo 'data-ciphers AES-256-GCM:AES-128-GCM' >> ${OPEN_VPN_DIR}server/server.conf
 	else
-		sed -i "s/^#\?data-ciphers .*/data-ciphers AES-256-GCM:AES-128-GCM/" ${OPEN_VPN_DIR}server/server.conf
+		sed -i "s/^#\?;\?data-ciphers .*/data-ciphers AES-256-GCM:AES-128-GCM/" ${OPEN_VPN_DIR}server/server.conf
 	fi
 
 	#CHANGE FALLBACK-CIPHERS
@@ -344,6 +344,14 @@ if [ "$TYPE" == "server" ]; then
 		sed -i "s/^explicit-exit-notify .*/explicit-exit-notify 1/" ${OPEN_VPN_DIR}server/server.conf
 	else
 		sed -i "s/^explicit-exit-notify .*/explicit-exit-notify 0/" ${OPEN_VPN_DIR}server/server.conf
+	fi
+
+	#CHANGE STATUS-LOG
+	mkdir -p /var/log/openvpn/
+	if ! grep -q '^#\?;\?status ' ${OPEN_VPN_DIR}server/server.conf; then
+		echo 'status /var/log/openvpn/openvpn-status.log' >> ${OPEN_VPN_DIR}server/server.conf
+	else
+		sed -i "s/^#\?;\?status .*/status \/var\/log\/openvpn\/openvpn-status.log/" ${OPEN_VPN_DIR}server/server.conf
 	fi
 
 	# CHANGE THE PORT NUMBER

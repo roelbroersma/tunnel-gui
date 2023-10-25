@@ -13,7 +13,7 @@ from flask import send_file
 from pydantic import BaseModel
 
 from forms import IpAddressChangeForm, PasswordForm, SignInForm, UpdateForm, RebootForm, TunnelMasterForm, TunnelNonMasterForm
-from utils import do_change_password, change_ip, get_token, get_passwords, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration, handle_uploaded_file, core_upgrade, get_version, app_upgrade, do_reboot
+from utils import do_change_password, change_ip, get_token, get_passwords, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration, handle_uploaded_file, core_upgrade, dietpi_upgrade, get_version, app_upgrade, do_reboot
 
 
 from flask_wtf.csrf import CSRFProtect
@@ -23,6 +23,7 @@ DEFAULT_EXECUTABLE = '/bin/bash'
 load_dotenv(BASE_DIR / ".env")
 
 UPDATE_LOG = BASE_DIR / "logs/update.log"
+OPENVPN_STATUS = "/var/log/openvpn/openvpn-status.log"
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
@@ -281,10 +282,16 @@ def update():
         if form.validate_on_submit():
             if 'check_online' in request.form:
                 version = get_version("all")
-            elif 'update_auto_enable' in request.form:
+            elif 'update_dietpi_auto_enable' in request.form:
+                dietpi_upgrade("auto")
+                version = get_version("local")
+            elif 'update_dietpi_auto_disable' in request.form:
+                dietpi_upgrade("manual")
+                version = get_version("local")
+            elif 'update_core_auto_enable' in request.form:
                 core_upgrade("auto")
                 version = get_version("local")
-            elif 'update_auto_disable' in request.form:
+            elif 'update_core_auto_disable' in request.form:
                 core_upgrade("manual")
                 version = get_version("local")
             elif 'update_app' in request.form:
@@ -294,6 +301,10 @@ def update():
             elif 'update_core' in request.form:
                 core_upgrade('now')
                 message="Software will be updated in the background, do not close this screen!"
+                version = get_version("local")
+            elif 'update_dietpi' in request.form:
+                dietpi_upgrade('now')
+                message="DietPi software will be updated in the background, do not close this screen!"
                 version = get_version("local")
             else:
                 version = get_version("local")
@@ -351,7 +362,7 @@ def diagnostics():
 @app.route("/openvpn-status", methods=["GET", ])
 def get_openvpn_status():
     try:
-        with open(os.getenv('OPENVPN_STATUS_PATH', '/'), 'r+') as f:
+        with open(OPENVPN_STATUS, 'r+') as f:
             return f.readlines()
     except:
         pass

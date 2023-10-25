@@ -7,7 +7,7 @@ DIRECTORY="tunnel-gui-main"
 
 # USAGE FUNCTION
 usage() {
-    echo "Usage: ap_upgrade -u now
+    echo "Usage: app_upgrade -u now
 
 " 1>&2
 }

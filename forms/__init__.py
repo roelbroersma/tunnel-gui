@@ -112,11 +112,14 @@ class PasswordForm(FlaskForm):
 
 class UpdateForm(FlaskForm):
     check_online = SubmitField("Check for Software Updates")
-    update_auto_enable = SubmitField("Enable automatic updates")
-    update_auto_disable = SubmitField("Disable automatic updates")
+    update_dietpi_auto_enable = SubmitField("Enable DietPi automatic updates")
+    update_dietpi_auto_disable = SubmitField("Disable DietPi automatic updates")
+    update_core_auto_enable = SubmitField("Enable OS automatic updates")
+    update_core_auto_disable = SubmitField("Disable OS automatic updates")
     update_app = SubmitField("Update T1 Sofware")
     update_app_force = BooleanField("Force/Overwrite update?")
     update_core = SubmitField("Update Operating System")
+    update_dietpi = SubmitField("Update DietPi Software")
 
 class RebootForm(FlaskForm):
     reboot = SubmitField("Reboot system")

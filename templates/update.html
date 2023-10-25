@@ -17,6 +17,17 @@
         {{ form.csrf_token }}
 
 	<div class="version-info">
+		{% if version.dietpi_version %}
+			<div class="row">
+				<p class="col-4">DietPi version</p>
+				<p class="info col-4">{{ version.dietpi_version }}</p>
+			</div>
+                	<div class="row">
+                        	<p class="col-4">DietPi updates</p>
+				<p class="info col-4">{{ version.dietpi_auto_update }}</p>
+				<p class="col-4">{% if version.dietpi_auto_update=="manual" %}{{ form.update_dietpi_auto_enable }}{% endif %}{% if version.dietpi_auto_update=="auto" %}{{ form.update_dietpi_auto_disable }}{% endif %}</p>
+			</div>
+		{% endif %}
 		<div class="row">
 			<p class="col-4">{{ version.core_os }} version</p>
 			<p class="info col-4">{{ version.core_version_full }}</p>
@@ -25,7 +36,7 @@
                 <div class="row">
                         <p class="col-4">OS updates</p>
 			<p class="info col-4">{{ version.core_auto_update }}</p>
-			<p class="col-4">{% if version.core_auto_update=="manual" %}{{ form.update_auto_enable }}{% endif %}{% if version.core_auto_update=="auto" %}{{ form.update_auto_disable }}{% endif %}</p>
+			<p class="col-4">{% if version.core_auto_update=="manual" %}{{ form.update_core_auto_enable }}{% endif %}{% if version.core_auto_update=="auto" %}{{ form.update_core_auto_disable }}{% endif %}</p>
                 </div>
 		{% endif %}
 		<div class="row">
@@ -54,20 +65,27 @@
 		{% else %}
 			<h4>Latest online available</h4>
 			<div class="version-info">
-			{% if version.future_core_version %}
+				{% if version.future_dietpi_version %}
+				<div class="row">
+					<p class="col-4">DietPi version</p>
+					<p class="info col-4">{{ version.future_dietpi_version }}</p>
+				</div>
+				<div class="row col-4">{{ form.update_dietpi }}</div>
+				<br /><br />
+				{% endif %}
+				{% if version.future_core_version %}
 				<div class="row">
 					<p class="col-4">{{ version.core_os }} version</p>
 					<p class="info col-4">{{ version.future_core_version }}</p>
 				</div>
-				<div class="col-4">{{ form.update_core }}</div>
+				<div class="row col-4">{{ form.update_core }}</div>
 				<br /><br />
-			{% endif %}
-			<div class="row">
-				<p class="col-4">T1 version</p>
-				<p class="info col-4">{{ version.future_app_version }}</p>
-			</div>
-			<div class="row">
-				<div class="col-4">{{ form.update_app }}</div>
+				{% endif %}
+				<div class="row">
+					<p class="col-4">T1 version</p>
+					<p class="info col-4">{{ version.future_app_version }}</p>
+				</div>
+				<div class="row col-4">{{ form.update_app }}</div>
 			</div>
 		{% endif %}
 	{% endif %}

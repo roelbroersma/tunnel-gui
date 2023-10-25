@@ -288,6 +288,15 @@ def handle_uploaded_file(file):
         return False
 
 
+def dietpi_upgrade(action):
+    command = [str(SCRIPT_DIR / "dietpi_upgrade.sh")]
+    command.extend(["-u", str(action)])
+    if action in ["now"]:
+        #ASYNC
+        subprocess.Popen(command)
+    elif action in ["manual", "auto"]:
+        #SYNC
+        subprocess.run(command)
 
 def core_upgrade(action):
     command = [str(SCRIPT_DIR / "core_upgrade.sh")]
