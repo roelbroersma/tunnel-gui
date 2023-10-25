@@ -36,6 +36,9 @@
 
 
 	function processLogData(lines) {
+		const joinedLines = lines.join('\n');
+		let result = "";
+
 		if (joinedLines.startsWith('OpenVPN STATISTICS')) {
 			const relevantLines = lines.slice(1, -1);  // Exclude the first and last line
 			const dataArray = relevantLines.map(line => line.split(','));
@@ -44,7 +47,7 @@
 
 			//Split but keep the WORDS itself
 			//const sections = lines.join('\n').split(/(?<=TITLE|TIME|HEADER|GLOBAL_STATS|END)|(?=TITLE|TIME|HEADER|GLOBAL_STATS|END)/);
-			const sections = lines.join('\n').match(/(TITLE.*?(?=TIME|HEADER|GLOBAL_STATS|END|$))|(TIME.*?(?=TITLE|HEADER|GLOBAL_STATS|END|$))|(HEADER.*?(?=HEADER|TITLE|TIME|GLOBAL_STATS|END|$))|(GLOBAL_STATS.*?(?=GLOBAL_STATS|TITLE|TIME|HEADER|END|$))|(END.*?(?=TITLE|TIME|HEADER|GLOBAL_STATS|$))/gs);
+			const sections = joinedLines.match(/(TITLE.*?(?=TIME|HEADER|GLOBAL_STATS|END|$))|(TIME.*?(?=TITLE|HEADER|GLOBAL_STATS|END|$))|(HEADER.*?(?=HEADER|TITLE|TIME|GLOBAL_STATS|END|$))|(GLOBAL_STATS.*?(?=GLOBAL_STATS|TITLE|TIME|HEADER|END|$))|(END.*?(?=TITLE|TIME|HEADER|GLOBAL_STATS|$))/gs);
 
 			const parsedSections = {};
 
