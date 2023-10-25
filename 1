@@ -363,25 +363,19 @@ def diagnostics():
 
 @app.route("/openvpn-status", methods=["GET"])
 def get_openvpn_status():
-#    try:
-#        with open(OPENVPN_STATUS, 'r+') as f:
-#            status_content = f.read()
-#        print(status_content)
-#        status = parse_status(status_content)
-#        print(status)
-#        return flask_render_template('logs_block.html', status=status)
-#    except:
-#        print("nothing")
-#        return flask_render_template('logs_block.html', status=None)
-#
     try:
         with open(OPENVPN_STATUS, 'r+') as f:
-            return f.readlines()
-    except:
-        pass
+            status_content = f.read()
+        status = parse_status(status_content)
+	return flask_render_template('logs_block.html', status=status)
 
-    return ""
-
+#    try:
+#        with open(OPENVPN_STATUS, 'r+') as f:
+#            return f.readlines()
+#    except:
+#        pass
+#
+#    return ""
 
 @app.route("/update-log", methods=["GET"])
 def get_update_log():
@@ -392,7 +386,6 @@ def get_update_log():
         pass
 
     return ""
-
 
 if __name__ == "__main__":
     is_debug = os.getenv('DEBUG', 'False').lower() == 'true'

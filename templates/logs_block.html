@@ -1,5 +1,6 @@
 {% block logs %}
-	<div id="log" class="col-8" style="height: {{ height }}; overflow-y: scroll; background-color: white">
+
+	<div id="log" class="col" style="height: {{ height }}; overflow-y: scroll;">
 	</div>
 
 	<style>
@@ -34,83 +35,110 @@
 	    }
         }
 
+
 	function processLogData(lines) {
-		// PROCESS THE LOG FILE HERE...
-		// FIND THE INDICES OF THE SECTION HEADERS
-		let clientListIndex = lines.findIndex(line => line.startsWith('HEADER,CLIENT_LIST'));
-		let routingTableIndex = lines.findIndex(line => line.startsWith('HEADER,ROUTING_TABLE'));
-		let globalStatsIndex = lines.findIndex(line => line.startsWith('GLOBAL_STATS'));
+		//Split but keep the WORDS itself
+//		const sections = lines.join('\n').split(/(?<=TITLE|TIME|HEADER|GLOBAL_STATS|END)|(?=TITLE|TIME|HEADER|GLOBAL_STATS|END)/);
+		const sections = lines.join('\n').match(/(TITLE.*?(?=TIME|HEADER|GLOBAL_STATS|END|$))|(TIME.*?(?=TITLE|HEADER|GLOBAL_STATS|END|$))|(HEADER.*?(?=HEADER|TITLE|TIME|GLOBAL_STATS|END|$))|(GLOBAL_STATS.*?(?=GLOBAL_STATS|TITLE|TIME|HEADER|END|$))|(END.*?(?=TITLE|TIME|HEADER|GLOBAL_STATS|$))/gs);
 
-		let globalStatsRows = '';
-		let routingTableRows = '';
-		let clientListRows = '';
+		const parsedSections = {};
 
-		// CHECK IF THE INDICES ARE VALID BEFORE SLICING
-		if (clientListIndex  !== -1 && routingTableIndex !== -1) {
-			let clientListLines = lines.slice(clientListIndex  + 1, routingTableIndex);
-			clientListRows  = clientListLines.map(line => {
-				if (line.startsWith('END')) { return ''; }
-				let columns = line.split(',');
-				return `<tr>${columns.map(column => `<td>${column}</td>`).join('')}</tr>`;
-			}).join('');
-		}
+		sections.forEach(section => {
+			const [headerLine, ...dataLines] = section.trim().split('\n');
+			if (section.startsWith('HEADER,CLIENT_LIST')) {
+				parsedSections.CLIENT_LIST = {
+					header : headerLine.split(',').slice(2),
+					data: dataLines.map(line => line.split(','))
+				};
+			} else if (section.startsWith('HEADER,ROUTING_TABLE')) {
+				parsedSections.ROUTING_TABLE = {
+					header: headerLine.split(',').slice(2),
+					data: dataLines.map(line => line.split(','))
+				};
+    			} else if (section.startsWith('GLOBAL_STATS,Max')) {
+				parsedSections.GLOBAL_STATS = {
+					header: headerLine.split(',').slice(1),
+					data: dataLines.map(line => line.split(','))
+				};
+    			} else if (section.startsWith('TITLE')) {
+				let version = '';
+				let features = '';
+				const splitOnComma = headerLine.split(',');
+				if (splitOnComma.length > 1) {
+					const splitOnBracket = splitOnComma[1].split('[');
+					if (splitOnBracket.length > 0) {
+						version = splitOnBracket[0].trim();
+						if (splitOnBracket.length > 1) {
+							features = '[' + splitOnBracket.slice(1).join('[');
+						}
+					}
+				}
+				parsedSections.TITLE = {
+					header: ['Version', 'Features'],
+					data: [[version, features]]
+            			};
+    			} else if (section.startsWith('TIME')) {
+				parsedSections.TIME = {
+                                        header: ['Time'],
+                                        data: [[headerLine.split(',')[1]]]
+            			};
+			}
+    		});
 
-		if (routingTableIndex !== -1 && globalStatsIndex !== -1) {
-			let routingTableLines = lines.slice(routingTableIndex + 1, globalStatsIndex);
-			routingTableRows = routingTableLines.map(line => {
-				if (line.startsWith('END')) { return ''; }
-				let columns = line.split(',');
-				return `<tr>${columns.map(column => `<td>${column}</td>`).join('')}</tr>`;
-			}).join('');
-		}
-
-		if (globalStatsIndex !== -1) {
-			let globalStatsLines = lines.slice(globalStatsIndex  + 1);
-			globalStatsRows = globalStatsLines.map(line => {
-				if (line.startsWith('END')) { return ''; }
-				let columns = line.split(',');
-				return `<tr>${columns.map(column => `<td>${column}</td>`).join('')}</tr>`;
-			}).join('');
-		}
-
-		// GENERATE THE FULL TABLE HTML FOR EACH SECTION
-		let globalStatsTable = `
-			<table>
-				<thead>
-					<tr><th>Max Broadcast/Multicast Queue Length</th></tr>
-				</thead>
-				<tbody>
-					${globalStatsRows}
-				</tbody>
-			</table>`;
-    
-		let routingTableTable = `
-			<table>
-				<thead>
-	       				<tr><th>Virtual Address</th><th>Common Name</th><th>Real Address</th><th>Last Ref</th><th>Last Ref (time_t)</th></tr>
-				</thead>
-				<tbody>
-					${routingTableRows}
-				</tbody>
-			</table>`;
-    
-		let clientListTable = `
-			<table>
-				<thead>
-					<tr><th>Common Name</th><th>Real Address</th><th>Virtual Address</th><th>Virtual IPv6 Address</th><th>Bytes Received</th><th>Bytes Sent</th><th>Connected Since</th><th>Connected Since (time_t)</th><th>Username</th><th>Client ID</th><th>Peer ID</th><th>Data Channel Cipher</th></tr>
-				</thead>
-				<tbody>
-					${clientListRows}
-				</tbody>
-			</table>`;
-console.log(clientListRows);
-console.log(clientListTable); 
-		// RETURN THE FULL HTML
-		return `
-			<div id="global-stats">${globalStatsTable}</div>
-			<div id="routing-table">${routingTableTable}</div>
-			<div id="client-list">${clientListTable}</div>`;
+		let result = "";
+		Object.keys(parsedSections).forEach(key => {
+			const sectionData = parsedSections[key];
+			result += generateTable(key, sectionData.header, sectionData.data);
+		});
+		return result;
 	}
+
+
+function epochToUTCString(epoch) {
+    const date = new Date(epoch * 1000);  // The Date constructor assumest milliseconds, so multiply by 1000
+    const isoString = date.toISOString();
+    return isoString.replace("T", " ").split(".")[0];
+}
+
+// Check if a value is within the Epoch Range, If yes, convert to UTC:
+function checkAndConvert(dataItem) {
+    const epoch = Number(dataItem)
+    if (isNaN(epoch)) {
+	return dataItem;
+    } 
+    const minEpoch = Date.UTC(2023, 0);  // 1st of january 2023
+    const maxEpoch = Date.UTC(2050, 0);  // 1st of january 2050
+    if (epoch >= minEpoch / 1000 && epoch <= maxEpoch / 1000) {  // Divide by 1000 to convert to seconds
+        return epochToUTCString(epoch);
+    }
+    return epoch;  // Return the original value if not in range
+}
+
+
+function generateTable(title, headerLine, dataLines) {
+    let html = ''
+    // DISPLAY TITLE IF IT IS NOT TIME, TITLE OR GLOBAL_STATS AND REPLACE THE _ WITH A SPACE
+    if (!/^(time|title|global_stats)$/i.test(title)) {
+	html = '<h3>' + title.replace(/_/g, ' ') + '</h3>';
+    }
+    html += '<table><thead><tr>';
+    // LOOP THROUGH THE TABLE HEADERS
+    headerLine.forEach(headerItem => {
+        html += '<th>' + headerItem.replace('time_t','UTC time') + '</th>';
+    });
+    html += '</tr></thead><tbody>';
+    // LOOP THROUGH THE TABLE ROWS AND THROUGH THE CELLS
+    dataLines.forEach(dataLine => {
+        html += '<tr>';
+        dataLine.forEach(dataItem => {
+	    // REPLACE IF EPOCH IS FOUND
+            html += '<td>' + checkAndConvert(dataItem) + '</td>';
+        });
+        html += '</tr>';
+    });
+    html += '</tbody></table><br/>';
+    return html;
+}
 
 
 	let previousContent = '';  // DECLARE VARIABLE OUTSIDE FUNCTION

@@ -20,3 +20,4 @@ Werkzeug>=2.2.2
 wheel>=0.37.1
 WTForms>=3.0.1
 zipp>=3.10.0
+openvpn-status
