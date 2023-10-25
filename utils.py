@@ -159,7 +159,11 @@ def generate_keys(server, clients, regenerate=False):
 
     if regenerate:
         command.extend(["-r"])
-    subprocess.run(command)
+    try:
+        subprocess.run(command, check=True)
+        return True
+    except:
+        return False
 
 
 def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_networks, clients, features):
@@ -186,7 +190,7 @@ def generate_server_config(bridge, public_ip_or_ddns, protocol, port, server_net
         for feature in features:
             command.extend(["-f", str(feature)])
 
-        subprocess.run(command)
+        subprocess.run(command, check=True)
         return True
 
     except:
@@ -197,7 +201,7 @@ def generate_client_config():
     try:
         command = [str(SCRIPT_DIR / "change_vpn.sh")]
         command.extend(["-t", "client"])
-        subprocess.run(command)
+        subprocess.run(command, check=True)
         return True
     except:
         return False
