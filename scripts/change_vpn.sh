@@ -68,7 +68,7 @@ enable_features() {
 		if [ $FEATURE == "mdns" ]; then
 			#SET THE MDNS CONFIG
 			sed -i 's#^enable-reflector=.*#enable-reflector=yes#g' /etc/avahi/avahi-daemon.conf
-			systemctl start avahi-daemon && systemctl enable avahi-daemon
+			systemctl enable avahi-daemon && systemctl start avahi-daemon
 
 		elif [ $FEATURE == "pimd" ]; then
 			#SET THE PIMD CONFIG
@@ -101,7 +101,7 @@ enable_features() {
 
 			echo "phyint eth0 enable ${ETH0_ENABLE}" >> /etc/pimd.conf
 			echo "phyint tap0 enable ${ETH0_ENABLE}" >> /etc/pimd.conf
-			systemctl start pimd && systemctl enable pimd
+			systemctl enable pimd && systemctl start pimd
 
 		elif [ $FEATURE == "stp" -a $BRIDGE == "on" ]; then
 			brctl stp br0 on
@@ -451,9 +451,9 @@ ${KEY_CONTENT}
 ########################
 #----T1 CONFIG BEGIN----
 #BRIDGE: ${BRIDGE}
-#FEATURES: ${FEATURES}
-#SERVER_NETWORKS: ${SUBNETS}
-#CLIENT: ${CLIENTS}
+#FEATURES: ${FEATURES[*]}
+#SERVER_NETWORKS: ${SUBNETS[*]}
+#CLIENT: ${CLIENTS[*]}
 #-----T1 CONFIG END-----
 ########################
 "
