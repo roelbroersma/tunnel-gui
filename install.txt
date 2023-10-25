@@ -52,6 +52,7 @@ if [[ $(lsb_release -is 2>/dev/null) == "Ubuntu" ]]; then
     mkdir -p /etc/openvpn/server
     sudo mv /etc/openvpn/server.conf /etc/openvpn/server/server.conf
     sudo ln -s /etc/openvpn/server/server.conf /etc/openvpn/server.conf
+    echo;
 fi
 
 echo "Stopping OpenVPN service since it will probably be started after installation."
