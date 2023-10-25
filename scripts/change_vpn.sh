@@ -425,7 +425,7 @@ if [ "$TYPE" == "server" ]; then
 			CONFIG="client
 dev tap
 proto ${PROTOCOL}
-remote ${HOST} ${PORT}
+remote ${HOST} ${PORT_NUMBER}
 resolv-retry infinite
 nobind
 persist-key
