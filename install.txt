@@ -42,18 +42,9 @@ install_packages() {
   fi
 }
 
-echo "Install required Software packages."
+echo "Installing required Software packages."
 install_packages
 echo;
-
-#UBUNTU FIX
-if [[ $(lsb_release -is 2>/dev/null) == "Ubuntu" ]]; then
-    echo "Move OpenVPN server.conf and create symlinks because Ubuntu stores openvpn config files differently."
-    mkdir -p /etc/openvpn/server
-    sudo mv /etc/openvpn/server.conf /etc/openvpn/server/server.conf
-    sudo ln -s /etc/openvpn/server/server.conf /etc/openvpn/server.conf
-    echo;
-fi
 
 echo "Stopping OpenVPN service since it will probably be started after installation."
 systemctl disable openvpn@server.service
@@ -75,6 +66,20 @@ shopt -u dotglob
 cd ${BASE_DIR}
 rm -rf ${BASE_DIR}/temp/tunnel-gui-main*
 echo;
+
+echo "Copying default OpenVPN server config"
+mkdir -p /etc/openvpn/server
+cp install/openvpn/server.conf /etc/openvpn/server/server.conf
+echo;
+
+#OPENVPN FIX (LIKE ON UBUNTU)
+if [[ -f /etc/openvpn/server.conf ]]; then
+    echo "Fixing bad OpenVPN server.conf file structure by creating symlink."
+    rm -f /etc/openvpn/server.conf
+    sudo ln -s /etc/openvpn/server/server.conf /etc/openvpn/server.conf
+    echo;
+fi
+
 
 if [[ ! -e web_password.txt ]]; then
     echo "Setting web password to: tunnel1"
@@ -108,7 +113,7 @@ echo;
 
 if [[ ${DIETPI_DETECTED} == True ]]; then
     echo "Copying DietPi-CloudShell config for small TFT display."
-    cp dietpi/.dietpi-cloudshell /boot/dietpi/.dietpi-cloudshell
+    cp install/dietpi/.dietpi-cloudshell /boot/dietpi/.dietpi-cloudshell
     echo;
     if ! grep -q "dtoverlay=rpi-display" /boot/config.txt; then
 	echo "Enable small TFT display"
@@ -118,7 +123,7 @@ if [[ ${DIETPI_DETECTED} == True ]]; then
 fi
 
 echo "Installing as a Service so it will run after rebooting or network restarts."
-cp t1tunnel.service /etc/systemd/system/t1tunnel.service
+cp install/t1tunnel.service /etc/systemd/system/t1tunnel.service
 systemctl daemon-reload
 systemctl enable t1tunnel.service
 systemctl start t1tunnel.service

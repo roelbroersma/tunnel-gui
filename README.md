@@ -32,7 +32,7 @@ When you want to enroll it yourself, you can use a **physical device** like a Ra
 We recommend setting up the Tunnel GUI on a Raspberry Pi 2/3/4. Running it on an Odroid or other devices which can run the DietPi image is possible and even devices with non-DietPi images might be possible but we still recommend the Raspberry Pi because of stability and because our developpers also use it.
 1. Download the [DietPi](https://dietpi.com/) image for your device (eg. for Raspberry Pi 2/3/4 or Odroid)
 2. Install the DietPi image to a MicroSD card using [balenaEtcher](https://www.balena.io/etcher/).
-3. Copy the [modified dietpi.txt](https://github.com/roelbroersma/tunnel-gui/blob/main/dietpi/dietpi.txt) to /boot/dietpi.txt on the microSD card. It will use it on first boot.
+3. Copy the [modified dietpi.txt](https://github.com/roelbroersma/tunnel-gui/blob/main/install/dietpi/dietpi.txt) to /boot/dietpi.txt on the microSD card. It will use it on first boot.
 4. Startup your device with the microSD card with the the DietPi image.
 5. When you startup your device, it will automatically obtain an IP address from DHCP and install the tunnel-gui. If it didn't got an address from DHCP, the tunnel-gui couldn't be installed and you have to do it manually by typing the following at the prompt:
 `wget -q -O - https://github.com/roelbroersma/tunnel-gui/raw/main/install.txt | bash`
@@ -70,7 +70,6 @@ The following files need to be modified when checking out the project but they a
     * SECRET_KEY - Flask App Secret Key. It is used in the web gui for cross-site protection. You can change it as you wish.
     * DEBUG - True or False.
     * SUPER_PASSWORD - A super secret (backup) password so you can always login to the web gui. You can only change this password in this file.
-    * OPENVPN_LOG_PATH - Set this to the log path as defined in openvpn config, default is: /var/log/openvpn/openvpn-status.log
     * PORT - The port the web application is running on, e.g. 8080. We use an alternative port because you probably want to run the tunnel itself at port 443.
 
 All script files which interface with the backend (openvpn, pimd, mdns, bridge-tools, ip address changes, etc.) are located in the /scripts/ folder. These files are developped and tested for the DietPi image, however they may work on other Debian-based Linux installations and other Linux installations as well because we try to keep the backend very flexible.
