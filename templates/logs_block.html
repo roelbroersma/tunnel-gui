@@ -37,12 +37,12 @@
 
 	function processLogData(lines) {
 		const joinedLines = lines.join('\n');
-		let result = "";
+		let formattedResult = "";
 
 		if (joinedLines.startsWith('OpenVPN STATISTICS')) {
 			const relevantLines = lines.slice(1, -1);  // Exclude the first and last line
 			const dataArray = relevantLines.map(line => line.split(','));
-			result = generateNonMasterTable('OpenVPN STATISTICS', dataArray);
+			formattedResult = generateNonMasterTable('OpenVPN STATISTICS', dataArray);
 		} else {
 
 			//Split but keep the WORDS itself
@@ -93,12 +93,11 @@
 				}
     			});
 	
-			let result = "";
 			Object.keys(parsedSections).forEach(key => {
 				const sectionData = parsedSections[key];
-				result += generateMasterTable(key, sectionData.header, sectionData.data);
+				formattedResult += generateMasterTable(key, sectionData.header, sectionData.data);
 			});
-			return result;
+			return formattedResult;
 		}
 	}
 
