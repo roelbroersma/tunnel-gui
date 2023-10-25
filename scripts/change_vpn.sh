@@ -302,25 +302,30 @@ if [ "$TYPE" == "server" ]; then
 	sed -i "s#^cert .*#cert ${EASY_RSA_DIR}openvpn-ca/server/server.crt#g" ${OPEN_VPN_DIR}server/server.conf
 	#SET SERVER KEY
 	sed -i "s#^key .*#key ${EASY_RSA_DIR}openvpn-ca/server/server.key#g" ${OPEN_VPN_DIR}server/server.conf
+	#DISABLE DIFFIE HELLMAN BECAUSE WE USE ELIPTIC CURVE KEYS
+	sed -i "s/^\(dh .*\)/dh none/" ${OPEN_VPN_DIR}server/server.conf
+
 	#SET VERIFY-CLIENT-CERT
 	if ! grep -q '^verify-client-cert require' ${OPEN_VPN_DIR}server/server.conf; then
 	  echo 'verify-client-cert require' >> ${OPEN_VPN_DIR}server/server.conf
 	fi
 	#DISABLE TLS-AUTH VIA SHARED-KEY (TODO FOR EXTRA SECURITY)
-	sed -i "s/^\(tls-auth.*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
+	sed -i "s/^\(tls-auth.*\)/;\1/" ${OPEN_VPN_DIR}server/server.conf
 
-	#SET SERVER SUBNET TO A VERY UNIQUE RANGE
-	if ! grep -q '^#\?;\?server ' ${OPEN_VPN_DIR}server/server.conf; then
-		echo 'server 172.31.199.0 255.255.255.0' >> ${OPEN_VPN_DIR}server/server.conf
+	#SET SERVER OR SERVER-BRIDGE SUBNET TO A VERY UNIQUE RANGE
+	if [ "$BRIDGE" == "on" ]; then
+		sed -i "s/^#\?;\?server-bridge .*/server-bridge 172.16.199.0 255.255.255.0/" ${OPEN_VPN_DIR}server/server.conf
+		sed -i "s/^\(server .*\)/;\1/" ${OPEN_VPN_DIR}server/server.conf
 	else
-		sed -i "s/^#\?;\?server .*/server 172.16.199.0 255.255.0.0/" ${OPEN_VPN_DIR}server/server.conf
+		sed -i "s/^#\?;\?server .*/server 172.16.199.0 255.255.255.0/" ${OPEN_VPN_DIR}server/server.conf
+		sed -i "s/^\(server-bridge .*\)/;\1/" ${OPEN_VPN_DIR}server/server.conf
 	fi
+
+	#DISABLE (old) CIPHERS IN GENERAL, DEPRECATED SINCE OPENVPN 2.6
+	sed -i "s/^#\?;\?\(ciphers .*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
 
 	#DISABLE CIPHER IN GENERAL, DEPRECATED SINCE OPENVPN 2.6
 	sed -i "s/^\(cipher.*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
-
-	#DISABLE (old) CIPHERS IN GENERAL
-	sed -i "s/^#\?;\?\(ciphers .*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
 
 	#CHANGE DATA-CIPHERS
 	if ! grep -q '^#\?;\?data-ciphers ' ${OPEN_VPN_DIR}server/server.conf; then
@@ -336,14 +341,11 @@ if [ "$TYPE" == "server" ]; then
 		sed -i "s/^#\?data-ciphers-fallback.*/data-ciphers-fallback AES-256-CBC:AES-128-CBC/" ${OPEN_VPN_DIR}server/server.conf
 	fi
 
-	#DISABLE DIFFIE HELLMAN BECAUSE WE USE ELIPTIC CURVE KEYS
-	sed -i "s/^\(dh .*\)/dh none/" ${OPEN_VPN_DIR}server/server.conf
-
 	#SET explicit-exit-notify ONLY FOR UDP MODE
 	if [ "$PROTOCOL" == "udp" ]; then
-		sed -i "s/^explicit-exit-notify .*/explicit-exit-notify 1/" ${OPEN_VPN_DIR}server/server.conf
+		sed -i "s/^#\?;\?explicit-exit-notify .*/explicit-exit-notify 1/" ${OPEN_VPN_DIR}server/server.conf
 	else
-		sed -i "s/^explicit-exit-notify .*/explicit-exit-notify 0/" ${OPEN_VPN_DIR}server/server.conf
+		sed -i "s/^#\?;\?explicit-exit-notify .*/explicit-exit-notify 0/" ${OPEN_VPN_DIR}server/server.conf
 	fi
 
 	#CHANGE STATUS-LOG
