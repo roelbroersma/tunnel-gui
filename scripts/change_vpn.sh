@@ -83,12 +83,12 @@ enable_features() {
 			sed -i '/^phyint .*/d' ${PIMD_CONF_FILE}
 
 			#SET BSR CANDIDATE LINE (SET TO LOW PRIORITY=LOW)
-			if grep -qE '^[;#]?bsr_candidate' ${PIMD_CONF_FILE}; then
+			if grep -qE '^[;#]?bsr-candidate' ${PIMD_CONF_FILE}; then
 				#REPLACE
-				sed -i 's/^[;#]\?bsr_candidate.*/bsr_candidate priority 2/' ${PIMD_CONF_FILE}
+				sed -i 's/^[;#]\?bsr-candidate.*/bsr_candidate priority 2/' ${PIMD_CONF_FILE}
 			else
 				#ADD
-    				echo 'bsr_candidate priority 2' >> ${PIMD_CONF_FILE}
+    				echo 'bsr-candidate priority 2' >> ${PIMD_CONF_FILE}
 			fi
 
 			#SET RP CANDIDATE LINE (SET TO LOW PRIORITY=HIGH)
