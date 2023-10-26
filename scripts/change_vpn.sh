@@ -26,6 +26,8 @@ EASY_RSA_DIR=${OPEN_VPN_DIR}"easy-rsa/"
 SCRIPT_PATH="$(realpath "$0")"
 SCRIPT_DIR="$(dirname "$SCRIPT_PATH")/"
 CONFIG_DIR="${SCRIPT_DIR}../configs/"
+PIMD_CONF_FILE="/etc/pimd.conf"
+AVAHI_CONF_FILE="/etc/avahi/avahi-daemon.conf"
 
 #INITIALIZE VARIABLES
 unset TYPE
@@ -59,48 +61,105 @@ disable_features() {
 }
 
 # FUNCTION TO ENABLE FEATURES
-#VARIABLES NEEDED: FEATURES,CLIENTS,SUBNETS
-#WHEN FEATURE STP IS SET, IT ALSO NEEDS BRIDGE VARIABLE
+# VARIABLES NEEDED: FEATURES,CLIENTS,SUBNETS
+# WHEN FEATURE STP IS SET, IT ALSO NEEDS BRIDGE VARIABLE
+# WHEN RUNNING ON A CLIENT, IT ALSO NEEDS: MACHINE_ID AND TYPE
 enable_features() {
 	#ACTIVATE FEATURES
 	for FEATURE in "${FEATURES[@]}"; do
 
 		if [ $FEATURE == "mdns" ]; then
 			#SET THE MDNS CONFIG
-			sed -i 's#^enable-reflector=.*#enable-reflector=yes#g' /etc/avahi/avahi-daemon.conf
+			sed -i 's#^enable-reflector=.*#enable-reflector=yes#g' ${AVAHI_CONF_FILE}
 			systemctl enable avahi-daemon && systemctl start avahi-daemon
 
 		elif [ $FEATURE == "pimd" ]; then
 			#SET THE PIMD CONFIG
 
 			#REMOVE THE phyint LINES
-			sed -i '/^phyint .*"$/d' /etc/pimd.conf
+			sed -i '/^phyint .*/d' ${PIMD_CONF_FILE}
 
-			ETH0_ALTNET=""
-			#ADD ALL ALTNETS OF THE SERVER
-			if [ ! -z "$SUBNETS" ]; then
-				for NETWORK in "${SUBNETS[@]}"; do
-					IFS='-' read -ra SERVER_NETWORK <<< "${NETWORK}"
-					SERVER_NET="${SERVER_NETWORK[0]}"
-					SERVER_MASK="${SERVER_NETWORK[1]}"
-					SERVER_CIDR=$(mask_to_cidr $SERVER_MASK)
-					ETH0_ALTNET="${ETH0_ALTNET}altnet ${SERVER_NET}/${SERVER_CIDR} "
-				done
+			#SET BSR CANDIDATE LINE (SET TO LOW PRIORITY=LOW)
+			if grep -qE '^[;#]?bsr_candidate' ${PIMD_CONF_FILE}; then
+				sed -i 's/^[;#]\?bsr_candidate.*/bsr_candidate priority 2/' ${PIMD_CONF_FILE}#REPLACE
+			else
+    				echo 'bsr_candidate priority 2' >> ${PIMD_CONF_FILE}#ADD
 			fi
 
-			#ALSO ALLOW ALL ALTNETS OF ALL CLIENTS (INCLUDING THIS CLIENT, WE CAN OMIT OURSELVE BUT THATS TOO HARD FOR NOW)
-			if [ ! -z "$CLIENTS" ]; then
-				for CLIENT in "${CLIENTS[@]}"; do
-					IFS='-' read -ra CLIENT_NETWORK <<< "${CLIENT}"
-					CLIENT_NET="${CLIENT_NETWORK[1]}"
-					CLIENT_MASK="${CLIENT_NETWORK[2]}"
-					CLIENT_CIDR=$(mask_to_cidr $CLIENT_MASK)
-					ETH0_ALTNET="${ETH0_ALTNET}altnet ${CLIENT_NET}/${CLIENT_CIDR} "
-				done
+			#SET RP CANDIDATE LINE (SET TO LOW PRIORITY=HIGH)
+			if grep -qE '^[;#]?rp-candidate' ${PIMD_CONF_FILE}; then
+				sed -i 's/^[;#]\?rp-candidate.*/rp-candidate time 30 priority 250/' ${PIMD_CONF_FILE}#REPLACE
+			else
+    				echo 'rp-candidate time 30 priority 250' >> ${PIMD_CONF_FILE}#ADD
 			fi
 
-			echo "phyint eth0 enable ${ETH0_ENABLE}" >> /etc/pimd.conf
-			echo "phyint tap0 enable ${ETH0_ENABLE}" >> /etc/pimd.conf
+			#SET GROUP PREFIX
+			if grep -qE '^[;#]?group-prefix' ${PIMD_CONF_FILE}; then
+				sed -i 's/^[;#]\?group-prefix.*/group-prefix 224.0.0.0 masklen 4/' ${PIMD_CONF_FILE}#REPLACE
+			else
+    				echo 'group-prefix 224.0.0.0 masklen 4' >> ${PIMD_CONF_FILE}#ADD
+			fi
+
+			# IF THIS WE ARE RUNNING ON THE CLIENT, ADD ALL ALTNETS HERE
+			if [[ ${TYPE} == "client" ]]; then
+				# ADD ALL NETWORKS OF THE SERVER TO THE CLIENT'S TAP INTERFACE
+				ALTNET_TAP="phyint tap0 enable altnet 172.16.199.0/24"
+				ALTNET_ETH="phyint eth0 enable"
+				if [ ! -z "$SUBNETS" ]; then
+					for NETWORK in "${SUBNETS[@]}"; do
+						IFS='-' read -ra SERVER_NETWORK <<< "${NETWORK}"
+						SERVER_NET="${SERVER_NETWORK[0]}"
+						SERVER_MASK="${SERVER_NETWORK[1]}"
+						SERVER_CIDR=$(mask_to_cidr $SERVER_MASK)
+						ALTNET_TAP="${ALTNET_TAP} altnet ${SERVER_NET}/${SERVER_CIDR}"
+					done
+				fi
+				# ALSO ADD ALL OTHER CLIENTS SUBNETS TO THE TAP0 INTERFACE (BUT NOT OUR OWN ONE)
+				if [ ! -z "$CLIENTS" ]; then
+					for CLIENT in "${CLIENTS[@]}"; do
+						IFS='-' read -ra CLIENT_NETWORK <<< "${CLIENT}"
+						CLIENT_ID="${CLIENT_NETWORK[0]}"
+						CLIENT_NET="${CLIENT_NETWORK[1]}"
+						CLIENT_MASK="${CLIENT_NETWORK[2]}"
+						CLIENT_CIDR=$(mask_to_cidr $CLIENT_MASK)
+						if [[ ${CLIENT_ID} == ${MACHINE_ID}  ]]; then
+							ALTNET_ETH="${ALTNET_ETH} altnet $CLIENT_NET/$CLIENT_CIDR"
+						else
+							ALTNET_TAP="${ALTNET_TAP} altnet ${CLIENT_NET}/${CLIENT_CIDR}"
+						fi
+					done
+				fi
+				echo "${ALTNET_TAP}" >> ${PIMD_CONF_FILE}
+				echo "${ALTNET_ETH}" >> ${PIMD_CONF_FILE}
+
+			# IF THIS WE ARE RUNNING ON THE SERVER, ADD ALL ALTNETS HERE
+			elif [[ ${TYPE} == "server" ]]
+				# ADD ALL NETWORKS OF ALL CLIENTS TO THE SERVER'S TAP INTERFACE
+				ALTNET_TAP="phyint tap0 enable altnet 172.16.199.0/24"
+				ALTNET_ETH="phyint eth0 enable"
+				if [ ! -z "$CLIENTS" ]; then
+					for CLIENT in "${CLIENTS[@]}"; do
+						IFS='-' read -ra CLIENT_NETWORK <<< "${CLIENT}"
+						CLIENT_NET="${CLIENT_NETWORK[1]}"
+						CLIENT_MASK="${CLIENT_NETWORK[2]}"
+						CLIENT_CIDR=$(mask_to_cidr $CLIENT_MASK)
+						ALTNET_TAP="${ALTNET_TAP} altnet ${CLIENT_NET}/${CLIENT_CIDR}"
+					done
+				fi
+				# ALSO ADD ALL SERVERS SUBNETS TO THE ETH0 INTERFACE
+				if [ ! -z "$SUBNETS" ]; then
+					for NETWORK in "${SUBNETS[@]}"; do
+						IFS='-' read -ra SERVER_NETWORK <<< "${NETWORK}"
+						SERVER_NET="${SERVER_NETWORK[0]}"
+						SERVER_MASK="${SERVER_NETWORK[1]}"
+						SERVER_CIDR=$(mask_to_cidr $SERVER_MASK)
+						ALTNET_ETH="${ALTNET_ETH} altnet ${SERVER_NET}/${SERVER_CIDR}"
+					done
+				fi
+				echo "${ALTNET_TAP}" >> ${PIMD_CONF_FILE}
+				echo "${ALTNET_ETH}" >> ${PIMD_CONF_FILE}
+			fi
+
 			systemctl enable pimd && systemctl start pimd
 
 		elif [ $FEATURE == "stp" -a $BRIDGE == "on" ]; then
