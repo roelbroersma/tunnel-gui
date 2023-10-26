@@ -55,8 +55,10 @@ disable_features() {
 	if [ $BRIDGE == "on" ]; then
 		echo "Disabling the Spanning Tree over the Bridge..."
 		brctl stp br0 off
-		ebtables -A FORWARD -d 01:00:0c:cc:cc:00/ff:ff:ff:ff:ff:00 -j DROP #ALL PVSTP VLANS
-		ebtables -A FORWARD -d 01:80:C2:00:00:00/ff:ff:ff:ff:ff:f0 -j DROP #ALL STP, RSTP and MST
+		#ALL PVST VLANS
+		ebtables -A FORWARD -d 01:00:0c:cc:cc:00/ff:ff:ff:ff:ff:00 -j DROP
+		#ALL STP, RSTP and MST
+		ebtables -A FORWARD -d 01:80:C2:00:00:00/ff:ff:ff:ff:ff:f0 -j DROP
 	fi
 }
 
@@ -81,23 +83,29 @@ enable_features() {
 
 			#SET BSR CANDIDATE LINE (SET TO LOW PRIORITY=LOW)
 			if grep -qE '^[;#]?bsr_candidate' ${PIMD_CONF_FILE}; then
-				sed -i 's/^[;#]\?bsr_candidate.*/bsr_candidate priority 2/' ${PIMD_CONF_FILE}#REPLACE
+				#REPLACE
+				sed -i 's/^[;#]\?bsr_candidate.*/bsr_candidate priority 2/' ${PIMD_CONF_FILE}
 			else
-    				echo 'bsr_candidate priority 2' >> ${PIMD_CONF_FILE}#ADD
+				#ADD
+    				echo 'bsr_candidate priority 2' >> ${PIMD_CONF_FILE}
 			fi
 
 			#SET RP CANDIDATE LINE (SET TO LOW PRIORITY=HIGH)
 			if grep -qE '^[;#]?rp-candidate' ${PIMD_CONF_FILE}; then
-				sed -i 's/^[;#]\?rp-candidate.*/rp-candidate time 30 priority 250/' ${PIMD_CONF_FILE}#REPLACE
+				#REPLACE
+				sed -i 's/^[;#]\?rp-candidate.*/rp-candidate time 30 priority 250/' ${PIMD_CONF_FILE}
 			else
-    				echo 'rp-candidate time 30 priority 250' >> ${PIMD_CONF_FILE}#ADD
+				#ADD
+    				echo 'rp-candidate time 30 priority 250' >> ${PIMD_CONF_FILE}
 			fi
 
 			#SET GROUP PREFIX
 			if grep -qE '^[;#]?group-prefix' ${PIMD_CONF_FILE}; then
-				sed -i 's/^[;#]\?group-prefix.*/group-prefix 224.0.0.0 masklen 4/' ${PIMD_CONF_FILE}#REPLACE
+				#REPLACE
+				sed -i 's/^[;#]\?group-prefix.*/group-prefix 224.0.0.0 masklen 4/' ${PIMD_CONF_FILE}
 			else
-    				echo 'group-prefix 224.0.0.0 masklen 4' >> ${PIMD_CONF_FILE}#ADD
+				#ADD
+    				echo 'group-prefix 224.0.0.0 masklen 4' >> ${PIMD_CONF_FILE}
 			fi
 
 			# IF THIS WE ARE RUNNING ON THE CLIENT, ADD ALL ALTNETS HERE
@@ -133,7 +141,7 @@ enable_features() {
 				echo "${ALTNET_ETH}" >> ${PIMD_CONF_FILE}
 
 			# IF THIS WE ARE RUNNING ON THE SERVER, ADD ALL ALTNETS HERE
-			elif [[ ${TYPE} == "server" ]]
+			elif [[ ${TYPE} == "server" ]]; then
 				# ADD ALL NETWORKS OF ALL CLIENTS TO THE SERVER'S TAP INTERFACE
 				ALTNET_TAP="phyint tap0 enable altnet 172.16.199.0/24"
 				ALTNET_ETH="phyint eth0 enable"
@@ -164,7 +172,8 @@ enable_features() {
 
 		elif [ $FEATURE == "stp" -a $BRIDGE == "on" ]; then
 			brctl stp br0 on
-			ebtables -F FORWARD #DELETE THE FORWARDING CHAIN
+			#DELETE THE FORWARD CHAIN
+			ebtables -F FORWARD
 
 		else
 			echo "Invalid Features specified: $FEATURE. Currently only supporting mdns, pimd and stp as options."
@@ -242,7 +251,8 @@ fi
 if [ "$TYPE" == "server" ]; then
 
 	unset OPTIND    #RESET GETOPTS
-	re_ip="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$" #REGEX PATTERN TO CHECK FOR VALID IP (NOT TO TIGHT, MAKE 0.0.0.0 OR 255.255.255.255 STILL POSSIBLE)
+	#REGEX PATTERN TO CHECK FOR VALID IP (NOT TO TIGHT, MAKE 0.0.0.0 OR 255.255.255.255 STILL POSSIBLE)
+	re_ip="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
 	re_subnet="^(128|192|224|240|248|252|254|255)\.(0|128|192|224|240|248|252|254|255)\.(0|128|192|224|240|248|252|254|255)\.(0|128|192|224|240|248|252|254|255)$"
 
 	# GET -h, -p, -n, -s and -c  ARGUMENTS
