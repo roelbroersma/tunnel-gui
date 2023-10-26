@@ -26,6 +26,7 @@ EASY_RSA_DIR=${OPEN_VPN_DIR}"easy-rsa/"
 SCRIPT_PATH="$(realpath "$0")"
 SCRIPT_DIR="$(dirname "$SCRIPT_PATH")/"
 CONFIG_DIR="${SCRIPT_DIR}../configs/"
+OPENVPN_STATUS_FILE="/var/log/openvpn/openvpn-status.log"
 PIMD_CONF_FILE="/etc/pimd.conf"
 AVAHI_CONF_FILE="/etc/avahi/avahi-daemon.conf"
 
@@ -418,11 +419,11 @@ if [ "$TYPE" == "server" ]; then
 	fi
 
 	#CHANGE STATUS-LOG
-	mkdir -p /var/log/openvpn/
+	mkdir -p "$(dirname ${OPENVPN_STATUS_FILE})"
 	if ! grep -q '^#\?;\?status ' ${OPEN_VPN_DIR}server/server.conf; then
-		echo 'status /var/log/openvpn/openvpn-status.log' >> ${OPEN_VPN_DIR}server/server.conf
+		echo "status ${OPENVPN_STATUS_FILE}" >> ${OPEN_VPN_DIR}server/server.conf
 	else
-		sed -i "s/^#\?;\?status .*/status \/var\/log\/openvpn\/openvpn-status.log/" ${OPEN_VPN_DIR}server/server.conf
+		sed -i "s|^#\?;\?status .*|status ${OPENVPN_STATUS_FILE}|" ${OPEN_VPN_DIR}server/server.conf
 	fi
 
 	# CHANGE THE PORT NUMBER
@@ -512,6 +513,7 @@ remote-cert-tls server"
 explicit-exit-notify 1"
 			fi
 			CONFIG="${CONFIG}
+status ${OPENVPN_STATUS_FILE} 
 <ca>
 $CA_CONTENT
 </ca>
