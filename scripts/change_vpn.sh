@@ -430,19 +430,25 @@ if [ "$TYPE" == "server" ]; then
 			IFS='-' read -ra SERVER_NETWORK <<< "${SUBNET}"
 			SERVER_NET="${SERVER_NETWORK[0]}"
 			SERVER_MASK="${SERVER_NETWORK[1]}"
-			echo "push \"route ${SERVER_NET} ${SERVER_MASK}\"" >> ${OPEN_VPN_DIR}server/server.conf
+			echo "push \"route ${SERVER_NET} ${SERVER_MASK} vpn_gateway\"" >> ${OPEN_VPN_DIR}server/server.conf
 		done
 	fi
 
 	#ALSO ADD ALL THE CLIENT NETWORKS AS PUSH ROUTES (SO EACH CLIENT KNOWS HOW TO REACH ANOTHER CLIENT)
+	#USE A HIGHER METRIC SO A CLIENT WILL NOT ROUTE HIS OWN CLIENT-NETWORK THROUGH THE TUNNEL
 	if [ ! -z "$CLIENTS" ]; then
 		for CLIENT in "${CLIENTS[@]}"; do
 			IFS='-' read -ra CLIENT_NETWORK <<< "${CLIENT}"
 			CLIENT_ID="${CLIENT_NETWORK[0]}"
 			CLIENT_NET="${CLIENT_NETWORK[1]}"
 			CLIENT_MASK="${CLIENT_NETWORK[2]}"
-			echo "push \"route ${CLIENT_NET} ${CLIENT_MASK}\"" >> ${OPEN_VPN_DIR}server/server.conf
+			echo "push \"route ${CLIENT_NET} ${CLIENT_MASK} vpn_gateway 100\"" >> ${OPEN_VPN_DIR}server/server.conf
 		done
+	fi
+
+	#FIX FOR USING A PRIVATE/LOCAL IP AS VPN-ENDPOINT. THEN THE TRAFFIC FROM THE CLIENTS TO THIS ENDPOINT MAY NOT FLOW VIA THE VPN BUT MUST FOLLOW THE CLIENT ROUTING TABLE
+	if [[ $HOST =~ ^10\.(.*) || $HOST =~ ^172\.1[6-9]\.(.*) || $HOST =~ ^172\.2[0-9]\.(.*) || $HOST =~ ^172\.3[0-1]\.(.*) || $HOST =~ ^192\.168\.(.*) ]]; then
+		echo "push \"route ${HOST} 255.255.255.255 netn_gateway\"" >> ${OPEN_VPN_DIR}server/server.conf
 	fi
 
 	#ALLOW THE CLIENTS, BY ADDING THEM IN THE CCD DIRECTORY
