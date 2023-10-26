@@ -457,8 +457,8 @@ if [ "$TYPE" == "server" ]; then
 	fi
 
 	#FIX FOR USING A PRIVATE/LOCAL IP AS VPN-ENDPOINT. THEN THE TRAFFIC FROM THE CLIENTS TO THIS ENDPOINT MAY NOT FLOW VIA THE VPN BUT MUST FOLLOW THE CLIENT ROUTING TABLE
-	if [[ $HOST =~ ^10\.(.*) || $HOST =~ ^172\.1[6-9]\.(.*) || $HOST =~ ^172\.2[0-9]\.(.*) || $HOST =~ ^172\.3[0-1]\.(.*) || $HOST =~ ^192\.168\.(.*) ]]; then
-		echo "push \"route ${HOST} 255.255.255.255 netn_gateway\"" >> ${OPEN_VPN_DIR}server/server.conf
+	if [[ ${HOST} =~ ^10\.(.*) || ${HOST} =~ ^172\.1[6-9]\.(.*) || ${HOST} =~ ^172\.2[0-9]\.(.*) || ${HOST} =~ ^172\.3[0-1]\.(.*) || ${HOST} =~ ^192\.168\.(.*) ]]; then
+		echo "push \"route ${HOST} 255.255.255.255 net_gateway\"" >> ${OPEN_VPN_DIR}server/server.conf
 	fi
 
 	#ALLOW THE CLIENTS, BY ADDING THEM IN THE CCD DIRECTORY
