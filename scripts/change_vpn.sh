@@ -363,7 +363,11 @@ if [ "$TYPE" == "server" ]; then
 
 	#ALWAYS SET THESE SETTINGS:
 	#SET TO TAP MODE
-	sed -i 's#^dev .*#dev tap#g' ${OPEN_VPN_DIR}server/server.conf
+	if [[ "${BRIDGE}" == "on" ]]; then
+		sed -i 's#^dev .*#dev tap0#g' ${OPEN_VPN_DIR}server/server.conf
+	else
+		sed -i 's#^dev .*#dev tap#g' ${OPEN_VPN_DIR}server/server.conf
+	fi
 	#SET CLIENT CONFIG DIR
 	sed -i "s#^;\?client-config-dir .*#client-config-dir ${OPEN_VPN_DIR}server/ccd#g" ${OPEN_VPN_DIR}server/server.conf
 	#SET SERVER CA
@@ -498,8 +502,17 @@ if [ "$TYPE" == "server" ]; then
 			CERT_CONTENT=$(cat "${EASY_RSA_DIR}openvpn-ca/client/${CLIENT_ID}.crt")
 			KEY_CONTENT=$(cat "${EASY_RSA_DIR}openvpn-ca/client/${CLIENT_ID}.key")
 			CA_CONTENT=$(cat "${EASY_RSA_DIR}openvpn-ca/pki/ca.crt")
-			CONFIG="client
-dev tap
+			CONFIG="client"
+
+			#SET TO TAP0 FOR BRIDGE, OTHERWISE TAP
+			if [[ "${BRIDGE}" == "on" ]]; then
+				CONFIG="${CONFIG}
+dev tap0"
+			else
+				CONFIG="${CONFIG}
+dev tap"
+			fi
+			${CONFIG}="${CONFIG}
 proto ${PROTOCOL}
 remote ${HOST} ${PORT_NUMBER}
 resolv-retry infinite
