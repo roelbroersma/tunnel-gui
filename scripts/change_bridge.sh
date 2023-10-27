@@ -77,9 +77,18 @@ if [ "$CURRENT_MODE" == "normal" ] && [ $BRIDGE == "on" ]; then
 
         # SET ETH0 TO MANUAL
         echo "Changing Interface eth0 to manual"
+	#sudo sed -i '/iface eth0 inet/c\iface eth0 inet manual' /etc/network/interfaces
         awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=eth0 mode=manual > /tmp/tmp_interfaces
 
         # FOR SOME REASON WE CAN NOT WRITE TO THE /ETC/NETWORK/INTERFACES FILE DIRECTLY, SO WE DO IT THIS WAY, VIA A TMP FILE.
+        cp /tmp/tmp_interfaces /etc/network/interfaces
+
+       # SHUT DOWN TAP0 INTERFACE WHICH MIGHT BE STILL OPEN FROM AN ACTIVE OPENVPN SESSION
+        ip link set dev tap0 down
+        ip link delete tap0
+        # ADD TAP0 INTERFACE
+        echo "Adding static tap0 interface"
+        awk -f changeInterface.awk /etc/network/interfaces action=add dev=tap0 mode=manual 'pre-up'='openvpn --mktun --dev tap0'
         cp /tmp/tmp_interfaces /etc/network/interfaces
 
         # NOW ADD THE BRIDGE INTERFACE
@@ -87,10 +96,11 @@ if [ "$CURRENT_MODE" == "normal" ] && [ $BRIDGE == "on" ]; then
         if [ "$CURRENT_TYPE" == "dhcp" ]; then
                 echo "Adding Bridge interface with DHCP and try to keep same MAC/IP Address"
                 awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=br0 action=add mode=dhcp > /tmp/tmp_interfaces
+		#echo "iface br0 inet static\n    bridge_ports eth0 tap0" >> /etc/network/interfaces
                 #WHEN SETTING A BRIDGE TO DHCP, THE BRIDGE_PORTS CONFIGURATION IS LOST, SO ADD IT HERE
-                echo "	bridge_ports eth0 tap0" >> /tmp/tmp_interfaces
+                echo "    bridge_ports eth0 tap0" >> /tmp/tmp_interfaces
 		#WHEN SETTING A BRIDGE TO DHCP, ANY OTHER VALUES CAN NOT BE WRITTEN, SO DO THAT HERE. HERE TRY TO KEEP THE SAME IP ADDRESS BY CLONING THE MAC ADDRESS, WHILE MOSTLY A UNIQUE IDENTIFIER (DUID) IS USED AS IN /etc/dhcp/dhcpclient.conf BUT WE WILL NOT CHANGE THAT BECAUSE THEN AFTER DOWNLOADING THIS TUNNEL1 SOFTWARE YOU WILL IMMEDIATELLY RECEIVE A NEW IP ADDRESS.
-		echo "	hwaddress ether ${CURRENT_MAC_ADDRESS}" >> /tmp/tmp_interfaces
+		echo "    hwaddress ether ${CURRENT_MAC_ADDRESS}" >> /tmp/tmp_interfaces
 
         #OTHERWISE, ADD BRIDGE WITH STATIC IP
         else
@@ -114,6 +124,15 @@ if [ "$CURRENT_MODE" == "normal" ] && [ $BRIDGE == "on" ]; then
 
 #SWITCH BACK TO NORMAL MODE
 elif [ "$CURRENT_MODE" == "bridge" ] && [ $BRIDGE == "off" ]; then
+
+	#SHUT DOWN AND DELETE TAP0 INTERFACE
+        ip link set dev tap0 down
+        ip link delete tap0
+
+        # REMOVE TAP0 INTERFACE
+        echo "Removing static tap0 interface"
+        awk -f changeInterface.awk /etc/network/interfaces dev=tap0 action=remove > /tmp/tmp_interfaces
+        cp /tmp/tmp_interfaces /etc/network/interfaces
 
         #REMOVE THE BRIDGE INTERFACE
         echo "Removing Bridge Interface"
