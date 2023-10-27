@@ -88,7 +88,10 @@ if [ "$CURRENT_MODE" == "normal" ] && [ $BRIDGE == "on" ]; then
         ip link delete tap0
         # ADD TAP0 INTERFACE
         echo "Adding static tap0 interface"
-        awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces action=add dev=tap0 mode=manual 'pre-up'='openvpn --mktun --dev tap0' > /tmp/tmp_interfaces
+        awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces action=add dev=tap0 mode=manual > /tmp/tmp_interfaces
+	# USE SED TO ADD THE LINE BELOW BECAUSE THE AWK SCRIPT CANT DO IT
+	sed -i '/iface tap0 inet manual/a \    pre-up openvpn --mktun --dev tap0' /tmp/tmp_interfaces
+
         cp /tmp/tmp_interfaces /etc/network/interfaces
 
         # NOW ADD THE BRIDGE INTERFACE
