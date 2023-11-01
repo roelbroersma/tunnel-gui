@@ -135,6 +135,8 @@ elif [ "$CURRENT_MODE" == "bridge" ] && [ $BRIDGE == "off" ]; then
         # REMOVE TAP0 INTERFACE
         echo "Removing static tap0 interface"
         awk -f ${SCRIPT_DIR}changeInterface.awk /etc/network/interfaces dev=tap0 action=remove > /tmp/tmp_interfaces
+
+	# FOR SOME REASON WE CAN NOT WRITE TO THE /ETC/NETWORK/INTERFACES FILE DIRECTLY, SO WE DO IT THIS WAY, VIA A TMP FILE.
         cp /tmp/tmp_interfaces /etc/network/interfaces
 
         #REMOVE THE BRIDGE INTERFACE

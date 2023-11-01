@@ -48,10 +48,10 @@
 
 			//Split but keep the WORDS itself
 			//const sections = lines.join('\n').split(/(?<=TITLE|TIME|HEADER|GLOBAL_STATS|END)|(?=TITLE|TIME|HEADER|GLOBAL_STATS|END)/);
-			const sections = joinedLines.match(/(TITLE.*?(?=TIME|HEADER|GLOBAL_STATS|END|$))|(TIME.*?(?=TITLE|HEADER|GLOBAL_STATS|END|$))|(HEADER.*?(?=HEADER|TITLE|TIME|GLOBAL_STATS|END|$))|(GLOBAL_STATS.*?(?=GLOBAL_STATS|TITLE|TIME|HEADER|END|$))|(END.*?(?=TITLE|TIME|HEADER|GLOBAL_STATS|$))/gs);
+			const sections = joinedLines.match(/(TITLE.*?(?=TITLE|TIME|HEADER,CLIENT|HEADER,ROUTING|GLOBAL_STATS|END))|(TIME.*?(?=TIME|TITLE|HEADER,CLIENT|HEADER,ROUTING|GLOBAL_STATS|END))|(HEADER,CLIENT.*?(?=TITLE|TIME|HEADER,CLIENT|HEADER,ROUTING|GLOBAL_STATS|END))|(HEADER,ROUTING.*?(?=TITLE|TIME|HEADER,CLIENT|HEADER,ROUTING|GLOBAL_STATS|END))|(GLOBAL_STATS.*?(?=TIME|TITLE|HEADER,CLIENT|HEADER,ROUTING|GLOBAL_STATS|END))|(END.*?(?=TITLE|TIME|HEADER,CLIENT|HEADER,ROUTING|GLOBAL_STATS|END))/gs);
 
 			const parsedSections = {};
-
+console.log(JSON.stringify(sections, null, 2));
 			sections.forEach(section => {
 				const [headerLine, ...dataLines] = section.trim().split('\n');
 				if (section.startsWith('HEADER,CLIENT_LIST')) {
@@ -62,7 +62,7 @@
 				} else if (section.startsWith('HEADER,ROUTING_TABLE')) {
 					parsedSections.ROUTING_TABLE = {
 						header: headerLine.split(',').slice(2),
-						data: dataLines.map(line => line.split(',').slice[1])
+						data: dataLines.map(line => line.split(',').slice(1))
 					};
     				} else if (section.startsWith('GLOBAL_STATS,Max')) {
 					parsedSections.GLOBAL_STATS = {
@@ -93,7 +93,7 @@
             				};
 				}
     			});
-	
+console.log(parsedSections);
 			Object.keys(parsedSections).forEach(key => {
 				const sectionData = parsedSections[key];
 				formattedResult += generateMasterTable(key, sectionData.header, sectionData.data);
@@ -101,7 +101,6 @@
 			return formattedResult;
 		}
 	}
-
 
 	function epochToUTCString(epoch) {
 	    const date = new Date(epoch * 1000);  // The Date constructor assumest milliseconds, so multiply by 1000
@@ -124,7 +123,7 @@
 	}
 
 
-	function generateMasterTable(title, headerLine, dataLines) {
+	function generateMasterTable(title, headerLine=[], dataLines=[]) {
 	    let html = ''
 	    // DISPLAY TITLE IF IT IS NOT TIME, TITLE OR GLOBAL_STATS AND REPLACE THE _ WITH A SPACE
 	    if (!/^(time|title|global_stats)$/i.test(title)) {
@@ -132,7 +131,9 @@
 	    }
 	    html += '<table><thead><tr>';
 	    // LOOP THROUGH THE TABLE HEADERS
-	    headerLine.forEach(headerItem => {
+	    let time_header = [];
+	    headerLine.forEach( (headerItem, index) => {
+		if (headerItem.includes('time_t')) { time_header.push(index); }
 	        html += '<th>' + headerItem.replace('time_t','UTC time') + '</th>';
 	    });
 	    html += '</tr></thead><tbody>';
@@ -140,9 +141,13 @@
 	    dataLines.forEach(dataLine => {
 	        if ( dataLine === undefined || !Array.isArray(dataLine)) { return; }
 	        html += '<tr>';
-	        dataLine.forEach(dataItem => {
+	        dataLine.forEach( (dataItem,index) => {
 		    // REPLACE IF EPOCH IS FOUND
-	            html += '<td>' + checkAndConvert(dataItem) + '</td>';
+		    if (time_header.includes(index)) {
+	            	html += '<td>' + checkAndConvert(dataItem) + '</td>';
+		    } else {
+	            	html += '<td>' + dataItem + '</td>';
+		    }
 	        });
 	        html += '</tr>';
 	    });
@@ -171,17 +176,22 @@
 	    let logElement = document.getElementById("log");
 
             fetchAsync('/openvpn-status')
-                .then(
-                    function (result) {
-                        let newContent = result.join('');
-                        if (newContent !== previousContent) {
-			    let formattedContent = processLogData(result);
-			    //EMPTY OLD CONTENT
-			    logElement.innerHTML = formattedContent;
-			    previousContent = newContent;
-                        }
-                    }
-                )
+                .then(function (result) {
+			if (result && Array.isArray(result)) {
+                        	let newContent = result.join('');
+                        	if (newContent !== previousContent) {
+			    	  let formattedContent = processLogData(result);
+			    	  //EMPTY OLD CONTENT
+			    	  logElement.innerHTML = formattedContent;
+			    	  previousContent = newContent;
+                        	}
+			} else {
+				console.error('Received invalid data:', result);
+			}
+                })
+		.catch(function(error) {
+			console.error('Error retrieving data:', error);
+		});
         }
 
         setInterval(loadLogData, 5000);

@@ -146,7 +146,7 @@ enable_features() {
 				# ADD ALL NETWORKS OF ALL CLIENTS TO THE SERVER'S TAP INTERFACE
 				ALTNET_TAP="phyint tap0 enable altnet 172.16.199.0/24"
 				ALTNET_ETH="phyint eth0 enable"
-				if [ ! -z "$CLIENTS" ]; then
+				if [ ! -z "${CLIENTS}" ]; then
 					for CLIENT in "${CLIENTS[@]}"; do
 						IFS='-' read -ra CLIENT_NETWORK <<< "${CLIENT}"
 						CLIENT_NET="${CLIENT_NETWORK[1]}"
@@ -156,7 +156,7 @@ enable_features() {
 					done
 				fi
 				# ALSO ADD ALL SERVERS SUBNETS TO THE ETH0 INTERFACE
-				if [ ! -z "$SUBNETS" ]; then
+				if [ ! -z "${SUBNETS}" ]; then
 					for NETWORK in "${SUBNETS[@]}"; do
 						IFS='-' read -ra SERVER_NETWORK <<< "${NETWORK}"
 						SERVER_NET="${SERVER_NETWORK[0]}"
@@ -171,13 +171,13 @@ enable_features() {
 
 			systemctl enable pimd && systemctl start pimd
 
-		elif [ $FEATURE == "stp" -a $BRIDGE == "on" ]; then
+		elif [ "${FEATURE}" == "stp" -a "${BRIDGE}" == "on" ]; then
 			brctl stp br0 on
 			#DELETE THE FORWARD CHAIN
 			ebtables -F FORWARD
 
 		else
-			echo "Invalid Features specified: $FEATURE. Currently only supporting mdns, pimd and stp as options."
+			echo "Invalid Features specified: ${FEATURE}. Currently only supporting mdns, pimd and stp as options."
 			exit_abnormal
 		fi
 	done
@@ -239,17 +239,17 @@ done
 
 
 # ERROR HANDLING FOR -t ARGUMENT
-if [ -z "$TYPE" ]; then
+if [ -z "${TYPE}" ]; then
 	echo "ERROR: Use of argument -t is required!"
 	exit_abnormal
 fi
-if [ "$TYPE" != "server" ] && [ "$TYPE" != "client" ]; then
+if [ "${TYPE}" != "server" ] && [ "${TYPE}" != "client" ]; then
 	echo "ERROR: Invalid option for -t specified. Argument -t should contain one of the following options: client or server."
 	exit_abnormal
 fi
 
 #DO THIS WHEN THE SCRIPT IS CALLED WITH SERVER MODE
-if [ "$TYPE" == "server" ]; then
+if [ "${TYPE}" == "server" ]; then
 
 	unset OPTIND    #RESET GETOPTS
 	#REGEX PATTERN TO CHECK FOR VALID IP (NOT TO TIGHT, MAKE 0.0.0.0 OR 255.255.255.255 STILL POSSIBLE)
@@ -261,21 +261,21 @@ if [ "$TYPE" == "server" ]; then
 		case "${options}" in
 		b)
 			BRIDGE=${OPTARG}
-			if ! [ $BRIDGE == "on" -o $BRIDGE == "off" ]; then
+			if ! [ "${BRIDGE}" == "on" -o "${BRIDGE}" == "off" ]; then
 				echo "Bridge should be set to on or off."
 				exit_abnormal
 			fi
 		;;
 		h)
 			HOST=${OPTARG}
-			if [ -z "$HOST" ]; then
+			if [ -z "${HOST}" ]; then
 				echo "A public IP or Hostname should be given."
 				exit_abnormal
 			fi
 		;;
 		p)
 			PROTOCOL=${OPTARG}
-			if [ $PROTOCOL != "udp" -a $PROTOCOL != "tcp" ]; then
+			if [ "${PROTOCOL}" != "udp" -a "${PROTOCOL}" != "tcp" ]; then
 				echo "Invalid Protocol. No changes will be made."
 				exit_abnormal
 			fi
@@ -293,12 +293,12 @@ if [ "$TYPE" == "server" ]; then
 			SUBNET="${SERVER_ADDR[1]}"
 
 			if ! [[ $NETWORK =~ $re_ip ]]; then
-				echo "Invalid Server network: $NETWORK. No changes will be made."
+				echo "Invalid Server network: ${NETWORK}. No changes will be made."
 				exit_abnormal
 			fi
 
 			if ! [[ $SUBNET =~ $re_subnet ]]; then
-				echo "Invalid Server subnet: $SUBNET. No changes will be made."
+				echo "Invalid Server subnet: ${SUBNET}. No changes will be made."
 				exit_abnormal
 			fi
 
@@ -316,12 +316,12 @@ if [ "$TYPE" == "server" ]; then
 			fi
 
 			if ! [[ $CLIENTNETWORK =~ $re_ip ]]; then
-				echo "Invalid Client network: $CLIENTNETWORK. No changes will be made."
+				echo "Invalid Client network: ${CLIENTNETWORK}. No changes will be made."
 				exit_abnormal
 			fi
 
 			if ! [[ $CLIENTSUBNET =~ $re_subnet ]]; then
-				echo "Invalid Client subnet: $CLIENTSUBNET. No changes will be made."
+				echo "Invalid Client subnet: ${CLIENTSUBNET}. No changes will be made."
 				exit_abnormal
 			fi
 
@@ -330,7 +330,7 @@ if [ "$TYPE" == "server" ]; then
 		f)
 			FEATURES+=("${OPTARG}")
 			for FEATURE in "${FEATURES[@]}"; do
-				if ! [ $FEATURE == "mdns" -o $FEATURE == "pimd" -o $FEATURE == "stp" -o $FEATURE == ":" ]; then
+				if ! [ "${FEATURE}" == "mdns" -o "${FEATURE}" == "pimd" -o "${FEATURE}" == "stp" -o "${FEATURE}" == ":" ]; then
 					echo "Invalid Features specified: $FEATURE. Currently only supporting mdns, pimd and stp as options."
 					exit_abnormal
 				fi
@@ -340,7 +340,7 @@ if [ "$TYPE" == "server" ]; then
 	done
 
 
-	if [ -z "$BRIDGE" ] || [ -z "$HOST" ] || [ -z "$PROTOCOL" ] || [ -z "$PORT_NUMBER" ] ; then
+	if [ -z "${BRIDGE}" ] || [ -z "${HOST}" ] || [ -z "${PROTOCOL}" ] || [ -z "${PORT_NUMBER}" ] ; then
 		echo "ERROR: When setting -t to server, -b, -h, -p, -n and -s are all required!"
 		exit_abnormal
 	fi
@@ -348,12 +348,12 @@ if [ "$TYPE" == "server" ]; then
 	# DO EXTRA CHECKS FOR OPTIONS/ARGUMENTS
 	FOUND_STP=false
 	for feature in "${FEATURES[@]}"; do
-		if [[ "$feature" == "stp" ]]; then
+		if [[ "${feature}" == "stp" ]]; then
 	        	found_stp=true
 		        break
 		fi
 	done
-	if [ "$BRIDGE" == "off" -a "$FOUND_STP" == true ]; then
+	if [ "${BRIDGE}" == "off" -a "${FOUND_STP}" == true ]; then
 		echo "ERROR: No Bridge selected but STP feature is enabled. STP feature will not work when in Normal (non-bridge) mode!"
 		exit_abnormal
 	fi
@@ -387,12 +387,12 @@ if [ "$TYPE" == "server" ]; then
 	sed -i "s/^\(tls-auth.*\)/;\1/" ${OPEN_VPN_DIR}server/server.conf
 
 	#SET SERVER OR SERVER-BRIDGE SUBNET TO A VERY UNIQUE RANGE
-	if [ "$BRIDGE" == "on" ]; then
-		sed -i "s/^#\?;\?server-bridge .*/server-bridge 172.16.199.0 255.255.255.0/" ${OPEN_VPN_DIR}server/server.conf
+	if [[ "${BRIDGE}" == "on" ]]; then
+		sed -i "s/^#\?;\?server-bridge$/server-bridge/" ${OPEN_VPN_DIR}server/server.conf
 		sed -i "s/^\(server .*\)/;\1/" ${OPEN_VPN_DIR}server/server.conf
 	else
 		sed -i "s/^#\?;\?server .*/server 172.16.199.0 255.255.255.0/" ${OPEN_VPN_DIR}server/server.conf
-		sed -i "s/^\(server-bridge .*\)/;\1/" ${OPEN_VPN_DIR}server/server.conf
+		sed -i "s/^\(server-bridge$\)/;\1/" ${OPEN_VPN_DIR}server/server.conf
 	fi
 
 	#DISABLE (old) CIPHERS IN GENERAL, DEPRECATED SINCE OPENVPN 2.6
@@ -409,6 +409,8 @@ if [ "$TYPE" == "server" ]; then
 	fi
 
 	#CHANGE FALLBACK-CIPHERS
+	#NORMALLY WE WOULD NOT USE THIS BECAUSE OPENVPN Note: --data-cipher-fallback with cipher 'AES-256-CBC:AES-128-CBC' disables data channel offload.
+	#HOWEVER, USING TAP INSTEAD OF TUN ALREADY DISABLES DATA CHANNEL OFFLOAD. 
 	if ! grep -q '^#\?data-ciphers-fallback' ${OPEN_VPN_DIR}server/server.conf; then
 		echo 'data-ciphers-fallback AES-256-CBC:AES-128-CBC' >> ${OPEN_VPN_DIR}server/server.conf
 	else
@@ -416,7 +418,7 @@ if [ "$TYPE" == "server" ]; then
 	fi
 
 	#SET explicit-exit-notify ONLY FOR UDP MODE
-	if [ "$PROTOCOL" == "udp" ]; then
+	if [[ "${PROTOCOL}" == "udp" ]]; then
 		sed -i "s/^#\?;\?explicit-exit-notify .*/explicit-exit-notify 1/" ${OPEN_VPN_DIR}server/server.conf
 	else
 		sed -i "s/^#\?;\?explicit-exit-notify .*/explicit-exit-notify 0/" ${OPEN_VPN_DIR}server/server.conf
@@ -440,7 +442,7 @@ if [ "$TYPE" == "server" ]; then
 	sed -i '/^push "route .*"$/d' ${OPEN_VPN_DIR}server/server.conf
 
 	#ADD THE PUSH ROUTES (IF NOT EMPTY)
-	if [ ! -z "$SUBNETS" ]; then
+	if [ ! -z "${SUBNETS}" ]; then
 		for SUBNET in "${SUBNETS[@]}"; do
 			IFS='-' read -ra SERVER_NETWORK <<< "${SUBNET}"
 			SERVER_NET="${SERVER_NETWORK[0]}"
@@ -451,7 +453,7 @@ if [ "$TYPE" == "server" ]; then
 
 	#ALSO ADD ALL THE CLIENT NETWORKS AS PUSH ROUTES (SO EACH CLIENT KNOWS HOW TO REACH ANOTHER CLIENT)
 	#USE A HIGHER METRIC SO A CLIENT WILL NOT ROUTE HIS OWN CLIENT-NETWORK THROUGH THE TUNNEL
-	if [ ! -z "$CLIENTS" ]; then
+	if [ ! -z "${CLIENT}S" ]; then
 		for CLIENT in "${CLIENTS[@]}"; do
 			IFS='-' read -ra CLIENT_NETWORK <<< "${CLIENT}"
 			CLIENT_ID="${CLIENT_NETWORK[0]}"
@@ -467,7 +469,7 @@ if [ "$TYPE" == "server" ]; then
 	fi
 
 	#ALLOW THE CLIENTS, BY ADDING THEM IN THE CCD DIRECTORY
-	if [ ! -z "$CLIENTS" ]; then
+	if [ ! -z "${CLIENTS}" ]; then
 		#ALWAYS CREATE THE CCD DIRECTORY
 		mkdir -p ${OPEN_VPN_DIR}server/ccd
 		#ALWAYS EMPTY THE CCD DIRECTORY BEFORE ADDING FILES TO IT
@@ -489,7 +491,7 @@ if [ "$TYPE" == "server" ]; then
 
 
 	# SAVE THE CLIENT CONFIG FILES IN THE CONFIG DIRECTORY
-	if [ ! -z "$CLIENTS" ]; then
+	if [ ! -z "${CLIENTS}" ]; then
 		#FIRST, ALWAYS EMPTY THE configs DIRECTORY EXCEPT OUR t1config.json FILE
 		#rm -f ${CONFIG_DIR}*
 		find "${CONFIG_DIR}" -type f ! -name "configt1.json" -exec rm -f {} +
@@ -519,16 +521,17 @@ resolv-retry infinite
 nobind
 persist-key
 persist-tun
+log-append openvpn.log
 remote-cert-tls server"
 			#SET explicit-exit-notify ONLY FOR UDP MODE
-			if [ "$PROTOCOL" == "udp" ]; then
+			if [[ "${PROTOCOL}" == "udp" ]]; then
 				CONFIG="${CONFIG}
 explicit-exit-notify 1"
 			fi
 			CONFIG="${CONFIG}
 status ${OPENVPN_STATUS_FILE} 
 <ca>
-$CA_CONTENT
+${CA_CONTENT}
 </ca>
 
 <cert>
@@ -567,9 +570,9 @@ ${KEY_CONTENT}
 	start_stop_openvpn "start"
 
 
-elif [ "$TYPE" == "client" ]; then
+elif [ "${TYPE}" == "client" ]; then
 
-	if [ "$BRIDGE" ] || [ "$HOST" ] || [ "$PROTOCOL" ] || [ "$PORT_NUMBER" ] || [ "$SUBNETS" ] || [ "$CLIENTS" ] || [ "$FEATURES" ]; then
+	if [ "${BRIDGE}" ] || [ "${HOST}" ] || [ "${PROTOCOL}" ] || [ "${PORT_NUMBER}" ] || [ "${SUBNETS}" ] || [ "${CLIENTS}" ] || [ "${FEATURES}" ]; then
 		echo "ERROR: When setting -t to client, all other options like -b, -h, -p, -n, -s, -c and -f  are not allowed! The config is created at the server and save to a config file. Clients will only parse that config file."
 		exit_abnormal
 	fi
@@ -608,30 +611,30 @@ elif [ "$TYPE" == "client" ]; then
 	fi
 
 	#GET THE BRIDGE VARIABLE
-	BRIDGE=$(sed -n '/#BRIDGE:/s/.*: \(.*\)/\1/p' "$CONFIG_FILE")
+	BRIDGE=$(sed -n '/#BRIDGE:/s/.*: \(.*\)/\1/p' "${CONFIG_FILE}")
 
 	#CHANGE TO BRIDGE OR NORMAL MODE
-	if [ "$BRIDGE" == "on" ] || [ "$BRIDGE" == "off" ]; then
-		${SCRIPT_DIR}change_bridge.sh -b $BRIDGE
+	if [[ "${BRIDGE}" == "on" ]] || [[ "${BRIDGE}" == "off" ]]; then
+		${SCRIPT_DIR}change_bridge.sh -b ${BRIDGE}
 	fi
 
 	#FIRST, DEACTIVATE ALL FEATURES
 	disable_features
 
 	#GET THE FEATURES VARIABLE
-	FEATURES_LINE=$(sed -n '/#FEATURES:/s/.*: \(.*\)/\1/p' "$CONFIG_FILE")
+	FEATURES_LINE=$(sed -n '/#FEATURES:/s/.*: \(.*\)/\1/p' "${CONFIG_FILE}")
 	#PUT IT INTO AN ARRAY
-	IFS=' ' read -r -a FEATURES <<< "$FEATURES_LINE"
+	IFS=' ' read -r -a FEATURES <<< "${FEATURES_LINE}"
 
 	#GET THE CLIENTS VARIABLE
-	CLIENTS_LINE=$(sed -n '/#CLIENT:/s/.*: \(.*\)/\1/p' "$CONFIG_FILE")
+	CLIENTS_LINE=$(sed -n '/#CLIENT:/s/.*: \(.*\)/\1/p' "${CONFIG_FILE}")
 	#PUT IT INTO AN ARRAY
-	IFS=' ' read -r -a CLIENTS <<< "$CLIENTS_LINE"
+	IFS=' ' read -r -a CLIENTS <<< "${CLIENTS_LINE}"
 
 	#GET THE SERVER NETWORKS VARIABLE
-	SERVER_NETWORKS_LINE=$(sed -n '/#SERVER_NETWORKS:/s/.*: \(.*\)/\1/p' "$CONFIG_FILE")
+	SERVER_NETWORKS_LINE=$(sed -n '/#SERVER_NETWORKS:/s/.*: \(.*\)/\1/p' "${CONFIG_FILE}")
 	#PUT IT INTO AN ARRAY
-	IFS=' ' read -r -a SUBNETS <<< "$SERVER_NETWORKS_LINE"
+	IFS=' ' read -r -a SUBNETS <<< "${SERVER_NETWORKS_LINE}"
 	
 	#ACTIVATE THE REQUESTED FEATURES
 	enable_features
