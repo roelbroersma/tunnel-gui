@@ -514,7 +514,7 @@ dev tap0"
 				CONFIG="${CONFIG}
 dev tap"
 			fi
-			${CONFIG}="${CONFIG}
+			CONFIG="${CONFIG}
 proto ${PROTOCOL}
 remote ${HOST} ${PORT_NUMBER}
 resolv-retry infinite
