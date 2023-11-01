@@ -12,8 +12,6 @@ from flask import render_template as flask_render_template
 from flask import send_file
 from pydantic import BaseModel
 
-from openvpn_status import parse_status
-
 from forms import IpAddressChangeForm, PasswordForm, SignInForm, UpdateForm, RebootForm, TunnelMasterForm, TunnelNonMasterForm
 from utils import do_change_password, change_ip, get_token, get_passwords, IpAddressChangeInfo, show_ip, PublicIpInfo, show_public_ip, generate_keys, generate_server_config, generate_client_config, save_tunnel_configuration, load_device_type, load_tunnel_configuration, handle_uploaded_file, core_upgrade, dietpi_upgrade, get_version, app_upgrade, do_reboot
 
