@@ -23,11 +23,11 @@ install_packages() {
     /boot/dietpi/dietpi-software install 152 # Avahi-Daemon
     echo;
     echo "Install additional small packages using apt-get if not already installed..."
-    apt-get install -y zip unzip sed mawk grep systemd easy-rsa python3-pip pimd bridge-utils
+    apt-get install -y zip unzip sed mawk grep systemd easy-rsa python3-pip pimd bridge-utils net-tools
   elif command -v apt-get > /dev/null 2>&1; then
     echo "Using apt-get to install Packages..."
     apt-get update
-    apt-get install -y zip unzip wget sed mawk grep systemd openssl openvpn easy-rsa python3 python3-pip pimd avahi-daemon bridge-utils
+    apt-get install -y zip unzip wget sed mawk grep systemd openssl openvpn easy-rsa python3 python3-pip pimd avahi-daemon bridge-utils net-tools
   elif command -v yum > /dev/null 2>&1; then
     echo "Using yum to install Packages..."
     yum makecache -y

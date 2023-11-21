@@ -172,9 +172,10 @@
 							<div class="help-tip" >
 								<p>
 									{% if subfield.label.text == "Normal": %}
-										Set tunnel type to Normal
+										The default setting is Normal mode.<br/><br/>In Normal mode, protocols like KNX and SONOS work fine, even though they use special types of network communication like Multicast, SSDP, and MDNS.<br/><br/> The main difference between Normal and Bridge mode is that in Normal mode, broadcast messages can't go through the tunnel. This is often chosen when both sides of the tunnel have different subnet addresses.<br/><br/>
+In simpler terms, Normal mode blocks "shout-outs" (broadcasts) from passing through the tunnel, specifically ARP traffic, which is a way devices on a network find out each other's address within the same subnet. However, it allows Multicast messages, which are like targeted "shout-outs" to specific groups of devices, to pass through.
 									{% elif subfield.label.text == "Bridge": %}
-										Set tunnel type to Bridge
+										Use bridge mode when both sides of the tunnel share the same IP space. When choosing Bridge mode, consider the following 3 points:<br/>* Will both sides have a DHCP server or only one side? If both sides have a DHCP server, split up the DHCP range so side A gives IP addresses for: 10-100 and side B gives IP addresses for 101-200. Then Block DHCP via the tunnel.<br/><br/>* Will both sides use their own gateway? Probably yes, then use a DHCP server on each side and have 2 different gateway addresses. Like 192.168.0.254 on side A and 192.168.0.253 on side B.<br/><br/>* You can make exceptions by addressing hosts with a static IP address and manually setting their gateway.
 									{% else %}
 										{{ subfield.label.text }}
 									{% endif %}
@@ -212,7 +213,13 @@
 				</div>
 				<div class="col-3">
 				{{ tunnel_master_form.protocol() }}
+					<div class="help-tip" >
+				    		<p>The default setting for the tunnel is UDP, which is usually faster. The traffic going <u>through</u> the tunnel is mostly TCP. If a hiccup happens with a UDP packet of the tunnel, the TCP traffic inside will be resend again automatically.<br/><br/>
+By changing the tunnel protocol to TCP, it gets more complicated. Both the tunnel and the data inside it can resend packets. This might make data arrive twice or get resent a lot, which can slow down the connection.<br/><br/>
+TCP for the tunnel is usually not a good choice because it can create a messy situation with too much resending.<br/><br/>Only use TCP for the tunnel protocol in very special cases, like if a firewall blocks UDP or if you are only sending UDP traffic through the tunnel.</p>
+					</div>
 				</div>
+			</li>
 				<br />
 			</div>
 		</div>

@@ -77,7 +77,7 @@ class TunnelMasterForm(FlaskForm):
     protocol = SelectField(
         "Protocol",
         choices=[("tcp", "TCP"), ("udp", "UDP")],
-        default="tcp",
+        default="udp",
         render_kw={"class": "mb-0", "style": "height: 30px"},
     )
     master_networks = FieldList(

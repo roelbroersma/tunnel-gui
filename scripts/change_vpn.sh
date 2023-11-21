@@ -109,7 +109,7 @@ enable_features() {
     				echo 'group-prefix 224.0.0.0 masklen 4' >> ${PIMD_CONF_FILE}
 			fi
 
-			# IF THIS WE ARE RUNNING ON THE CLIENT, ADD ALL ALTNETS HERE
+			# IF WE ARE RUNNING ON THE CLIENT, ADD ALL ALTNETS HERE
 			if [[ ${TYPE} == "client" ]]; then
 				# ADD ALL NETWORKS OF THE SERVER TO THE CLIENT'S TAP INTERFACE
 				ALTNET_TAP="phyint tap0 enable altnet 172.16.199.0/24"
@@ -345,6 +345,20 @@ if [ "${TYPE}" == "server" ]; then
 		exit_abnormal
 	fi
 
+	# IT IS GOOD PRACTICE TO SORT OUR ARRAYS FIRST
+	# CONVERT THE CLIENTS ARRAY TO STRING AND SORT IT
+	IFS=$'\n' sorted_clients=($(sort <<<"${CLIENTS[*]}"))
+	unset IFS
+	# SET SORTED VALUES BACK IN ARRAY
+	CLIENTS=("${sorted_clients[@]}")
+
+	# CONVERT THE ARRAY TO STRING AND SORT
+	IFS=$'\n' sorted_subnets=($(sort <<<"${SUBNETS[*]}"))
+	unset IFS
+	# SET SORTED VALUES BACK IN ARRAY
+	SUBNETS=("${sorted_subnets[@]}")
+
+
 	# DO EXTRA CHECKS FOR OPTIONS/ARGUMENTS
 	FOUND_STP=false
 	for feature in "${FEATURES[@]}"; do
@@ -369,7 +383,7 @@ if [ "${TYPE}" == "server" ]; then
 		sed -i 's#^dev .*#dev tap#g' ${OPEN_VPN_DIR}server/server.conf
 	fi
 	#SET CLIENT CONFIG DIR
-	sed -i "s#^;\?client-config-dir .*#client-config-dir ${OPEN_VPN_DIR}server/ccd#g" ${OPEN_VPN_DIR}server/server.conf
+	sed -i "s#^;\?\#\?\s\?client-config-dir .*#client-config-dir ${OPEN_VPN_DIR}server/ccd#g" ${OPEN_VPN_DIR}server/server.conf
 	#SET SERVER CA
 	sed -i "s#^ca .*#ca ${EASY_RSA_DIR}openvpn-ca/pki/ca.crt#g" ${OPEN_VPN_DIR}server/server.conf
 	#SET SERVER CERT
@@ -396,32 +410,32 @@ if [ "${TYPE}" == "server" ]; then
 	fi
 
 	#DISABLE (old) CIPHERS IN GENERAL, DEPRECATED SINCE OPENVPN 2.6
-	sed -i "s/^#\?;\?\(ciphers .*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
+	sed -i "s/^#\?;\?\s\?\(ciphers .*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
 
 	#DISABLE CIPHER IN GENERAL, DEPRECATED SINCE OPENVPN 2.6
 	sed -i "s/^\(cipher.*\)/#\1/" ${OPEN_VPN_DIR}server/server.conf
 
 	#CHANGE DATA-CIPHERS
-	if ! grep -q '^#\?;\?data-ciphers ' ${OPEN_VPN_DIR}server/server.conf; then
+	if ! grep -q '^#\?;\?\s\?data-ciphers ' ${OPEN_VPN_DIR}server/server.conf; then
 		echo 'data-ciphers AES-256-GCM:AES-128-GCM' >> ${OPEN_VPN_DIR}server/server.conf
 	else
-		sed -i "s/^#\?;\?data-ciphers .*/data-ciphers AES-256-GCM:AES-128-GCM/" ${OPEN_VPN_DIR}server/server.conf
+		sed -i "s/^#\?;\?\s\?data-ciphers .*/data-ciphers AES-256-GCM:AES-128-GCM/" ${OPEN_VPN_DIR}server/server.conf
 	fi
 
 	#CHANGE FALLBACK-CIPHERS
 	#NORMALLY WE WOULD NOT USE THIS BECAUSE OPENVPN Note: --data-cipher-fallback with cipher 'AES-256-CBC:AES-128-CBC' disables data channel offload.
 	#HOWEVER, USING TAP INSTEAD OF TUN ALREADY DISABLES DATA CHANNEL OFFLOAD. 
-	if ! grep -q '^#\?data-ciphers-fallback' ${OPEN_VPN_DIR}server/server.conf; then
+	if ! grep -q '^#\?;\?\s\?data-ciphers-fallback' ${OPEN_VPN_DIR}server/server.conf; then
 		echo 'data-ciphers-fallback AES-256-CBC:AES-128-CBC' >> ${OPEN_VPN_DIR}server/server.conf
 	else
-		sed -i "s/^#\?data-ciphers-fallback.*/data-ciphers-fallback AES-256-CBC:AES-128-CBC/" ${OPEN_VPN_DIR}server/server.conf
+		sed -i "s/^#\?;\?\s\?data-ciphers-fallback.*/data-ciphers-fallback AES-256-CBC:AES-128-CBC/" ${OPEN_VPN_DIR}server/server.conf
 	fi
 
 	#SET explicit-exit-notify ONLY FOR UDP MODE
 	if [[ "${PROTOCOL}" == "udp" ]]; then
-		sed -i "s/^#\?;\?explicit-exit-notify .*/explicit-exit-notify 1/" ${OPEN_VPN_DIR}server/server.conf
+		sed -i "s/^#\?;\?\s?explicit-exit-notify .*/explicit-exit-notify 1/" ${OPEN_VPN_DIR}server/server.conf
 	else
-		sed -i "s/^#\?;\?explicit-exit-notify .*/explicit-exit-notify 0/" ${OPEN_VPN_DIR}server/server.conf
+		sed -i "s/^#\?;\?\s?explicit-exit-notify .*/explicit-exit-notify 0/" ${OPEN_VPN_DIR}server/server.conf
 	fi
 
 	#CHANGE STATUS-LOG
@@ -429,7 +443,7 @@ if [ "${TYPE}" == "server" ]; then
 	if ! grep -q '^#\?;\?status ' ${OPEN_VPN_DIR}server/server.conf; then
 		echo "status ${OPENVPN_STATUS_FILE}" >> ${OPEN_VPN_DIR}server/server.conf
 	else
-		sed -i "s|^#\?;\?status .*|status ${OPENVPN_STATUS_FILE}|" ${OPEN_VPN_DIR}server/server.conf
+		sed -i "s|^#\?;\?\s?status .*|status ${OPENVPN_STATUS_FILE}|" ${OPEN_VPN_DIR}server/server.conf
 	fi
 
 	# CHANGE THE PORT NUMBER
@@ -447,19 +461,19 @@ if [ "${TYPE}" == "server" ]; then
 			IFS='-' read -ra SERVER_NETWORK <<< "${SUBNET}"
 			SERVER_NET="${SERVER_NETWORK[0]}"
 			SERVER_MASK="${SERVER_NETWORK[1]}"
-			echo "push \"route ${SERVER_NET} ${SERVER_MASK} vpn_gateway\"" >> ${OPEN_VPN_DIR}server/server.conf
+			echo "push \"route ${SERVER_NET} ${SERVER_MASK}\"" >> ${OPEN_VPN_DIR}server/server.conf
 		done
 	fi
 
 	#ALSO ADD ALL THE CLIENT NETWORKS AS PUSH ROUTES (SO EACH CLIENT KNOWS HOW TO REACH ANOTHER CLIENT)
-	#USE A HIGHER METRIC SO A CLIENT WILL NOT ROUTE HIS OWN CLIENT-NETWORK THROUGH THE TUNNEL
+	#WE FILTER OUT PUSH ROUTES IN THE CLIENT CONFIG, ANOTHER OPTION CAN BE BY USING A HIGHER METRIC BUT THAT GIVES MORE ROUTES ON A CLIENT WHICH WE DONT WANT
 	if [ ! -z "${CLIENT}S" ]; then
 		for CLIENT in "${CLIENTS[@]}"; do
 			IFS='-' read -ra CLIENT_NETWORK <<< "${CLIENT}"
 			CLIENT_ID="${CLIENT_NETWORK[0]}"
 			CLIENT_NET="${CLIENT_NETWORK[1]}"
 			CLIENT_MASK="${CLIENT_NETWORK[2]}"
-			echo "push \"route ${CLIENT_NET} ${CLIENT_MASK} vpn_gateway 100\"" >> ${OPEN_VPN_DIR}server/server.conf
+			echo "push \"route ${CLIENT_NET} ${CLIENT_MASK}\"" >> ${OPEN_VPN_DIR}server/server.conf
 		done
 	fi
 
@@ -468,7 +482,12 @@ if [ "${TYPE}" == "server" ]; then
 		echo "push \"route ${HOST} 255.255.255.255 net_gateway\"" >> ${OPEN_VPN_DIR}server/server.conf
 	fi
 
-	#ALLOW THE CLIENTS, BY ADDING THEM IN THE CCD DIRECTORY
+	#REMOVE THE SERVER ROUTES
+	sed -i '/^route .*$/d' ${OPEN_VPN_DIR}server/server.conf
+
+	#ALLOW THE CLIENTS, BY ADDING THEM IN THE CCD DIRECTORY AND ASSIGNING THEM AN IP ADDRESS (START WITH 2, BECAUSE 1 IS THE SERVER)
+	#ALSO ADD THE SERVER ROUTES HERE
+	CLIENT_IP=1
 	if [ ! -z "${CLIENTS}" ]; then
 		#ALWAYS CREATE THE CCD DIRECTORY
 		mkdir -p ${OPEN_VPN_DIR}server/ccd
@@ -480,41 +499,51 @@ if [ "${TYPE}" == "server" ]; then
 			CLIENT_ID="${CLIENT_NETWORK[0]}"
 			CLIENT_NET="${CLIENT_NETWORK[1]}"
 			CLIENT_MASK="${CLIENT_NETWORK[2]}"
-			#CHECK IF FILE EXISTS, IF NOT CREATE IT
-            if [ ! -f ${OPEN_VPN_DIR}server/ccd/${CLIENT_ID} ]; then
-				touch ${OPEN_VPN_DIR}server/ccd/${CLIENT_ID}
-            fi
-			#ADD THE NETWORKS TO THE RIGHT CLIENT'S FILE
-			echo "iroute ${CLIENT_NET} ${CLIENT_MASK}" >> ${OPEN_VPN_DIR}server/ccd/${CLIENT_ID}
+			#CHECK IF FILE EXISTS, IF NOT CREATE IT AND ADD THE IP ADDRESS TO IT
+            		if [ ! -f ${OPEN_VPN_DIR}server/ccd/${CLIENT_ID} ]; then
+				((CLIENT_IP++))
+				#NOT NEEDED TO TOUCH ANYMORE, SINCE WE USE ECHO TO WRITE TO A FILE
+				#touch ${OPEN_VPN_DIR}server/ccd/${CLIENT_ID}
+				echo "ifconfig-push 172.16.199.${CLIENT_IP} 255.255.255.0" > ${OPEN_VPN_DIR}server/ccd/${CLIENT_ID}
+            		fi
+			#TAP MODE DOES NOT SUPPORT IROUTE. SO FOR NOW, DO NOT ADD THE NETWORKS TO THE RIGHT CLIENT'S FILE
+			#echo "iroute ${CLIENT_NET} ${CLIENT_MASK}" >> ${OPEN_VPN_DIR}server/ccd/${CLIENT_ID}
+
+			#ADD SERVER ROUTES HERE TO THE CLIENT IP
+			echo "route ${CLIENT_NET} ${CLIENT_MASK} 172.16.199.${CLIENT_IP}" >> ${OPEN_VPN_DIR}server/server.conf
 		done
 	fi
 
 
-	# SAVE THE CLIENT CONFIG FILES IN THE CONFIG DIRECTORY
+	# SAVE THE CLIENT CONFIG FILES IN THE CONFIG DIRECTORY, WE ASSUME A SORTED CLIENT ARRAY HERE!!
 	if [ ! -z "${CLIENTS}" ]; then
 		#FIRST, ALWAYS EMPTY THE configs DIRECTORY EXCEPT OUR t1config.json FILE
 		#rm -f ${CONFIG_DIR}*
 		find "${CONFIG_DIR}" -type f ! -name "configt1.json" -exec rm -f {} +
 		#ADD A FILE FOR EACH CLIENT WITH ITS CONFIG AND SAVE IT WITH THE MACHINE_ID AS FILENAME
+		OLD_CLIENT_ID=""
 		for CLIENT in "${CLIENTS[@]}"; do
 			IFS='-' read -ra CLIENT_NETWORK <<< "${CLIENT}"
 			CLIENT_ID="${CLIENT_NETWORK[0]}"
 			CLIENT_NET="${CLIENT_NETWORK[1]}"
 			CLIENT_MASK="${CLIENT_NETWORK[2]}"
-			CERT_CONTENT=$(cat "${EASY_RSA_DIR}openvpn-ca/client/${CLIENT_ID}.crt")
-			KEY_CONTENT=$(cat "${EASY_RSA_DIR}openvpn-ca/client/${CLIENT_ID}.key")
-			CA_CONTENT=$(cat "${EASY_RSA_DIR}openvpn-ca/pki/ca.crt")
-			CONFIG="client"
 
-			#SET TO TAP0 FOR BRIDGE, OTHERWISE TAP
-			if [[ "${BRIDGE}" == "on" ]]; then
-				CONFIG="${CONFIG}
+			if [[ "$CLIENT_ID" != "$OLD_CLIENT_ID" ]]; then
+		
+				CERT_CONTENT=$(cat "${EASY_RSA_DIR}openvpn-ca/client/${CLIENT_ID}.crt")
+				KEY_CONTENT=$(cat "${EASY_RSA_DIR}openvpn-ca/client/${CLIENT_ID}.key")
+				CA_CONTENT=$(cat "${EASY_RSA_DIR}openvpn-ca/pki/ca.crt")
+				CONFIG="client"
+
+				#SET TO TAP0 FOR BRIDGE, OTHERWISE TAP
+				if [[ "${BRIDGE}" == "on" ]]; then
+					CONFIG="${CONFIG}
 dev tap0"
-			else
-				CONFIG="${CONFIG}
+				else
+					CONFIG="${CONFIG}
 dev tap"
-			fi
-			CONFIG="${CONFIG}
+				fi
+				CONFIG="${CONFIG}
 proto ${PROTOCOL}
 remote ${HOST} ${PORT_NUMBER}
 resolv-retry infinite
@@ -523,12 +552,15 @@ persist-key
 persist-tun
 log-append openvpn.log
 remote-cert-tls server"
-			#SET explicit-exit-notify ONLY FOR UDP MODE
-			if [[ "${PROTOCOL}" == "udp" ]]; then
+				#SET PULL-FILTER, THE CLIENT SHOULD IGNORE PUSH ROUTES FOR ITS OWN NETWORKS
 				CONFIG="${CONFIG}
+pull-filter ignore \"route ${CLIENT_NET} ${CLIENT_MASK}\""
+				#SET explicit-exit-notify ONLY FOR UDP MODE
+				if [[ "${PROTOCOL}" == "udp" ]]; then
+					CONFIG="${CONFIG}
 explicit-exit-notify 1"
-			fi
-			CONFIG="${CONFIG}
+				fi
+				CONFIG="${CONFIG}
 status ${OPENVPN_STATUS_FILE} 
 <ca>
 ${CA_CONTENT}
@@ -550,8 +582,14 @@ ${KEY_CONTENT}
 #-----T1 CONFIG END-----
 ########################
 "
-			#WRITE THE CONFIG
-			echo "${CONFIG}" > ${CONFIG_DIR}${CLIENT_ID}.conf
+				#WRITE THE CONFIG
+				echo "${CONFIG}" > ${CONFIG_DIR}${CLIENT_ID}.conf
+			else
+				#CLIENT HAS SEVERAL NETWORKS, ADD THEM TO THE PULL-FILTER HERE
+				echo "pull-filter ignore \"route ${CLIENT_NET} ${CLIENT_MASK}\"" >> ${CONFIG_DIR}${CLIENT_ID}.conf
+			fi
+
+			OLD_CLIENT_ID="$CLIENT_ID"
 		done
 	fi
 
