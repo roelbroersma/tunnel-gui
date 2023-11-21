@@ -517,6 +517,8 @@ if [ "${TYPE}" == "server" ]; then
 
 	# SAVE THE CLIENT CONFIG FILES IN THE CONFIG DIRECTORY, WE ASSUME A SORTED CLIENT ARRAY HERE!!
 	if [ ! -z "${CLIENTS}" ]; then
+		#CREATE CONFIG DIR IF NOT ALREADY EXISTS
+		mkdir -p ${CONFIG_DIR}
 		#FIRST, ALWAYS EMPTY THE configs DIRECTORY EXCEPT OUR t1config.json FILE
 		#rm -f ${CONFIG_DIR}*
 		find "${CONFIG_DIR}" -type f ! -name "configt1.json" -exec rm -f {} +
